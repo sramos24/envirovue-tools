@@ -47,16 +47,20 @@
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   /* ── HEADER ── */
   header {
     background: var(--navy);
     padding: 0 24px;
+    padding-top: env(safe-area-inset-top);
+    padding-left: calc(24px + env(safe-area-inset-left));
+    padding-right: calc(24px + env(safe-area-inset-right));
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 56px;
+    min-height: 56px;
     position: sticky;
     top: 0;
     z-index: 100;

@@ -44,6 +44,9 @@
     background: linear-gradient(180deg, var(--navy-2) 0%, var(--navy) 100%);
     color: #fff;
     padding: 32px 20px 40px;
+    padding-top: calc(32px + env(safe-area-inset-top));
+    padding-left: calc(20px + env(safe-area-inset-left));
+    padding-right: calc(20px + env(safe-area-inset-right));
     text-align: center;
     position: relative;
     overflow: hidden;

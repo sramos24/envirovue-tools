@@ -6,7 +6,7 @@
 // Bump this version whenever you update any file in the repo.
 // Users will get the fresh version next time they open the app
 // while online — the old cache is purged automatically.
-const CACHE_VERSION = 'envirovue-v1.0.0';
+const CACHE_VERSION = 'envirovue-v1.0.1';
 
 // All files that should work offline
 const PRECACHE_URLS = [
