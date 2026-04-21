@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1F3864">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Home Inspector">
+<title>Home Inspector — Insight Environmental</title>
+<style>
+:root {
+  --navy: #1F3864;
+  --navy-light: #2E5FA3;
+  --navy-dim: #9cb8e0;
+  --white: #ffffff;
+  --gray-50: #F8F9FA;
+  --gray-100: #F1F3F5;
+  --gray-200: #E2E8F0;
+  --gray-300: #CBD5E0;
+  --gray-400: #94A3B8;
+  --gray-500: #64748B;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1E293B;
+
+  /* Category colors — from report prompt */
+  --sd-bg: #E8E8E8;     --sd-brd: #7a7a7a;   --sd-ink: #2a2a2a;
+  --r-bg: #F5D9A3;      --r-brd: #a07830;    --r-ink: #5a3e0a;
+  --dd-bg: #C5E3F1;     --dd-brd: #4a8ba8;   --dd-ink: #14425c;
+  --rm-bg: #F6CCCC;     --rm-brd: #b85a5a;   --rm-ink: #5a1515;
+  --i-bg: #B7DEF2;      --i-brd: #1a6fa0;    --i-ink: #0b3e5c;
+  --m-bg: #C7EFC7;      --m-brd: #3c9a3c;    --m-ink: #1d4e1d;
+  --lm-bg: #FCE9B8;     --lm-brd: #c0a030;   --lm-ink: #5c4610;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #EDF1F7;
+  color: var(--gray-800);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+body { padding-bottom: 80px; }
+
+input, textarea, select, button { font-family: inherit; font-size: inherit; }
+
+/* ── HEADER ───────────────────────────── */
+.app-header {
+  background: var(--navy);
+  color: #fff;
+  padding: 12px 14px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 10px;
+}
+.menu-btn {
+  background: none; border: none; color: #fff; font-size: 22px;
+  padding: 4px 8px; cursor: pointer; border-radius: 4px;
+}
+.menu-btn:active { background: rgba(255,255,255,0.15); }
+.hdr-title {
+  flex: 1;
+  min-width: 0;
+}
+.hdr-co { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; }
+.hdr-sec { font-size: 12px; color: var(--navy-dim); margin-top: 2px; }
+.hdr-btns { display: flex; gap: 6px; }
+.hdr-btn {
+  background: rgba(255,255,255,0.15); border: none; color: #fff;
+  padding: 7px 12px; border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 13px; font-weight: 500;
+}
+.hdr-btn:active { background: rgba(255,255,255,0.3); }
+.hdr-btn.primary { background: #fff; color: var(--navy); }
+
+/* ── LAYOUT ───────────────────────────── */
+.layout {
+  display: flex;
+  min-height: calc(100vh - 60px);
+}
+
+/* ── SIDEBAR ──────────────────────────── */
+.sidebar {
+  width: 240px;
+  background: #fff;
+  border-right: 1px solid var(--gray-200);
+  padding: 12px 0;
+  flex-shrink: 0;
+}
+.sb-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--gray-500);
+  padding: 8px 16px 4px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px; cursor: pointer; font-size: 14px;
+  color: var(--gray-700); border-left: 3px solid transparent;
+  user-select: none;
+}
+.sb-item:active { background: var(--gray-100); }
+.sb-item.active {
+  background: #EEF3FB;
+  border-left-color: var(--navy);
+  color: var(--navy);
+  font-weight: 600;
+}
+.sb-count {
+  margin-left: auto;
+  background: var(--gray-200); color: var(--gray-700);
+  font-size: 11px; font-weight: 600;
+  padding: 1px 7px; border-radius: 10px;
+  min-width: 20px; text-align: center;
+}
+.sb-item.active .sb-count {
+  background: var(--navy); color: #fff;
+}
+.sb-item.has-items .sb-count { background: #FEE2AA; color: #8a5a14; }
+.sb-item.active.has-items .sb-count { background: var(--navy); color: #fff; }
+
+/* sidebar overlay on mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 60px 0 0 0;
+  background: rgba(0,0,0,0.4); z-index: 50;
+}
+
+/* ── MAIN ─────────────────────────────── */
+.main {
+  flex: 1;
+  padding: 16px;
+  min-width: 0;
+  max-width: 900px;
+}
+.page-title {
+  font-size: 20px; font-weight: 700; color: var(--navy);
+  margin-bottom: 4px;
+}
+.page-sub {
+  font-size: 13px; color: var(--gray-500);
+  margin-bottom: 16px;
+}
+
+/* ── FORM (General) ────────────────────── */
+.form-card {
+  background: #fff; border-radius: var(--radius);
+  padding: 16px; box-shadow: var(--shadow);
+  margin-bottom: 14px;
+}
+.form-row {
+  margin-bottom: 12px;
+}
+.form-row:last-child { margin-bottom: 0; }
+.form-row label {
+  display: block;
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--gray-600);
+  margin-bottom: 4px;
+}
+.form-row input, .form-row textarea, .form-row select {
+  width: 100%; padding: 9px 11px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: #fff; color: var(--gray-800);
+  font-size: 15px;
+}
+.form-row input:focus, .form-row textarea:focus, .form-row select:focus {
+  outline: none; border-color: var(--navy);
+  box-shadow: 0 0 0 2px rgba(31,56,100,0.15);
+}
+
+/* ── BOX (Descriptions / Observations / Limitations) ─── */
+.box {
+  background: #fff; border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.box-head {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex; align-items: center; gap: 8px;
+}
+.box-title {
+  font-size: 15px; font-weight: 700; color: var(--navy);
+  flex: 1;
+}
+.box-count {
+  background: var(--gray-100); color: var(--gray-600);
+  font-size: 12px; font-weight: 600;
+  padding: 2px 8px; border-radius: 10px;
+}
+.box-body { padding: 10px 14px 14px; }
+
+/* add buttons */
+.add-row {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 10px;
+}
+.add-btn {
+  flex: 1 1 auto;
+  min-width: 90px;
+  padding: 8px 10px;
+  border: 1.5px dashed var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  color: var(--gray-700);
+  text-align: center;
+  transition: all 0.15s;
+}
+.add-btn:active { transform: scale(0.97); }
+.add-btn.single { width: 100%; flex: 1 1 100%; }
+
+.add-btn.r   { border-color: var(--r-brd);  color: var(--r-ink); background: var(--r-bg); border-style: solid; }
+.add-btn.dd  { border-color: var(--dd-brd); color: var(--dd-ink); background: var(--dd-bg); border-style: solid; }
+.add-btn.rm  { border-color: var(--rm-brd); color: var(--rm-ink); background: var(--rm-bg); border-style: solid; }
+.add-btn.i   { border-color: var(--i-brd);  color: var(--i-ink); background: var(--i-bg); border-style: solid; }
+.add-btn.m   { border-color: var(--m-brd);  color: var(--m-ink); background: var(--m-bg); border-style: solid; }
+.add-btn.sd  { border-color: var(--sd-brd); color: var(--sd-ink); background: var(--sd-bg); border-style: solid; }
+.add-btn.lm  { border-color: var(--lm-brd); color: var(--lm-ink); background: var(--lm-bg); border-style: solid; }
+
+/* finding cards */
+.finding {
+  border-left: 4px solid var(--gray-400);
+  background: var(--gray-50);
+  border-radius: 4px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  position: relative;
+}
+.finding.sd { border-left-color: var(--sd-brd); background: #F4F4F4; }
+.finding.r  { border-left-color: var(--r-brd);  background: #FAEBCD; }
+.finding.dd { border-left-color: var(--dd-brd); background: #DCEDF6; }
+.finding.rm { border-left-color: var(--rm-brd); background: #F9DDDD; }
+.finding.i  { border-left-color: var(--i-brd);  background: #CDE6F5; }
+.finding.m  { border-left-color: var(--m-brd);  background: #DCF3DC; }
+.finding.lm { border-left-color: var(--lm-brd); background: #FBEEC6; }
+
+.finding-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+}
+.finding-tag {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: #fff;
+  text-transform: uppercase;
+}
+.finding-tag.sd { background: var(--sd-brd); }
+.finding-tag.r  { background: var(--r-brd); }
+.finding-tag.dd { background: var(--dd-brd); }
+.finding-tag.rm { background: var(--rm-brd); }
+.finding-tag.i  { background: var(--i-brd); }
+.finding-tag.m  { background: var(--m-brd); }
+.finding-tag.lm { background: var(--lm-brd); }
+
+.finding-del {
+  background: none; border: none; color: var(--gray-500);
+  font-size: 18px; padding: 0 4px; cursor: pointer;
+  margin-left: auto; line-height: 1;
+}
+.finding-del:active { color: #c53030; }
+
+.finding textarea {
+  width: 100%;
+  border: 1px solid var(--gray-300);
+  background: #fff;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  line-height: 1.45;
+  resize: vertical;
+  min-height: 56px;
+  color: var(--gray-800);
+}
+.finding textarea:focus {
+  outline: none; border-color: var(--navy);
+  box-shadow: 0 0 0 2px rgba(31,56,100,0.15);
+}
+
+.finding-actions {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.mic-btn {
+  background: var(--navy); color: #fff;
+  border: none; border-radius: 50%;
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.mic-btn:active { transform: scale(0.92); }
+.mic-btn.listening {
+  background: #c53030;
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(197,48,48,0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(197,48,48,0); }
+}
+
+.photo-toggle {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600;
+  color: var(--gray-600); cursor: pointer;
+  user-select: none;
+}
+.photo-toggle input[type="checkbox"] {
+  width: 16px; height: 16px; cursor: pointer; accent-color: var(--navy);
+}
+
+.photo-row {
+  display: none;
+  margin-top: 8px;
+  gap: 6px;
+  align-items: center;
+}
+.photo-row.active { display: flex; }
+.photo-row input {
+  flex: 1;
+  border: 1px solid var(--gray-300);
+  background: #fff;
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 14px;
+  min-width: 0;
+}
+.photo-row input:focus {
+  outline: none; border-color: var(--navy);
+  box-shadow: 0 0 0 2px rgba(31,56,100,0.15);
+}
+.photo-prefix {
+  font-size: 12px; font-weight: 700; color: var(--navy);
+  letter-spacing: 0.04em;
+}
+
+.empty {
+  padding: 16px; text-align: center;
+  color: var(--gray-400); font-size: 13px;
+  font-style: italic;
+}
+
+/* ── EXPORT MODAL ─────────────────────── */
+.modal-back {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 200;
+  align-items: center; justify-content: center;
+  padding: 16px;
+}
+.modal-back.active { display: flex; }
+.modal {
+  background: #fff; border-radius: var(--radius);
+  max-width: 700px; width: 100%;
+  max-height: 90vh; display: flex; flex-direction: column;
+  box-shadow: var(--shadow-lg);
+}
+.modal-head {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex; align-items: center; gap: 10px;
+}
+.modal-title {
+  flex: 1; font-size: 16px; font-weight: 700; color: var(--navy);
+}
+.modal-close {
+  background: none; border: none; font-size: 22px;
+  color: var(--gray-500); cursor: pointer; padding: 0 4px;
+}
+.modal-body {
+  padding: 14px 16px; overflow-y: auto; flex: 1;
+}
+.modal-body textarea {
+  width: 100%; min-height: 340px;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px; line-height: 1.55;
+  color: var(--gray-800);
+  resize: vertical;
+}
+.modal-foot {
+  padding: 12px 16px;
+  border-top: 1px solid var(--gray-200);
+  display: flex; gap: 8px; flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.btn {
+  padding: 9px 14px; border: 1px solid var(--gray-300);
+  background: #fff; color: var(--gray-800);
+  border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+}
+.btn:active { transform: scale(0.97); }
+.btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+.btn.danger  { background: #fff; color: #c53030; border-color: #f2c2c2; }
+
+/* toast */
+.toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--gray-800); color: #fff;
+  padding: 10px 18px; border-radius: 22px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  opacity: 0; transition: all 0.3s;
+  z-index: 300;
+  pointer-events: none;
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ── RESPONSIVE ───────────────────────── */
+@media (max-width: 768px) {
+  .menu-btn { display: flex; }
+  .sidebar {
+    position: fixed; inset: 60px 0 0 0;
+    transform: translateX(-100%);
+    transition: transform 0.25s;
+    z-index: 60;
+    width: 260px;
+    right: auto;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
+  .main { padding: 12px; }
+}
+@media (min-width: 769px) {
+  .menu-btn { display: none; }
+  .sidebar-overlay { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <button class="menu-btn" id="menuBtn" aria-label="Menu">☰</button>
+  <div class="hdr-title">
+    <div class="hdr-co">Insight Environmental</div>
+    <div class="hdr-sec" id="hdrSec">Home Inspection</div>
+  </div>
+  <div class="hdr-btns">
+    <button class="hdr-btn" id="menuMore">•••</button>
+    <button class="hdr-btn primary" id="exportBtn">Export</button>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sbOverlay"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-label">Property</div>
+    <div class="sb-item" data-sec="GENERAL">
+      <span>🏠</span><span>General</span>
+      <span class="sb-count" id="count-GENERAL">—</span>
+    </div>
+    <div class="sb-label">Inspection Sections</div>
+    <div class="sb-item" data-sec="ROOFING"><span>🏡</span><span>Roofing</span><span class="sb-count" id="count-ROOFING">0</span></div>
+    <div class="sb-item" data-sec="EXTERIORS"><span>🧱</span><span>Exteriors</span><span class="sb-count" id="count-EXTERIORS">0</span></div>
+    <div class="sb-item" data-sec="ELECTRICAL"><span>⚡</span><span>Electrical</span><span class="sb-count" id="count-ELECTRICAL">0</span></div>
+    <div class="sb-item" data-sec="HVAC"><span>🌡️</span><span>HVAC</span><span class="sb-count" id="count-HVAC">0</span></div>
+    <div class="sb-item" data-sec="PLUMBING"><span>🚰</span><span>Plumbing</span><span class="sb-count" id="count-PLUMBING">0</span></div>
+    <div class="sb-item" data-sec="INTERIORS"><span>🛋️</span><span>Interiors</span><span class="sb-count" id="count-INTERIORS">0</span></div>
+    <div class="sb-item" data-sec="STRUCTURAL"><span>🏗️</span><span>Structural</span><span class="sb-count" id="count-STRUCTURAL">0</span></div>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-back" id="exportModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Field Notes Export</div>
+      <button class="modal-close" id="exportClose">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--gray-600);margin-bottom:10px;">
+        <strong>Field notes:</strong> Copy the text below and paste it into your Claude Project to generate the formatted report.
+      </p>
+      <textarea id="exportText" readonly></textarea>
+      <p id="exportSummary" style="font-size:12px;color:var(--gray-500);margin-top:8px;"></p>
+      <p style="font-size:13px;color:var(--gray-600);margin-top:12px;padding-top:10px;border-top:1px solid var(--gray-200);">
+        <strong>Photo map (.json):</strong> Download a companion file that maps each photo ID to its section, category, and finding text. Import this into the Photo Documentation Tool to auto-populate captions.
+      </p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="downloadMapBtn">Photo Map (.json)</button>
+      <button class="btn" id="downloadBtn">Field Notes (.txt)</button>
+      <button class="btn primary" id="copyBtn">Copy Field Notes</button>
+    </div>
+  </div>
+</div>
+
+<!-- More Menu Modal -->
+<div class="modal-back" id="moreModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head">
+      <div class="modal-title">Options</div>
+      <button class="modal-close" id="moreClose">×</button>
+    </div>
+    <div class="modal-body">
+      <button class="btn" style="width:100%;margin-bottom:8px;" id="saveJsonBtn">💾 Save Session (JSON backup)</button>
+      <button class="btn" style="width:100%;margin-bottom:8px;" id="loadJsonBtn">📂 Load Session</button>
+      <input type="file" id="loadFile" accept=".json" style="display:none;">
+      <button class="btn danger" style="width:100%;" id="clearBtn">🗑 Clear All Data</button>
+      <p style="font-size:12px;color:var(--gray-500);margin-top:12px;line-height:1.5;">
+        Your data is saved in this browser automatically. Use Save/Load JSON to back up between devices or start a new inspection.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════
+const SECTIONS = ['GENERAL','ROOFING','EXTERIORS','ELECTRICAL','HVAC','PLUMBING','INTERIORS','STRUCTURAL'];
+const INSPECT_SECTIONS = SECTIONS.filter(s => s !== 'GENERAL');
+
+const BOXES = {
+  desc: {
+    key: 'descriptions',
+    title: 'Descriptions',
+    buttons: [{ code: 'SD', label: 'Add System Description', cls: 'sd', single: true }]
+  },
+  obs: {
+    key: 'observations',
+    title: 'Observations',
+    buttons: [
+      { code: 'R',  label: '+ Repair',         cls: 'r' },
+      { code: 'DD', label: '+ Due Diligence',  cls: 'dd' },
+      { code: 'RM', label: '+ Rec. Maintenance',cls: 'rm' },
+      { code: 'I',  label: '+ Information',    cls: 'i' },
+      { code: 'M',  label: '+ Monitor',        cls: 'm' }
+    ]
+  },
+  lim: {
+    key: 'limitations',
+    title: 'Limitations',
+    buttons: [{ code: 'LM', label: 'Add Limitation', cls: 'lm', single: true }]
+  }
+};
+
+const CODE_CLS = { SD:'sd', R:'r', DD:'dd', RM:'rm', I:'i', M:'m', LM:'lm' };
+const CODE_LABEL = {
+  SD:'System Description', R:'Repair', DD:'Due Diligence',
+  RM:'Recommended Maintenance', I:'Information', M:'Monitor', LM:'Limitation'
+};
+
+const STORAGE_KEY = 'insight_home_inspector_v1';
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state = createEmptyState();
+let currentSection = 'GENERAL';
+let uidCounter = 1;
+
+function createEmptyState() {
+  const s = {
+    general: {
+      address: '',
+      date: new Date().toISOString().slice(0,10),
+      era: '',
+      foundation: '',
+      exterior: '',
+      client: '',
+      weather: '',
+      occupancy: ''
+    },
+    sections: {}
+  };
+  INSPECT_SECTIONS.forEach(sec => {
+    s.sections[sec] = {
+      descriptions: [],
+      observations: [],
+      limitations: []
+    };
+  });
+  return s;
+}
+
+function newUid() { return 'f_' + (Date.now()) + '_' + (uidCounter++); }
+
+// ═══════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════
+function save() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) { console.warn('save failed', e); }
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (parsed && parsed.sections && parsed.general) {
+      // ensure all sections exist
+      INSPECT_SECTIONS.forEach(sec => {
+        if (!parsed.sections[sec]) {
+          parsed.sections[sec] = { descriptions: [], observations: [], limitations: [] };
+        } else {
+          parsed.sections[sec].descriptions = parsed.sections[sec].descriptions || [];
+          parsed.sections[sec].observations = parsed.sections[sec].observations || [];
+          parsed.sections[sec].limitations = parsed.sections[sec].limitations || [];
+        }
+      });
+      state = parsed;
+    }
+  } catch (e) { console.warn('load failed', e); }
+}
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+function renderSidebarCounts() {
+  INSPECT_SECTIONS.forEach(sec => {
+    const s = state.sections[sec];
+    const n = s.descriptions.length + s.observations.length + s.limitations.length;
+    const el = document.getElementById('count-' + sec);
+    if (el) el.textContent = n;
+    const item = document.querySelector(`.sb-item[data-sec="${sec}"]`);
+    if (item) item.classList.toggle('has-items', n > 0);
+  });
+  // general shows checkmark if address filled
+  const gCount = document.getElementById('count-GENERAL');
+  if (gCount) gCount.textContent = state.general.address ? '✓' : '—';
+  const gItem = document.querySelector('.sb-item[data-sec="GENERAL"]');
+  if (gItem) gItem.classList.toggle('has-items', !!state.general.address);
+}
+
+function renderActive() {
+  document.querySelectorAll('.sb-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.sec === currentSection);
+  });
+  document.getElementById('hdrSec').textContent =
+    currentSection === 'GENERAL' ? 'General Information' :
+    currentSection.charAt(0) + currentSection.slice(1).toLowerCase();
+}
+
+function renderMain() {
+  const main = document.getElementById('main');
+  if (currentSection === 'GENERAL') {
+    main.innerHTML = renderGeneral();
+    wireGeneralForm();
+  } else {
+    main.innerHTML = renderInspectionSection(currentSection);
+    wireSectionEvents(currentSection);
+  }
+  renderActive();
+  renderSidebarCounts();
+}
+
+function renderGeneral() {
+  const g = state.general;
+  return `
+    <h2 class="page-title">General Information</h2>
+    <p class="page-sub">Property metadata for the title page and General section of the report.</p>
+    <div class="form-card">
+      <div class="form-row">
+        <label>Property Address *</label>
+        <input id="g-address" type="text" value="${esc(g.address)}" placeholder="1642 Lauren Dr., Petaluma, CA">
+      </div>
+      <div class="form-row">
+        <label>Inspection Date</label>
+        <input id="g-date" type="date" value="${esc(g.date)}">
+      </div>
+      <div class="form-row">
+        <label>Client Name</label>
+        <input id="g-client" type="text" value="${esc(g.client)}" placeholder="Optional">
+      </div>
+      <div class="form-row">
+        <label>Construction Era</label>
+        <select id="g-era">
+          <option value="">— select —</option>
+          <option ${g.era==='Pre-1940'?'selected':''}>Pre-1940</option>
+          <option ${g.era==='1940-1959'?'selected':''}>1940-1959</option>
+          <option ${g.era==='1960-1979'?'selected':''}>1960-1979</option>
+          <option ${g.era==='1980-1999'?'selected':''}>1980-1999</option>
+          <option ${g.era==='2000-present'?'selected':''}>2000-present</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Foundation Type</label>
+        <select id="g-foundation">
+          <option value="">— select —</option>
+          <option ${g.foundation==='Concrete perimeter'?'selected':''}>Concrete perimeter</option>
+          <option ${g.foundation==='Concrete slab on grade'?'selected':''}>Concrete slab on grade</option>
+          <option ${g.foundation==='Pier and post'?'selected':''}>Pier and post</option>
+          <option ${g.foundation==='Raised concrete with crawlspace'?'selected':''}>Raised concrete with crawlspace</option>
+          <option ${g.foundation==='Mixed / Other'?'selected':''}>Mixed / Other</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Exterior Cladding</label>
+        <select id="g-exterior">
+          <option value="">— select —</option>
+          <option ${g.exterior==='Stucco'?'selected':''}>Stucco</option>
+          <option ${g.exterior==='Wood siding'?'selected':''}>Wood siding</option>
+          <option ${g.exterior==='Fiber cement'?'selected':''}>Fiber cement</option>
+          <option ${g.exterior==='Vinyl siding'?'selected':''}>Vinyl siding</option>
+          <option ${g.exterior==='Brick'?'selected':''}>Brick</option>
+          <option ${g.exterior==='Mixed'?'selected':''}>Mixed</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Weather at Inspection</label>
+        <input id="g-weather" type="text" value="${esc(g.weather)}" placeholder="e.g. Sunny, 62°F, recent rain">
+      </div>
+      <div class="form-row">
+        <label>Occupancy</label>
+        <select id="g-occupancy">
+          <option value="">— select —</option>
+          <option ${g.occupancy==='Occupied - furnished'?'selected':''}>Occupied - furnished</option>
+          <option ${g.occupancy==='Vacant - unfurnished'?'selected':''}>Vacant - unfurnished</option>
+          <option ${g.occupancy==='Vacant - furnished'?'selected':''}>Vacant - furnished</option>
+        </select>
+      </div>
+    </div>
+  `;
+}
+
+function wireGeneralForm() {
+  const map = {
+    'g-address': 'address', 'g-date': 'date', 'g-client': 'client',
+    'g-era': 'era', 'g-foundation': 'foundation', 'g-exterior': 'exterior',
+    'g-weather': 'weather', 'g-occupancy': 'occupancy'
+  };
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const field = map[id];
+    el.addEventListener('input', () => { state.general[field] = el.value; save(); renderSidebarCounts(); });
+    el.addEventListener('change', () => { state.general[field] = el.value; save(); renderSidebarCounts(); });
+  });
+}
+
+function renderInspectionSection(sec) {
+  const data = state.sections[sec];
+  const secLabel = sec.charAt(0) + sec.slice(1).toLowerCase();
+  return `
+    <h2 class="page-title">${secLabel}</h2>
+    <p class="page-sub">Tap the buttons below each heading to add findings. Tap the mic icon to dictate.</p>
+    ${renderBox(sec, 'desc', data.descriptions)}
+    ${renderBox(sec, 'obs',  data.observations)}
+    ${renderBox(sec, 'lim',  data.limitations)}
+  `;
+}
+
+function renderBox(sec, boxKey, items) {
+  const box = BOXES[boxKey];
+  const btnsHtml = box.buttons.map(b =>
+    `<button class="add-btn ${b.cls}${b.single?' single':''}" data-add="${b.code}" data-sec="${sec}" data-box="${boxKey}">${b.label}</button>`
+  ).join('');
+  const itemsHtml = items.length
+    ? items.map(f => renderFinding(sec, boxKey, f)).join('')
+    : `<div class="empty">No ${box.title.toLowerCase()} yet.</div>`;
+  return `
+    <div class="box">
+      <div class="box-head">
+        <div class="box-title">${box.title}</div>
+        <div class="box-count">${items.length}</div>
+      </div>
+      <div class="box-body">
+        <div class="add-row">${btnsHtml}</div>
+        ${itemsHtml}
+      </div>
+    </div>
+  `;
+}
+
+function renderFinding(sec, boxKey, f) {
+  const cls = CODE_CLS[f.code] || '';
+  const label = CODE_LABEL[f.code] || f.code;
+  return `
+    <div class="finding ${cls}" data-id="${f.id}" data-sec="${sec}" data-box="${boxKey}">
+      <div class="finding-head">
+        <span class="finding-tag ${cls}">${f.code}</span>
+        <span style="font-size:12px;color:var(--gray-600);">${label}</span>
+        <button class="finding-del" data-del="${f.id}" aria-label="Delete">×</button>
+      </div>
+      <textarea data-text="${f.id}" rows="2" placeholder="Describe the finding...">${esc(f.text||'')}</textarea>
+      <div class="finding-actions">
+        <button class="mic-btn" data-mic-text="${f.id}" aria-label="Dictate">🎤</button>
+        <label class="photo-toggle">
+          <input type="checkbox" data-photo-tgl="${f.id}" ${f.photoOn?'checked':''}>
+          <span>Photo tag</span>
+        </label>
+      </div>
+      <div class="photo-row ${f.photoOn?'active':''}" data-photo-row="${f.id}">
+        <span class="photo-prefix">photos:</span>
+        <input type="text" data-photo="${f.id}" value="${esc(f.photos||'')}" placeholder="e.g. 1234, 1235 or IMG_1234">
+        <button class="mic-btn" data-mic-photo="${f.id}" aria-label="Dictate photo number">🎤</button>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+//  EVENT WIRING
+// ═══════════════════════════════════════════
+function wireSectionEvents(sec) {
+  // add buttons
+  document.querySelectorAll('[data-add]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const code = btn.dataset.add;
+      const boxKey = btn.dataset.box;
+      addFinding(sec, boxKey, code);
+    });
+  });
+
+  // delete
+  document.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!confirm('Delete this finding?')) return;
+      deleteFinding(sec, btn.dataset.del);
+    });
+  });
+
+  // text editing
+  document.querySelectorAll('[data-text]').forEach(ta => {
+    ta.addEventListener('input', () => {
+      updateFinding(sec, ta.dataset.text, { text: ta.value });
+      autoResize(ta);
+    });
+    autoResize(ta);
+  });
+
+  // photo toggle
+  document.querySelectorAll('[data-photo-tgl]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const id = cb.dataset.photoTgl;
+      updateFinding(sec, id, { photoOn: cb.checked });
+      const row = document.querySelector(`[data-photo-row="${id}"]`);
+      if (row) row.classList.toggle('active', cb.checked);
+    });
+  });
+
+  // photo input
+  document.querySelectorAll('[data-photo]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      updateFinding(sec, inp.dataset.photo, { photos: inp.value });
+    });
+  });
+
+  // mic buttons
+  document.querySelectorAll('[data-mic-text]').forEach(b => {
+    b.addEventListener('click', () => startDictation(b, 'text'));
+  });
+  document.querySelectorAll('[data-mic-photo]').forEach(b => {
+    b.addEventListener('click', () => startDictation(b, 'photo'));
+  });
+}
+
+function autoResize(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = (ta.scrollHeight + 2) + 'px';
+}
+
+function addFinding(sec, boxKey, code) {
+  const key = BOXES[boxKey].key;
+  const f = {
+    id: newUid(),
+    code,
+    text: '',
+    photoOn: false,
+    photos: ''
+  };
+  state.sections[sec][key].push(f);
+  save();
+  renderMain();
+  // focus new textarea
+  setTimeout(() => {
+    const ta = document.querySelector(`[data-text="${f.id}"]`);
+    if (ta) { ta.focus(); ta.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+  }, 50);
+}
+
+function deleteFinding(sec, id) {
+  const s = state.sections[sec];
+  ['descriptions','observations','limitations'].forEach(k => {
+    s[k] = s[k].filter(f => f.id !== id);
+  });
+  save();
+  renderMain();
+}
+
+function updateFinding(sec, id, patch) {
+  const s = state.sections[sec];
+  ['descriptions','observations','limitations'].forEach(k => {
+    s[k].forEach(f => {
+      if (f.id === id) Object.assign(f, patch);
+    });
+  });
+  save();
+}
+
+// ═══════════════════════════════════════════
+//  SPEECH RECOGNITION
+// ═══════════════════════════════════════════
+let currentRec = null;
+let currentRecBtn = null;
+
+function startDictation(btn, kind) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    toast('Speech recognition not supported in this browser');
+    return;
+  }
+  // if already listening on this button, stop
+  if (currentRec && currentRecBtn === btn) {
+    try { currentRec.stop(); } catch(e){}
+    return;
+  }
+  // stop any existing
+  if (currentRec) { try { currentRec.stop(); } catch(e){} }
+
+  const rec = new SR();
+  rec.lang = 'en-US';
+  rec.continuous = false;
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+
+  let targetSelector;
+  if (kind === 'text')  targetSelector = `[data-text="${btn.dataset.micText}"]`;
+  if (kind === 'photo') targetSelector = `[data-photo="${btn.dataset.micPhoto}"]`;
+  const target = document.querySelector(targetSelector);
+  if (!target) return;
+
+  btn.classList.add('listening');
+  currentRec = rec;
+  currentRecBtn = btn;
+
+  rec.onresult = (ev) => {
+    let said = '';
+    for (const r of ev.results) said += r[0].transcript;
+    if (kind === 'photo') said = parsePhotoSpeech(said);
+    // append to existing (with separator if needed)
+    const cur = (target.value || '').trimEnd();
+    target.value = cur ? (cur + (kind === 'photo' ? ', ' : ' ') + said) : said;
+    // trigger save
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+    if (kind === 'text') autoResize(target);
+  };
+  rec.onerror = (e) => {
+    toast('Mic: ' + (e.error || 'error'));
+  };
+  rec.onend = () => {
+    btn.classList.remove('listening');
+    currentRec = null;
+    currentRecBtn = null;
+  };
+
+  try {
+    rec.start();
+    toast('🎤 Listening...');
+  } catch (e) {
+    btn.classList.remove('listening');
+    toast('Mic could not start');
+  }
+}
+
+// Convert spoken photo IDs into a clean comma list.
+// Handles: "twelve thirty four" → "1234", "one two three four" → "1234",
+// "IMG 1234" → "IMG_1234", and comma/and separators.
+function parsePhotoSpeech(text) {
+  if (!text) return '';
+  // lowercase, clean
+  let t = text.trim()
+    .replace(/\band\b/gi, ',')
+    .replace(/\bcomma\b/gi, ',');
+  // number words → digits (single digits)
+  const words = { zero:'0', oh:'0', one:'1', two:'2', to:'2', too:'2', three:'3', four:'4', for:'4',
+                  five:'5', six:'6', seven:'7', eight:'8', ate:'8', nine:'9' };
+  // Split by comma-groups
+  const groups = t.split(',').map(g => g.trim()).filter(Boolean);
+  const out = groups.map(g => {
+    // if contains IMG prefix
+    const imgMatch = g.match(/img[\s_-]*(\d+)/i);
+    if (imgMatch) return 'IMG_' + imgMatch[1];
+    // Already digits
+    if (/^\d+$/.test(g.replace(/\s/g,''))) return g.replace(/\s/g,'');
+    // Word-numbers: split tokens and convert
+    const toks = g.toLowerCase().split(/\s+/);
+    let digits = '';
+    let allConvertible = true;
+    for (const w of toks) {
+      if (/^\d+$/.test(w)) { digits += w; continue; }
+      if (words[w] != null) { digits += words[w]; continue; }
+      allConvertible = false; break;
+    }
+    return allConvertible && digits ? digits : g;
+  });
+  return out.filter(Boolean).join(', ');
+}
+
+// ═══════════════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════════════
+
+// Parse a free-text photo ID string like "1234, 1235" or "IMG_1234, 1235"
+// into a clean array of IDs. Preserves IMG_NNNN if supplied; bare digits stay bare.
+function parsePhotoIds(str) {
+  if (!str) return [];
+  return String(str).split(',')
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(s => {
+      const imgMatch = s.match(/^img[\s_-]*(\d+)$/i);
+      if (imgMatch) return 'IMG_' + imgMatch[1];
+      // strip any non-id junk if it's clearly a number
+      if (/^\d+$/.test(s)) return s;
+      return s;
+    });
+}
+
+// Build a photo-id → finding-context map. Each id gets registered under both
+// its raw form (e.g. "1234") AND its IMG_NNNN form — so the Photo Tool can
+// match against whatever filename form iPhone hands it.
+function buildPhotoMap() {
+  const map = {};
+  const findings = [];
+  let seq = 0;
+
+  const addKey = (key, data) => {
+    if (!key) return;
+    map[key] = data;
+    // also register alt forms
+    const digits = key.replace(/\D/g, '');
+    if (digits && digits !== key) map[digits] = data;
+    if (digits) {
+      const imgForm = 'IMG_' + digits;
+      if (imgForm !== key) map[imgForm] = data;
+    }
+  };
+
+  INSPECT_SECTIONS.forEach(sec => {
+    const s = state.sections[sec];
+    const all = [
+      ...s.descriptions.map(f => ({ ...f, _box: 'Descriptions' })),
+      ...s.observations.map(f => ({ ...f, _box: 'Observations' })),
+      ...s.limitations.map(f => ({ ...f, _box: 'Limitations' }))
+    ];
+    all.forEach(f => {
+      if (!f.photoOn || !f.photos) return;
+      const ids = parsePhotoIds(f.photos);
+      if (!ids.length) return;
+      const finding = {
+        section: sec,
+        section_label: sec.charAt(0) + sec.slice(1).toLowerCase(),
+        box: f._box,
+        code: f.code,
+        code_label: CODE_LABEL[f.code] || f.code,
+        text: (f.text || '').trim(),
+        photo_ids: ids
+      };
+      findings.push(finding);
+      ids.forEach(id => {
+        seq++;
+        addKey(id, {
+          section: finding.section,
+          section_label: finding.section_label,
+          box: finding.box,
+          code: finding.code,
+          code_label: finding.code_label,
+          finding_text: finding.text,
+          sequence: seq
+        });
+      });
+    });
+  });
+
+  return {
+    meta: {
+      property: state.general.address || '',
+      inspection_date: state.general.date ? formatDate(state.general.date) : '',
+      inspector: 'Steve Ramos',
+      company: 'Insight Environmental Building Consultants LLC',
+      generated: new Date().toISOString()
+    },
+    findings,
+    photo_map: map
+  };
+}
+
+function countPhotos() {
+  const pm = buildPhotoMap();
+  // photo_map has duplicate keys for each form; count unique sequences instead
+  const seqs = new Set();
+  Object.values(pm.photo_map).forEach(v => seqs.add(v.sequence));
+  return { findings: pm.findings.length, photos: seqs.size };
+}
+
+function buildExportText() {
+  const lines = [];
+  const g = state.general;
+
+  lines.push('## GENERAL');
+  if (g.address)    lines.push('Property address: ' + g.address);
+  if (g.date)       lines.push('Inspection date: ' + formatDate(g.date));
+  if (g.client)     lines.push('Client: ' + g.client);
+  if (g.era)        lines.push('Construction era: ' + g.era);
+  if (g.foundation) lines.push('Foundation: ' + g.foundation);
+  if (g.exterior)   lines.push('Exterior: ' + g.exterior);
+  if (g.weather)    lines.push('Weather: ' + g.weather);
+  if (g.occupancy)  lines.push('Occupancy: ' + g.occupancy);
+
+  INSPECT_SECTIONS.forEach(sec => {
+    const s = state.sections[sec];
+    const all = [...s.descriptions, ...s.observations, ...s.limitations];
+    if (all.length === 0) return;
+    lines.push('');
+    lines.push('## ' + sec);
+    all.forEach(f => {
+      const text = (f.text || '').trim();
+      if (!text) return;
+      lines.push(f.code + ': ' + text);
+      if (f.photoOn && f.photos && f.photos.trim()) {
+        lines.push('photos: ' + f.photos.trim());
+      }
+    });
+  });
+  return lines.join('\n');
+}
+
+function formatDate(ymd) {
+  if (!ymd) return '';
+  const [y, m, d] = ymd.split('-');
+  if (!y || !m || !d) return ymd;
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `${months[parseInt(m,10)-1]} ${parseInt(d,10)}, ${y}`;
+}
+
+function openExport() {
+  const text = buildExportText();
+  document.getElementById('exportText').value = text;
+  const c = countPhotos();
+  const fc = document.querySelectorAll('.finding').length; // not used; compute fresh
+  // Count all findings across all sections
+  let totalFindings = 0;
+  INSPECT_SECTIONS.forEach(sec => {
+    const s = state.sections[sec];
+    totalFindings += s.descriptions.length + s.observations.length + s.limitations.length;
+  });
+  document.getElementById('exportSummary').textContent =
+    `${totalFindings} finding${totalFindings===1?'':'s'} · ${c.photos} photo tag${c.photos===1?'':'s'} across ${c.findings} finding${c.findings===1?'':'s'}`;
+  document.getElementById('exportModal').classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+//  MISC UI
+// ═══════════════════════════════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function esc(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  load();
+
+  document.querySelectorAll('.sb-item').forEach(el => {
+    el.addEventListener('click', () => {
+      currentSection = el.dataset.sec;
+      renderMain();
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sbOverlay').classList.remove('open');
+      window.scrollTo(0, 0);
+    });
+  });
+
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sbOverlay').classList.toggle('open');
+  });
+  document.getElementById('sbOverlay').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sbOverlay').classList.remove('open');
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', openExport);
+  document.getElementById('exportClose').addEventListener('click', () => {
+    document.getElementById('exportModal').classList.remove('active');
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    const text = document.getElementById('exportText').value;
+    try {
+      await navigator.clipboard.writeText(text);
+      toast('Copied to clipboard');
+    } catch (e) {
+      // fallback
+      const ta = document.getElementById('exportText');
+      ta.select(); document.execCommand('copy');
+      toast('Copied');
+    }
+  });
+
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    const text = document.getElementById('exportText').value;
+    const addr = (state.general.address || 'inspection').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+    const name = `${addr}_field_notes.txt`;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('downloadMapBtn').addEventListener('click', () => {
+    const map = buildPhotoMap();
+    const json = JSON.stringify(map, null, 2);
+    const addr = (state.general.address || 'inspection').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+    const name = `${addr}_photo_map.json`;
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name; a.click();
+    URL.revokeObjectURL(url);
+    toast('Photo map downloaded');
+  });
+
+  // more menu
+  document.getElementById('menuMore').addEventListener('click', () => {
+    document.getElementById('moreModal').classList.add('active');
+  });
+  document.getElementById('moreClose').addEventListener('click', () => {
+    document.getElementById('moreModal').classList.remove('active');
+  });
+
+  document.getElementById('saveJsonBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const addr = (state.general.address || 'inspection').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+    const a = document.createElement('a');
+    a.href = url; a.download = `${addr}_session.json`; a.click();
+    URL.revokeObjectURL(url);
+    toast('Session saved');
+  });
+
+  document.getElementById('loadJsonBtn').addEventListener('click', () => {
+    document.getElementById('loadFile').click();
+  });
+  document.getElementById('loadFile').addEventListener('change', (ev) => {
+    const file = ev.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (parsed && parsed.general && parsed.sections) {
+          state = parsed;
+          // ensure structure
+          INSPECT_SECTIONS.forEach(sec => {
+            state.sections[sec] = state.sections[sec] || { descriptions:[], observations:[], limitations:[] };
+          });
+          save();
+          renderMain();
+          document.getElementById('moreModal').classList.remove('active');
+          toast('Session loaded');
+        } else {
+          toast('Invalid session file');
+        }
+      } catch (e) { toast('Could not read file'); }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    if (!confirm('Clear ALL data? This cannot be undone.')) return;
+    state = createEmptyState();
+    save();
+    currentSection = 'GENERAL';
+    renderMain();
+    document.getElementById('moreModal').classList.remove('active');
+    toast('All data cleared');
+  });
+
+  // close modals on backdrop click
+  document.querySelectorAll('.modal-back').forEach(bg => {
+    bg.addEventListener('click', (e) => {
+      if (e.target === bg) bg.classList.remove('active');
+    });
+  });
+
+  renderMain();
+});
+</script>
+<script>
+// PWA: Register the root service worker (handles all tools)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js', { scope: '../' })
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>

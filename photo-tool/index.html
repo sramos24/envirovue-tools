@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1F3864">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Photo Tool">
+<title>Insight Environmental — Photo Documentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --navy:    #1a3a5c;
+    --blue:    #2e6da4;
+    --steel:   #4a7fa8;
+    --ice:     #d9e2f3;
+    --bg:      #f0f3f8;
+    --surface: #ffffff;
+    --border:  #c8d4e8;
+    --text:    #1a2535;
+    --muted:   #6b7e96;
+    --repair:  #d0b074;
+    --dd:      #a1d3e9;
+    --rm:      #f1bebe;
+    --info:    #2ba3e4;
+    --monitor: #b2f4b2;
+    --limit:   #f9e8b8;
+    --sd:      #c3c3c3;
+    --repair-border: #a07830;
+    --dd-border:     #5a9ab5;
+    --rm-border:     #c07070;
+    --info-border:   #1a6fa0;
+    --monitor-border:#50b050;
+    --limit-border:  #c0a030;
+    --sd-border:     #888888;
+    --green:   #2d7a4f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    flex-wrap: wrap;
+  }
+  header .brand {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  header .brand span { color: #7ab3d8; }
+  header .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 14px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .btn-primary   { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--steel); }
+  .btn-ghost     { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.2); }
+  .btn-green     { background: var(--green); color: #fff; }
+  .btn-green:hover { background: #236040; }
+  .btn-amber     { background: #b07820; color: #fff; }
+  .btn-amber:hover { background: #8a5e18; }
+  .btn-sm        { padding: 5px 10px; font-size: 12px; }
+  .btn-danger    { background: #c0392b; color: #fff; }
+  .btn-danger:hover { background: #a93226; }
+  .btn-outline   { background: transparent; color: var(--blue); border: 1px solid var(--blue); }
+  .btn-outline:hover { background: var(--ice); }
+  .btn-accent    { background: #7a3da8; color: #fff; }
+  .btn-accent:hover { background: #642e8d; }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 24px;
+  }
+
+  /* ── PROPERTY BAR ── */
+  .property-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--blue);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+  .property-bar label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 5px;
+  }
+  .property-bar input {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 7px 11px;
+    color: var(--text);
+    background: var(--bg);
+    width: 100%;
+  }
+  .property-bar input:focus { outline: none; border-color: var(--blue); }
+  .property-bar .field { flex: 1; min-width: 180px; }
+
+  /* ── LINK BANNER ── */
+  .link-banner {
+    display: none;
+    background: #E9F2F8;
+    border: 1px solid #86B3CE;
+    border-left: 4px solid var(--navy);
+    border-radius: 6px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .link-banner.active { display: flex; }
+  .link-banner-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+  .link-banner-info {
+    flex: 1;
+    min-width: 200px;
+  }
+  .link-banner-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 2px;
+  }
+  .link-banner-detail {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .link-banner-detail .match-count {
+    color: var(--green);
+    font-weight: 600;
+  }
+  .link-banner-detail .miss-count {
+    color: #b07820;
+    font-weight: 600;
+  }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--blue);
+    background: #eef4fb;
+  }
+  .upload-zone input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .upload-zone .icon { font-size: 32px; margin-bottom: 8px; display: block; color: var(--steel); }
+  .upload-zone p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .upload-zone strong { color: var(--blue); }
+
+  /* ── COMPRESSION PANEL ── */
+  .compress-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--green);
+    border-radius: 6px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    display: none;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+  .compress-panel.visible { display: flex; }
+  .compress-panel .panel-title {
+    font-size: 11px; font-weight: 700; color: var(--navy);
+    text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+  }
+  .compress-field { display: flex; align-items: center; gap: 8px; }
+  .compress-field label { font-size: 12px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .compress-field input[type=range] { width: 110px; accent-color: var(--blue); cursor: pointer; }
+  .compress-field select {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 12px;
+    padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px;
+    background: var(--bg); color: var(--text); cursor: pointer;
+  }
+  .compress-val {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 700;
+    color: var(--navy); min-width: 32px; text-align: right;
+  }
+  .compress-stats {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    color: var(--muted); margin-left: auto; text-align: right; line-height: 1.7;
+  }
+  .stat-good { color: var(--green); font-weight: 600; }
+  .stat-warn { color: #b07820; font-weight: 600; }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .photo-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--ice);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── GROUP FILTER TABS ── */
+  .group-tabs {
+    display: flex;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    flex-wrap: wrap;
+  }
+  .group-tab {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'IBM Plex Sans', sans-serif;
+    border-right: 1px solid var(--border);
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .group-tab:last-child { border-right: none; }
+  .group-tab:hover { background: var(--ice); color: var(--navy); }
+  .group-tab.active { background: var(--navy); color: #fff; }
+  .group-tab .badge {
+    font-size: 10px; font-family: 'IBM Plex Mono', monospace;
+    background: rgba(0,0,0,0.15); border-radius: 10px; padding: 1px 5px;
+  }
+  .group-tab.active .badge { background: rgba(255,255,255,0.2); }
+
+  /* ── SORT / VIEW ── */
+  .sort-controls { display: flex; gap: 6px; align-items: center; }
+  .sort-controls label { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .sort-select {
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 12px;
+    padding: 5px 8px; border: 1px solid var(--border); border-radius: 4px;
+    background: var(--surface); color: var(--text); cursor: pointer;
+  }
+  .view-toggle { display: flex; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .view-btn { background: none; border: none; padding: 6px 10px; cursor: pointer; color: var(--muted); transition: all 0.15s; font-size: 14px; }
+  .view-btn.active { background: var(--navy); color: white; }
+
+  /* ── PHOTO GRID ── */
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+
+  /* ── PHOTO CARD ── */
+  .photo-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: box-shadow 0.15s, transform 0.15s;
+    cursor: grab;
+    user-select: none;
+    position: relative;
+  }
+  .photo-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .photo-card.dragging { opacity: 0.4; transform: scale(0.97); cursor: grabbing; }
+  .photo-card.drag-over-card { box-shadow: 0 0 0 2px var(--blue), 0 4px 20px rgba(46,109,164,0.3); }
+  .photo-card[data-cat="Repair"]             { border-left-color: var(--repair-border); }
+  .photo-card[data-cat="Due Diligence"]      { border-left-color: var(--dd-border); }
+  .photo-card[data-cat="Rec. Maintenance"]   { border-left-color: var(--rm-border); }
+  .photo-card[data-cat="Information"]        { border-left-color: var(--info-border); }
+  .photo-card[data-cat="Monitor"]            { border-left-color: var(--monitor-border); }
+  .photo-card[data-cat="Limitation"]         { border-left-color: var(--limit-border); }
+  .photo-card[data-cat="System Description"] { border-left-color: var(--sd-border); }
+
+  .photo-card .thumb {
+    width: 100%; height: 160px; object-fit: cover; display: block; background: var(--bg);
+  }
+  .photo-card .card-body { padding: 10px 12px 12px; }
+
+  .card-top-row {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .cat-badge {
+    font-size: 10px; font-weight: 600; font-family: 'IBM Plex Mono', monospace;
+    padding: 2px 7px; border-radius: 3px; display: inline-block;
+  }
+  .badge-repair  { background: var(--repair);  color: #5a3800; }
+  .badge-dd      { background: var(--dd);      color: #1a3a5c; }
+  .badge-rm      { background: var(--rm);      color: #6b1a1a; }
+  .badge-info    { background: #d0eeff;        color: #0a4a6e; }
+  .badge-monitor { background: var(--monitor); color: #1a4a1a; }
+  .badge-limit   { background: var(--limit);   color: #5a4a00; }
+  .badge-sd      { background: var(--sd);      color: #333;    }
+  .badge-general { background: var(--ice);     color: var(--navy); }
+
+  .link-chip {
+    font-size: 9px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: var(--navy);
+    color: #fff;
+    letter-spacing: 0.04em;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .section-select, .cat-select {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 3px 6px;
+    background: var(--bg);
+    color: var(--text);
+    margin-bottom: 5px;
+    width: 100%;
+    cursor: pointer;
+  }
+  .section-select:focus, .cat-select:focus { outline: none; border-color: var(--blue); }
+
+  .caption-input {
+    width: 100%;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 5px 8px;
+    resize: vertical;
+    min-height: 44px;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.4;
+  }
+  .caption-input:focus { outline: none; border-color: var(--blue); }
+
+  .card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; gap: 6px; }
+  .id-label {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0;
+  }
+
+  .drag-handle {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0,0,0,0.45); color: white; border-radius: 3px;
+    padding: 3px 5px; font-size: 12px; cursor: grab; line-height: 1;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .photo-card:hover .drag-handle { opacity: 1; }
+
+  .photo-num {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(26,58,92,0.85); color: white;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
+    border-radius: 3px; padding: 2px 7px;
+  }
+
+  /* ── SECTION GROUP ── */
+  .section-group { margin-bottom: 24px; }
+  .section-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--muted); margin-bottom: 10px;
+    padding-left: 2px; display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── LIST VIEW ── */
+  .photo-list { display: flex; flex-direction: column; gap: 8px; }
+  .list-card {
+    background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--border);
+    border-radius: 6px; padding: 10px 14px; display: flex; align-items: center;
+    gap: 14px; cursor: grab; transition: box-shadow 0.15s;
+  }
+  .list-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .list-card.dragging { opacity: 0.4; }
+  .list-card.drag-over-card { box-shadow: 0 0 0 2px var(--blue); }
+  .list-card[data-cat="Repair"]             { border-left-color: var(--repair-border); }
+  .list-card[data-cat="Due Diligence"]      { border-left-color: var(--dd-border); }
+  .list-card[data-cat="Rec. Maintenance"]   { border-left-color: var(--rm-border); }
+  .list-card[data-cat="Information"]        { border-left-color: var(--info-border); }
+  .list-card[data-cat="Monitor"]            { border-left-color: var(--monitor-border); }
+  .list-card[data-cat="Limitation"]         { border-left-color: var(--limit-border); }
+  .list-card[data-cat="System Description"] { border-left-color: var(--sd-border); }
+  .list-thumb { width: 60px; height: 48px; object-fit: cover; border-radius: 3px; flex-shrink: 0; }
+  .list-info { flex: 1; min-width: 0; }
+  .list-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
+  .list-caption { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list-meta { font-size: 11px; color: var(--muted); display: flex; gap: 8px; margin-top: 2px; align-items: center; }
+  .list-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 8px; width: 90%; max-width: 600px;
+    max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .modal-header {
+    background: var(--navy); color: white; padding: 14px 18px; font-weight: 600;
+    font-size: 14px; border-radius: 8px 8px 0 0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-close { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+  .modal-body { padding: 18px; }
+  .export-output {
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    background: #f7f9fc; border: 1px solid var(--border); border-radius: 4px;
+    padding: 14px; white-space: pre-wrap; max-height: 300px; overflow-y: auto;
+    line-height: 1.6; color: #333;
+  }
+
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
+  .empty-state .big-icon { font-size: 44px; margin-bottom: 10px; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--navy); color: white;
+    padding: 10px 18px; border-radius: 22px;
+    font-size: 13px; font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    opacity: 0; transition: all 0.25s;
+    z-index: 300;
+    pointer-events: none;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
+  @media print { .compress-panel, .link-banner { display: none !important; } }
+
+  /* ── PDF PRINT STYLES ── */
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+    body { background: white !important; font-family: Arial, sans-serif; }
+    header, .upload-zone, .toolbar, .property-bar, .card-footer,
+    .drag-handle, .section-select, .cat-select, .caption-input,
+    .modal-overlay, .link-banner, .toast { display: none !important; }
+
+    main { max-width: 100%; padding: 0; margin: 0; }
+
+    .pdf-cover {
+      display: flex !important;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      page-break-after: always;
+      text-align: center;
+    }
+    .pdf-cover h1 { font-size: 28px; color: #1a3a5c; margin-bottom: 8px; }
+    .pdf-cover .sub { font-size: 16px; color: #2e6da4; margin-bottom: 32px; }
+    .pdf-cover table { border-collapse: collapse; width: 380px; }
+    .pdf-cover td { padding: 8px 14px; font-size: 13px; border: 1px solid #ccc; }
+    .pdf-cover td:first-child { background: #d9e2f3; font-weight: bold; color: #1a3a5c; width: 140px; }
+
+    .pdf-section-header {
+      display: block !important;
+      background: #2e6da4 !important;
+      color: white !important;
+      font-size: 15px;
+      font-weight: bold;
+      padding: 8px 12px;
+      margin: 20px 0 12px 0;
+      page-break-after: avoid;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pdf-photo-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      page-break-inside: auto;
+    }
+
+    .pdf-card {
+      display: block !important;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      overflow: hidden;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+    .pdf-card img {
+      width: 100%; height: 200px; object-fit: cover; display: block;
+    }
+    .pdf-card .pdf-card-meta { padding: 8px 10px; font-size: 11px; }
+    .pdf-card .pdf-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+    .pdf-card .pdf-num { font-weight: bold; color: #1a3a5c; font-family: monospace; font-size: 11px; }
+    .pdf-card .pdf-badge { font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 3px; font-family: monospace; }
+    .pdf-card .pdf-caption { font-size: 11px; color: #333; line-height: 1.4; margin-top: 3px; }
+    .pdf-card .pdf-section-tag { font-size: 10px; color: #888; margin-top: 2px; font-family: monospace; }
+
+    .pdf-badge.cat-repair   { background: #d0b074; color: #5a3800; }
+    .pdf-badge.cat-dd       { background: #a1d3e9; color: #1a3a5c; }
+    .pdf-badge.cat-rm       { background: #f1bebe; color: #6b1a1a; }
+    .pdf-badge.cat-info     { background: #2ba3e4; color: #fff; }
+    .pdf-badge.cat-monitor  { background: #b2f4b2; color: #1a4a1a; }
+    .pdf-badge.cat-limit    { background: #f9e8b8; color: #5a4a00; }
+    .pdf-badge.cat-sd       { background: #c3c3c3; color: #333; }
+    .pdf-badge.cat-general  { background: #d9e2f3; color: #1a3a5c; }
+
+    .pdf-card[data-cat="Repair"]             { border-left: 4px solid #a07830; }
+    .pdf-card[data-cat="Due Diligence"]      { border-left: 4px solid #5a9ab5; }
+    .pdf-card[data-cat="Rec. Maintenance"]   { border-left: 4px solid #c07070; }
+    .pdf-card[data-cat="Information"]        { border-left: 4px solid #1a6fa0; }
+    .pdf-card[data-cat="Monitor"]            { border-left: 4px solid #50b050; }
+    .pdf-card[data-cat="Limitation"]         { border-left: 4px solid #c0a030; }
+    .pdf-card[data-cat="System Description"] { border-left: 4px solid #888888; }
+
+    .photo-grid, .photo-list, .section-group { display: none !important; }
+    .pdf-output { display: block !important; }
+  }
+
+  .pdf-output { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Insight <span>Environmental</span> — Photo Documentation</div>
+  <div class="actions">
+    <button class="btn btn-accent btn-sm" id="linkBtn">🔗 Link Field Notes</button>
+    <input type="file" id="mapInput" accept=".json" style="display:none">
+    <button class="btn btn-amber btn-sm" id="saveBtn" title="Save session as backup">💾 Save</button>
+    <button class="btn btn-ghost btn-sm" id="restoreBtn" title="Restore saved session">↩ Restore</button>
+    <input type="file" id="restoreInput" accept=".json" style="display:none">
+    <button class="btn btn-green btn-sm" id="pdfBtn">🖨 Export PDF</button>
+    <button class="btn btn-ghost btn-sm" id="logBtn">⬇ Log</button>
+    <button class="btn btn-primary btn-sm" id="addBtn">+ Add Photos</button>
+  </div>
+</header>
+
+<main>
+  <!-- Property Bar -->
+  <div class="property-bar">
+    <div class="field">
+      <label>Property Address</label>
+      <input type="text" id="propAddress" placeholder="1642 Lauren Dr., Petaluma CA">
+    </div>
+    <div class="field">
+      <label>Inspection Date</label>
+      <input type="text" id="propDate" placeholder="March 27, 2026">
+    </div>
+    <div class="field">
+      <label>Inspector</label>
+      <input type="text" id="propInspector" value="Steve Ramos">
+    </div>
+  </div>
+
+  <!-- Link Banner -->
+  <div class="link-banner" id="linkBanner">
+    <span class="link-banner-icon">🔗</span>
+    <div class="link-banner-info">
+      <div class="link-banner-title" id="linkTitle">Field notes linked</div>
+      <div class="link-banner-detail" id="linkDetail"></div>
+    </div>
+    <button class="btn btn-outline btn-sm" id="rematchBtn">Re-match all</button>
+    <button class="btn btn-outline btn-sm" id="unlinkBtn">Unlink</button>
+  </div>
+
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="uploadZone">
+    <input type="file" id="fileInput" multiple accept="image/*">
+    <span class="icon">📷</span>
+    <p><strong>Drop photos here</strong> or click to browse<br>
+    Batch upload supported — filenames auto-match to field notes when linked</p>
+  </div>
+
+  <!-- Compression Settings -->
+  <div class="compress-panel" id="compressPanel">
+    <span class="panel-title">⚙ Import Settings</span>
+    <div class="compress-field">
+      <label>Quality</label>
+      <input type="range" id="qualitySlider" min="20" max="100" value="80" step="5">
+      <span class="compress-val" id="qualityVal">80%</span>
+    </div>
+    <div class="compress-field">
+      <label>Max Width</label>
+      <select id="maxWidth">
+        <option value="3840">Original</option>
+        <option value="2560">2560 px</option>
+        <option value="1920" selected>1920 px</option>
+        <option value="1280">1280 px</option>
+        <option value="800">800 px</option>
+      </select>
+    </div>
+    <div class="compress-field">
+      <label>Format</label>
+      <select id="outFormat">
+        <option value="image/jpeg" selected>JPEG</option>
+        <option value="image/webp">WebP</option>
+      </select>
+    </div>
+    <button class="btn btn-outline btn-sm" id="recompressBtn">↺ Recompress All</button>
+    <div class="compress-stats" id="compressStats"></div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar" id="toolbar" style="display:none">
+    <div class="toolbar-left">
+      <span class="photo-count" id="photoCount">0 photos</span>
+      <div class="group-tabs" id="groupTabs"></div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <div class="sort-controls">
+        <label>Group by:</label>
+        <select class="sort-select" id="groupBy">
+          <option value="none">— None —</option>
+          <option value="section">Section</option>
+          <option value="category">Category</option>
+        </select>
+      </div>
+      <div class="view-toggle">
+        <button class="view-btn active" id="viewGrid" title="Grid">⊞</button>
+        <button class="view-btn" id="viewList" title="List">≡</button>
+      </div>
+      <button class="btn btn-outline btn-sm" id="clearBtn">Clear All</button>
+    </div>
+  </div>
+
+  <div id="photoContainer"></div>
+  <div class="pdf-output" id="pdfOutput"></div>
+</main>
+
+<!-- Log Export Modal -->
+<div class="modal-overlay" id="logModal">
+  <div class="modal">
+    <div class="modal-header">
+      Photo Log Export
+      <button class="modal-close" data-close="logModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+        Copy this log to include with your field notes.
+      </p>
+      <div class="export-output" id="exportOutput"></div>
+      <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;">
+        <button class="btn btn-outline" id="copyLogBtn">Copy to Clipboard</button>
+        <button class="btn btn-primary" data-close="logModal">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PDF Modal -->
+<div class="modal-overlay" id="pdfModal">
+  <div class="modal">
+    <div class="modal-header">
+      Export as PDF
+      <button class="modal-close" data-close="pdfModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:10px;">Your PDF is ready to print.</p>
+      <p style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:14px;">
+        A print dialog will open. To save as PDF:<br>
+        &nbsp;&nbsp;<strong>Mac:</strong> Click <em>PDF → Save as PDF</em> in the bottom-left of the dialog.<br>
+        &nbsp;&nbsp;<strong>Windows:</strong> Select <em>Microsoft Print to PDF</em>.<br><br>
+        For best results use <strong>landscape orientation</strong> and set margins to <strong>Minimum</strong>.
+        Photos are laid out 2 per row, grouped by section.
+      </p>
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button class="btn btn-outline" data-close="pdfModal">Cancel</button>
+        <button class="btn btn-green" id="doPrintBtn">Open Print Dialog →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═════════════════════════════════════════════
+//   CONSTANTS
+// ═════════════════════════════════════════════
+const SECTIONS   = ['General','Roofing','Exteriors','Electrical','HVAC','Plumbing','Interiors','Structural'];
+const CATEGORIES = ['—','System Description','Repair','Due Diligence','Rec. Maintenance','Information','Monitor','Limitation'];
+
+// Home Inspector code → Photo Tool category label
+const CODE_TO_CAT = {
+  'SD': 'System Description',
+  'R':  'Repair',
+  'DD': 'Due Diligence',
+  'RM': 'Rec. Maintenance',
+  'I':  'Information',
+  'M':  'Monitor',
+  'LM': 'Limitation'
+};
+
+// Home Inspector SECTION (uppercase) → Photo Tool section (title case)
+const SECTION_MAP = {
+  'GENERAL':    'General',
+  'ROOFING':    'Roofing',
+  'EXTERIORS':  'Exteriors',
+  'ELECTRICAL': 'Electrical',
+  'HVAC':       'HVAC',
+  'PLUMBING':   'Plumbing',
+  'INTERIORS':  'Interiors',
+  'STRUCTURAL': 'Structural'
+};
+
+const CAT_BADGE = {
+  'Repair':             'badge-repair',
+  'Due Diligence':      'badge-dd',
+  'Rec. Maintenance':   'badge-rm',
+  'Information':        'badge-info',
+  'Monitor':            'badge-monitor',
+  'Limitation':         'badge-limit',
+  'System Description': 'badge-sd',
+  '—':                  'badge-general'
+};
+
+const CAT_PRINT = {
+  'Repair':             'cat-repair',
+  'Due Diligence':      'cat-dd',
+  'Rec. Maintenance':   'cat-rm',
+  'Information':        'cat-info',
+  'Monitor':            'cat-monitor',
+  'Limitation':         'cat-limit',
+  'System Description': 'cat-sd',
+  '—':                  'cat-general'
+};
+
+const AUTOSAVE_KEY = 'insight_photo_tool_autosave_v6';
+
+// ═════════════════════════════════════════════
+//   STATE
+// ═════════════════════════════════════════════
+let photos        = [];
+let photoMap      = null;     // the imported field notes map
+let photoMapMeta  = null;
+let nextId        = 1;
+let activeFilter  = 'all';
+let viewMode      = 'grid';
+let dragSrcId     = null;
+
+// ═════════════════════════════════════════════
+//   INIT
+// ═════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  buildGroupTabs();
+  wireEvents();
+  loadAutosave();
+});
+
+function buildGroupTabs() {
+  const wrap = document.getElementById('groupTabs');
+  const tabs = [{ key: 'all', label: 'All' }].concat(
+    SECTIONS.map(s => ({ key: s, label: s, badge: true }))
+  );
+  wrap.innerHTML = tabs.map(t =>
+    `<button class="group-tab${t.key==='all'?' active':''}" data-filter="${t.key}">
+       ${t.label}${t.badge?` <span class="badge" id="badge-${t.key}">0</span>`:''}
+     </button>`
+  ).join('');
+  wrap.querySelectorAll('.group-tab').forEach(btn => {
+    btn.addEventListener('click', () => setFilter(btn.dataset.filter, btn));
+  });
+}
+
+function wireEvents() {
+  // Upload
+  const uz = document.getElementById('uploadZone');
+  const fi = document.getElementById('fileInput');
+  uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('drag-over'); });
+  uz.addEventListener('dragleave', () => uz.classList.remove('drag-over'));
+  uz.addEventListener('drop', e => {
+    e.preventDefault(); uz.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+  fi.addEventListener('change', e => handleFiles(e.target.files));
+  document.getElementById('addBtn').addEventListener('click', () => fi.click());
+
+  // Link Field Notes
+  const mi = document.getElementById('mapInput');
+  document.getElementById('linkBtn').addEventListener('click', () => mi.click());
+  mi.addEventListener('change', e => handleMapFile(e.target.files[0]));
+  document.getElementById('rematchBtn').addEventListener('click', rematchAll);
+  document.getElementById('unlinkBtn').addEventListener('click', unlinkMap);
+
+  // Save / Restore
+  document.getElementById('saveBtn').addEventListener('click', saveSession);
+  const ri = document.getElementById('restoreInput');
+  document.getElementById('restoreBtn').addEventListener('click', () => ri.click());
+  ri.addEventListener('change', e => restoreSession(e.target.files[0]));
+
+  // Export
+  document.getElementById('pdfBtn').addEventListener('click', exportPDF);
+  document.getElementById('logBtn').addEventListener('click', exportLog);
+  document.getElementById('copyLogBtn').addEventListener('click', copyLog);
+  document.getElementById('doPrintBtn').addEventListener('click', doPrint);
+
+  // Clear
+  document.getElementById('clearBtn').addEventListener('click', clearAll);
+
+  // View toggle
+  document.getElementById('viewGrid').addEventListener('click', () => setView('grid'));
+  document.getElementById('viewList').addEventListener('click', () => setView('list'));
+  document.getElementById('groupBy').addEventListener('change', renderPhotos);
+
+  // Compression controls
+  const qs = document.getElementById('qualitySlider');
+  qs.addEventListener('input', () => {
+    document.getElementById('qualityVal').textContent = qs.value + '%';
+  });
+  document.getElementById('recompressBtn').addEventListener('click', recompressAll);
+
+  // Property bar autosave
+  ['propAddress','propDate','propInspector'].forEach(id => {
+    document.getElementById(id).addEventListener('input', autosave);
+  });
+
+  // Modal backdrops + close buttons
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+  });
+  document.querySelectorAll('[data-close]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById(btn.dataset.close).classList.remove('open');
+    });
+  });
+}
+
+// ═════════════════════════════════════════════
+//   COMPRESSION
+// ═════════════════════════════════════════════
+function compressImage(src, maxW, quality, format) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL(format, quality / 100));
+    };
+    img.onerror = () => resolve(src);
+    img.src = src;
+  });
+}
+
+function getCompressSettings() {
+  return {
+    maxW:    parseInt(document.getElementById('maxWidth').value),
+    quality: parseInt(document.getElementById('qualitySlider').value),
+    format:  document.getElementById('outFormat').value
+  };
+}
+
+function updateStats() {
+  const el = document.getElementById('compressStats');
+  if (!photos.length) { el.innerHTML = ''; return; }
+  let total = 0;
+  photos.forEach(p => { total += (p.src || '').length * 0.75; });
+  const mb = (total / 1048576).toFixed(1);
+  const cls = parseFloat(mb) > 50 ? 'stat-warn' : 'stat-good';
+  el.innerHTML = `${photos.length} photo${photos.length===1?'':'s'} &nbsp;|&nbsp; <span class="${cls}">${mb} MB est.</span>`;
+}
+
+async function recompressAll() {
+  if (!photos.length) return;
+  const btn = document.getElementById('recompressBtn');
+  const txt = btn.textContent;
+  btn.textContent = '...'; btn.disabled = true;
+  const { maxW, quality, format } = getCompressSettings();
+  for (const p of photos) {
+    p.src = await compressImage(p.src, maxW, quality, format);
+  }
+  btn.textContent = txt; btn.disabled = false;
+  renderPhotos(); updateStats(); autosave();
+  toast('Recompressed ' + photos.length + ' photos');
+}
+
+// ═════════════════════════════════════════════
+//   FILE UPLOAD
+// ═════════════════════════════════════════════
+function handleFiles(files) {
+  const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (!arr.length) return;
+  const { maxW, quality, format } = getCompressSettings();
+  let loaded = 0;
+  let matched = 0;
+  arr.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      const compressed = await compressImage(e.target.result, maxW, quality, format);
+      const photo = {
+        id: nextId++, src: compressed, filename: file.name,
+        section: 'General', category: '—', caption: '',
+        order: photos.length,
+        photoId: null,         // extracted ID like "1234"
+        linked: false,         // was it matched to field notes
+        findingText: null
+      };
+      // Auto-match against photo map
+      if (photoMap) {
+        const match = lookupPhotoForFile(file.name);
+        if (match) {
+          photo.section     = match.section_label || photo.section;
+          photo.category    = (match.code && CODE_TO_CAT[match.code]) || match.code_label || photo.category;
+          photo.caption     = match.finding_text  || '';
+          photo.photoId     = match.matchedKey;
+          photo.linked      = true;
+          photo.findingText = match.finding_text;
+          matched++;
+        } else {
+          // Even if not found in map, extract the ID for reference
+          const ids = extractPhotoId(file.name);
+          if (ids) photo.photoId = ids.full;
+        }
+      }
+      photos.push(photo);
+      loaded++;
+      if (loaded === arr.length) {
+        renderPhotos(); updateBadges(); showToolbar(); updateStats();
+        document.getElementById('compressPanel').classList.add('visible');
+        autosave();
+        if (photoMap) {
+          updateLinkBanner();
+          toast(`Added ${arr.length} photos · ${matched} auto-linked`);
+        } else {
+          toast('Added ' + arr.length + ' photo' + (arr.length===1?'':'s'));
+        }
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ═════════════════════════════════════════════
+//   PHOTO MAP INTEGRATION
+// ═════════════════════════════════════════════
+function handleMapFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.photo_map) {
+        alert('This does not look like a photo map JSON. Expected a "photo_map" key.');
+        return;
+      }
+      photoMap     = data.photo_map;
+      photoMapMeta = data.meta || {};
+
+      // Pre-fill property bar from map meta
+      if (photoMapMeta.property && !document.getElementById('propAddress').value) {
+        document.getElementById('propAddress').value = photoMapMeta.property;
+      }
+      if (photoMapMeta.inspection_date && !document.getElementById('propDate').value) {
+        document.getElementById('propDate').value = photoMapMeta.inspection_date;
+      }
+      if (photoMapMeta.inspector && !document.getElementById('propInspector').value) {
+        document.getElementById('propInspector').value = photoMapMeta.inspector;
+      }
+
+      // Re-match existing photos silently
+      if (photos.length) {
+        let matched = 0;
+        photos.forEach(p => {
+          const m = lookupPhotoForFile(p.filename);
+          if (m) {
+            p.section     = m.section_label || p.section;
+            p.category    = (m.code && CODE_TO_CAT[m.code]) || m.code_label || p.category;
+            p.caption     = m.finding_text  || p.caption;
+            p.photoId     = m.matchedKey;
+            p.linked      = true;
+            p.findingText = m.finding_text;
+            matched++;
+          }
+        });
+        renderPhotos();
+        if (matched) toast(`${matched} existing photo${matched===1?'':'s'} matched`);
+      }
+
+      updateLinkBanner();
+      autosave();
+      document.getElementById('mapInput').value = '';
+    } catch (err) {
+      alert('Could not read photo map — file may be corrupted.');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function updateLinkBanner() {
+  const banner = document.getElementById('linkBanner');
+  if (!photoMap) {
+    banner.classList.remove('active');
+    return;
+  }
+  banner.classList.add('active');
+  // Count unique photo IDs in map (sequence-based)
+  const seqs = new Set();
+  Object.values(photoMap).forEach(v => { if (v && v.sequence != null) seqs.add(v.sequence); });
+  const total = seqs.size;
+  // Count how many of those are uploaded
+  const uploadedSeqs = new Set();
+  photos.forEach(p => {
+    if (p.linked && p.photoId && photoMap[p.photoId]) {
+      uploadedSeqs.add(photoMap[p.photoId].sequence);
+    }
+  });
+  const uploaded = uploadedSeqs.size;
+  const missing  = total - uploaded;
+
+  const prop = photoMapMeta.property || 'Unknown property';
+  document.getElementById('linkTitle').textContent = `Linked · ${prop}`;
+  let detail = `<span class="match-count">${uploaded}</span> / ${total} photos uploaded`;
+  if (missing > 0) detail += ` · <span class="miss-count">${missing} waiting</span>`;
+  document.getElementById('linkDetail').innerHTML = detail;
+}
+
+function rematchAll() {
+  if (!photoMap) return;
+  let matched = 0;
+  photos.forEach(p => {
+    const m = lookupPhotoForFile(p.filename);
+    if (m) {
+      p.section     = m.section_label || 'General';
+      p.category    = (m.code && CODE_TO_CAT[m.code]) || m.code_label || '—';
+      p.caption     = m.finding_text  || '';
+      p.photoId     = m.matchedKey;
+      p.linked      = true;
+      p.findingText = m.finding_text;
+      matched++;
+    } else {
+      p.linked      = false;
+      p.findingText = null;
+      // keep whatever user had set
+    }
+  });
+  renderPhotos(); updateBadges(); updateLinkBanner(); autosave();
+  toast(`Re-matched · ${matched} of ${photos.length} photos`);
+}
+
+function unlinkMap() {
+  if (!confirm('Unlink field notes? Existing photo assignments will be preserved, but the "Linked" status will be removed.')) return;
+  photoMap = null;
+  photoMapMeta = null;
+  photos.forEach(p => { p.linked = false; p.findingText = null; });
+  updateLinkBanner();
+  renderPhotos();
+  autosave();
+  toast('Unlinked from field notes');
+}
+
+// Extract a candidate photo ID from an iPhone-style filename.
+// Handles: IMG_1234.HEIC, IMG_E1234.JPG (edited), IMG_1234 (1).JPG, 1234.jpg
+function extractPhotoId(filename) {
+  if (!filename) return null;
+  const base = filename.split('.')[0].trim();
+  // IMG_NNNN or IMG_ENNNN
+  const imgMatch = base.match(/IMG[\s_-]*E?(\d+)/i);
+  if (imgMatch) return { full: 'IMG_' + imgMatch[1], digits: imgMatch[1] };
+  // Just digits (possibly with surrounding junk)
+  const digitMatch = base.match(/(\d{3,})/);
+  if (digitMatch) return { full: digitMatch[1], digits: digitMatch[1] };
+  return null;
+}
+
+function lookupPhotoForFile(filename) {
+  if (!photoMap) return null;
+  const ids = extractPhotoId(filename);
+  if (!ids) return null;
+  // try the IMG form first, then digits
+  const keys = [ids.full, ids.digits, 'IMG_' + ids.digits];
+  for (const k of keys) {
+    if (photoMap[k]) {
+      return Object.assign({}, photoMap[k], { matchedKey: k });
+    }
+  }
+  return null;
+}
+
+// ═════════════════════════════════════════════
+//   FILTER / VIEW / RENDER
+// ═════════════════════════════════════════════
+function showToolbar() { document.getElementById('toolbar').style.display = 'flex'; }
+
+function setFilter(filter, el) {
+  activeFilter = filter;
+  document.querySelectorAll('.group-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderPhotos();
+}
+
+function setView(mode) {
+  viewMode = mode;
+  document.getElementById('viewGrid').classList.toggle('active', mode === 'grid');
+  document.getElementById('viewList').classList.toggle('active', mode === 'list');
+  renderPhotos();
+}
+
+function updateBadges() {
+  SECTIONS.forEach(s => {
+    const el = document.getElementById('badge-' + s);
+    if (el) el.textContent = photos.filter(p => p.section === s).length;
+  });
+  document.getElementById('photoCount').textContent =
+    photos.length + ' photo' + (photos.length !== 1 ? 's' : '');
+}
+
+function renderPhotos() {
+  const container = document.getElementById('photoContainer');
+  const groupBy   = document.getElementById('groupBy').value;
+  let visible = activeFilter === 'all' ? [...photos] : photos.filter(p => p.section === activeFilter);
+
+  if (!visible.length) {
+    if (!photos.length) {
+      container.innerHTML = `<div class="empty-state"><div class="big-icon">🖼</div>
+        <p>No photos yet.<br>Drop images above or click <strong>+ Add Photos</strong>.</p></div>`;
+    } else {
+      container.innerHTML = `<div class="empty-state"><div class="big-icon">🔍</div>
+        <p>No photos in this section.</p></div>`;
+    }
+    return;
+  }
+
+  visible.sort((a, b) => a.order - b.order);
+  container.innerHTML = '';
+
+  if (groupBy === 'none') {
+    container.appendChild(makeGrid(visible));
+  } else {
+    const groupKey   = groupBy === 'section' ? 'section' : 'category';
+    const groupOrder = groupBy === 'section' ? SECTIONS : CATEGORIES;
+    const groups = {};
+    visible.forEach(p => {
+      const k = p[groupKey];
+      if (!groups[k]) groups[k] = [];
+      groups[k].push(p);
+    });
+    groupOrder.forEach(key => {
+      if (!groups[key] || !groups[key].length) return;
+      const g = document.createElement('div');
+      g.className = 'section-group';
+      g.innerHTML = `<div class="section-label">${key === '—' ? 'Unassigned' : key}</div>`;
+      g.appendChild(makeGrid(groups[key]));
+      container.appendChild(g);
+    });
+  }
+}
+
+function makeGrid(items) {
+  if (viewMode === 'list') return makeList(items);
+  const grid = document.createElement('div');
+  grid.className = 'photo-grid';
+  items.forEach(p => grid.appendChild(makeCard(p)));
+  return grid;
+}
+function makeList(items) {
+  const list = document.createElement('div');
+  list.className = 'photo-list';
+  items.forEach(p => list.appendChild(makeListCard(p)));
+  return list;
+}
+
+function makeCard(p) {
+  const idx = photos.indexOf(p);
+  const div = document.createElement('div');
+  div.className = 'photo-card';
+  div.dataset.id = p.id;
+  div.dataset.cat = p.category;
+  div.draggable = true;
+
+  const badgeCls  = CAT_BADGE[p.category] || 'badge-general';
+  const catLabel  = p.category === '—' ? 'Unassigned' : p.category;
+  const idTag     = p.photoId || '';
+
+  div.innerHTML = `
+    <img class="thumb" src="${p.src}" alt="${escHtml(p.filename)}" loading="lazy">
+    <span class="photo-num">#${idx + 1}</span>
+    <span class="drag-handle">⠿</span>
+    <div class="card-body">
+      <div class="card-top-row">
+        <span class="cat-badge ${badgeCls}">${escHtml(catLabel)}</span>
+        ${p.linked ? '<span class="link-chip">🔗 LINKED</span>' : ''}
+      </div>
+      <select class="section-select" data-field="section">
+        ${SECTIONS.map(s => `<option ${p.section===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+      <select class="cat-select" data-field="category">
+        ${CATEGORIES.map(c => `<option ${p.category===c?'selected':''}>${c === '—' ? '— Unassigned —' : c}</option>`).join('')}
+      </select>
+      <textarea class="caption-input" data-field="caption" placeholder="Caption / observation note…">${escHtml(p.caption)}</textarea>
+      <div class="card-footer">
+        <span class="id-label" title="${escHtml(p.filename)}">${escHtml(idTag || p.filename)}</span>
+        <button class="btn btn-danger btn-sm" data-remove>✕</button>
+      </div>
+    </div>`;
+
+  // Wire field events (avoid full re-render on caption typing)
+  div.querySelector('[data-field="section"]').addEventListener('change', e => {
+    updateFieldLight(p.id, 'section', e.target.value);
+    updateBadges(); updateLinkBanner();
+    // if current filter excludes this section, re-render
+    if (activeFilter !== 'all' && activeFilter !== e.target.value) renderPhotos();
+  });
+  div.querySelector('[data-field="category"]').addEventListener('change', e => {
+    updateFieldLight(p.id, 'category', e.target.value);
+    div.dataset.cat = e.target.value;
+    const badge = div.querySelector('.cat-badge');
+    badge.className = 'cat-badge ' + (CAT_BADGE[e.target.value] || 'badge-general');
+    badge.textContent = e.target.value === '—' ? 'Unassigned' : e.target.value;
+  });
+  div.querySelector('[data-field="caption"]').addEventListener('input', e => {
+    updateFieldLight(p.id, 'caption', e.target.value);
+  });
+  div.querySelector('[data-remove]').addEventListener('click', () => removePhoto(p.id));
+
+  addDragEvents(div, p);
+  return div;
+}
+
+function makeListCard(p) {
+  const idx = photos.indexOf(p);
+  const div = document.createElement('div');
+  div.className = 'list-card';
+  div.dataset.id = p.id;
+  div.dataset.cat = p.category;
+  div.draggable = true;
+  const catLabel = p.category === '—' ? 'Unassigned' : p.category;
+  const idTag    = p.photoId || p.filename;
+
+  div.innerHTML = `
+    <img class="list-thumb" src="${p.src}" alt="" loading="lazy">
+    <div class="list-info">
+      <div class="list-num">#${idx + 1} · ${escHtml(idTag)}</div>
+      <div class="list-caption">${escHtml(p.caption || p.filename)}</div>
+      <div class="list-meta">
+        <span>${escHtml(p.section)}</span>
+        <span>${escHtml(catLabel)}</span>
+        ${p.linked ? '<span class="link-chip">🔗 LINKED</span>' : ''}
+      </div>
+    </div>
+    <div class="list-actions">
+      <select class="section-select" style="width:110px" data-field="section">
+        ${SECTIONS.map(s => `<option ${p.section===s?'selected':''}>${s}</option>`).join('')}
+      </select>
+      <select class="cat-select" style="width:140px" data-field="category">
+        ${CATEGORIES.map(c => `<option ${p.category===c?'selected':''}>${c === '—' ? '— Unassigned —' : c}</option>`).join('')}
+      </select>
+      <button class="btn btn-danger btn-sm" data-remove>✕</button>
+    </div>`;
+
+  div.querySelector('[data-field="section"]').addEventListener('change', e => {
+    updateFieldLight(p.id, 'section', e.target.value);
+    updateBadges(); updateLinkBanner();
+    renderPhotos(); // list view benefits from a redraw
+  });
+  div.querySelector('[data-field="category"]').addEventListener('change', e => {
+    updateFieldLight(p.id, 'category', e.target.value);
+    div.dataset.cat = e.target.value;
+    renderPhotos();
+  });
+  div.querySelector('[data-remove]').addEventListener('click', () => removePhoto(p.id));
+
+  addDragEvents(div, p);
+  return div;
+}
+
+function addDragEvents(el, p) {
+  el.addEventListener('dragstart', e => {
+    dragSrcId = p.id;
+    el.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  el.addEventListener('dragend', () => {
+    el.classList.remove('dragging');
+    document.querySelectorAll('.drag-over-card').forEach(x => x.classList.remove('drag-over-card'));
+  });
+  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-over-card'); });
+  el.addEventListener('dragleave', () => el.classList.remove('drag-over-card'));
+  el.addEventListener('drop', e => {
+    e.preventDefault(); el.classList.remove('drag-over-card');
+    if (dragSrcId !== p.id) reorderPhotos(dragSrcId, p.id);
+  });
+}
+
+// ═════════════════════════════════════════════
+//   FIELD UPDATES
+// ═════════════════════════════════════════════
+function updateFieldLight(id, field, value) {
+  const p = photos.find(x => x.id === id);
+  if (!p) return;
+  p[field] = value;
+  // Manual edit breaks the "linked" state only if content diverges from map
+  if (p.linked && photoMap && p.photoId && photoMap[p.photoId]) {
+    const m = photoMap[p.photoId];
+    if ((field === 'section'  && value !== (m.section_label || 'General')) ||
+        (field === 'category' && value !== (m.code_label    || '—'))      ||
+        (field === 'caption'  && value !== (m.finding_text  || ''))) {
+      // Keep linked true (user may want to know source) but we could toggle here if desired.
+      // Leaving linked chip in place; if user wants to fully break link, they can re-match.
+    }
+  }
+  autosave();
+}
+
+function removePhoto(id) {
+  if (!confirm('Remove this photo?')) return;
+  photos = photos.filter(p => p.id !== id);
+  photos.forEach((p, i) => p.order = i);
+  renderPhotos(); updateBadges(); updateStats(); updateLinkBanner();
+  if (!photos.length) {
+    document.getElementById('toolbar').style.display = 'none';
+    document.getElementById('compressPanel').classList.remove('visible');
+  }
+  autosave();
+}
+
+function clearAll() {
+  if (!confirm('Remove all photos? Property info and field-notes link will be preserved.')) return;
+  photos = []; nextId = 1;
+  renderPhotos(); updateBadges(); updateStats(); updateLinkBanner();
+  document.getElementById('toolbar').style.display = 'none';
+  document.getElementById('compressPanel').classList.remove('visible');
+  autosave();
+  toast('All photos cleared');
+}
+
+function reorderPhotos(srcId, targetId) {
+  const si = photos.findIndex(p => p.id === srcId);
+  const ti = photos.findIndex(p => p.id === targetId);
+  if (si < 0 || ti < 0) return;
+  const [moved] = photos.splice(si, 1);
+  photos.splice(ti, 0, moved);
+  photos.forEach((p, i) => p.order = i);
+  renderPhotos();
+  autosave();
+}
+
+// ═════════════════════════════════════════════
+//   AUTOSAVE (localStorage)
+// ═════════════════════════════════════════════
+function autosave() {
+  try {
+    const data = buildSessionData();
+    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
+  } catch (e) {
+    // likely quota exceeded from too many base64 photos — silent fail
+    console.warn('Autosave skipped:', e.message);
+  }
+}
+
+function loadAutosave() {
+  try {
+    const raw = localStorage.getItem(AUTOSAVE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    applySessionData(data);
+    if (photos.length) {
+      renderPhotos(); updateBadges(); showToolbar(); updateStats();
+      document.getElementById('compressPanel').classList.add('visible');
+    }
+    updateLinkBanner();
+  } catch (e) { console.warn('Autosave load failed', e); }
+}
+
+// ═════════════════════════════════════════════
+//   SESSION SAVE / RESTORE (to file)
+// ═════════════════════════════════════════════
+function buildSessionData() {
+  return {
+    version:    2,
+    address:    document.getElementById('propAddress').value,
+    date:       document.getElementById('propDate').value,
+    inspector:  document.getElementById('propInspector').value,
+    photoMap,
+    photoMapMeta,
+    photos: photos.map(p => ({
+      id: p.id, src: p.src, filename: p.filename,
+      section: p.section, category: p.category, caption: p.caption,
+      order: p.order, photoId: p.photoId, linked: p.linked, findingText: p.findingText
+    }))
+  };
+}
+
+function applySessionData(data) {
+  if (!data) return;
+  document.getElementById('propAddress').value   = data.address   || '';
+  document.getElementById('propDate').value      = data.date      || '';
+  document.getElementById('propInspector').value = data.inspector || 'Steve Ramos';
+  photoMap     = data.photoMap     || null;
+  photoMapMeta = data.photoMapMeta || null;
+  photos       = (data.photos || []).map(p => ({
+    photoId: null, linked: false, findingText: null, ...p
+  }));
+  nextId = photos.length ? Math.max(...photos.map(p => p.id)) + 1 : 1;
+}
+
+function saveSession() {
+  const data = buildSessionData();
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const a = document.createElement('a');
+  const addr = (data.address || 'session').replace(/[^a-z0-9]/gi,'_').slice(0,40) || 'session';
+  a.href = URL.createObjectURL(blob);
+  a.download = `Insight_Photos_${addr}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Session saved');
+}
+
+function restoreSession(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      applySessionData(data);
+      renderPhotos(); updateBadges(); updateStats(); updateLinkBanner();
+      if (photos.length) {
+        showToolbar();
+        document.getElementById('compressPanel').classList.add('visible');
+      }
+      autosave();
+      toast('Session restored');
+    } catch (err) {
+      alert('Could not restore session — file may be corrupted.');
+    }
+  };
+  reader.readAsText(file);
+  document.getElementById('restoreInput').value = '';
+}
+
+// ═════════════════════════════════════════════
+//   PDF EXPORT
+// ═════════════════════════════════════════════
+function exportPDF() {
+  if (!photos.length) { alert('No photos to export.'); return; }
+  buildPDFOutput();
+  document.getElementById('pdfModal').classList.add('open');
+}
+
+function doPrint() {
+  document.getElementById('pdfModal').classList.remove('open');
+  setTimeout(() => window.print(), 300);
+}
+
+function buildPDFOutput() {
+  const addr = document.getElementById('propAddress').value  || '—';
+  const date = document.getElementById('propDate').value     || '—';
+  const insp = document.getElementById('propInspector').value|| 'Steve Ramos';
+  const total = photos.length;
+
+  let html = `
+    <div class="pdf-cover">
+      <h1>Photo Documentation</h1>
+      <div class="sub">Insight Environmental Building Consultants LLC</div>
+      <table>
+        <tr><td>Property</td><td>${escHtml(addr)}</td></tr>
+        <tr><td>Date</td><td>${escHtml(date)}</td></tr>
+        <tr><td>Inspector</td><td>${escHtml(insp)}</td></tr>
+        <tr><td>Total Photos</td><td>${total}</td></tr>
+      </table>
+    </div>`;
+
+  SECTIONS.forEach(sec => {
+    const secPhotos = photos.filter(p => p.section === sec).sort((a,b) => a.order - b.order);
+    if (!secPhotos.length) return;
+    html += `<div class="pdf-section-header">${sec}</div>`;
+    html += `<div class="pdf-photo-grid">`;
+    secPhotos.forEach(p => {
+      const idx = photos.indexOf(p);
+      const badgeCls = CAT_PRINT[p.category] || 'cat-general';
+      const catLabel = p.category === '—' ? 'Unassigned' : p.category;
+      const idTag    = p.photoId || p.filename;
+      html += `
+        <div class="pdf-card" data-cat="${escAttr(p.category)}">
+          <img src="${p.src}" alt="">
+          <div class="pdf-card-meta">
+            <div class="pdf-card-header">
+              <span class="pdf-num">#${idx + 1}</span>
+              <span class="pdf-badge ${badgeCls}">${escHtml(catLabel)}</span>
+            </div>
+            ${p.caption ? `<div class="pdf-caption">${escHtml(p.caption)}</div>` : ''}
+            <div class="pdf-section-tag">${escHtml(idTag)}</div>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  });
+
+  document.getElementById('pdfOutput').innerHTML = html;
+}
+
+// ═════════════════════════════════════════════
+//   LOG EXPORT
+// ═════════════════════════════════════════════
+function exportLog() {
+  const addr = document.getElementById('propAddress').value || 'Unknown';
+  const date = document.getElementById('propDate').value    || 'Unknown';
+  const insp = document.getElementById('propInspector').value || 'Steve Ramos';
+  let out = `INSIGHT ENVIRONMENTAL — PHOTO LOG\n${'─'.repeat(50)}\n`;
+  out += `Property:  ${addr}\nDate:      ${date}\nInspector: ${insp}\nPhotos:    ${photos.length}\n`;
+  if (photoMapMeta && photoMapMeta.property) {
+    const seqs = new Set();
+    photos.forEach(p => { if (p.linked && p.photoId && photoMap[p.photoId]) seqs.add(photoMap[p.photoId].sequence); });
+    out += `Linked:    ${seqs.size} photos matched to field notes\n`;
+  }
+  out += `${'─'.repeat(50)}\n\n`;
+
+  SECTIONS.forEach(sec => {
+    const sp = photos.filter(p => p.section === sec).sort((a,b) => a.order - b.order);
+    if (!sp.length) return;
+    out += `## ${sec.toUpperCase()}\n`;
+    sp.forEach((p, i) => {
+      out += `  Photo ${i+1}: ${p.filename}${p.photoId?` [${p.photoId}]`:''}\n`;
+      out += `  Category: ${p.category === '—' ? 'Unassigned' : p.category}\n`;
+      if (p.caption) out += `  Note: ${p.caption}\n`;
+      if (p.linked) out += `  🔗 Linked to field notes\n`;
+      out += '\n';
+    });
+  });
+  document.getElementById('exportOutput').textContent = out;
+  document.getElementById('logModal').classList.add('open');
+}
+
+function copyLog() {
+  const text = document.getElementById('exportOutput').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyLogBtn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = orig, 1800);
+  }).catch(() => toast('Copy failed'));
+}
+
+// ═════════════════════════════════════════════
+//   UTILITIES
+// ═════════════════════════════════════════════
+function escHtml(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function escAttr(str) { return escHtml(str); }
+
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+</script>
+<script>
+// PWA: Register the root service worker (handles all tools)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js', { scope: '../' })
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+</script>
+</body>
+</html>

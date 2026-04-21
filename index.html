@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1F3864">
+
+<!-- PWA metadata -->
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Envirovue">
+
+<title>Envirovue Tools — Insight Environmental</title>
+<style>
+  :root {
+    --navy:    #1F3864;
+    --navy-2:  #2E5FA3;
+    --blue:    #2e6da4;
+    --steel:   #4a7fa8;
+    --ice:     #d9e2f3;
+    --accent:  #7ab3d8;
+    --bg:      #EDF1F7;
+    --surface: #ffffff;
+    --border:  #c8d4e8;
+    --text:    #1a2535;
+    --muted:   #6b7e96;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    -webkit-font-smoothing: antialiased;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  .hero {
+    background: linear-gradient(180deg, var(--navy-2) 0%, var(--navy) 100%);
+    color: #fff;
+    padding: 32px 20px 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 1; }
+  .hero h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+  .hero .sub {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .hero .brand-mark {
+    font-family: Georgia, serif;
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    margin-bottom: 12px;
+    color: #fff;
+    line-height: 1;
+  }
+  .hero .accent-bar {
+    width: 60px; height: 4px; background: var(--accent);
+    margin: 0 auto 18px; border-radius: 2px;
+  }
+
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 24px 16px 40px;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 10px;
+    padding: 0 4px;
+  }
+
+  .tool-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .tool-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--blue);
+    border-radius: 10px;
+    padding: 18px 18px;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 0.12s, box-shadow 0.12s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .tool-card:active { transform: scale(0.98); }
+  .tool-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .tool-card.coming-soon {
+    border-left-color: var(--border);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  .tool-icon {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--navy-2), var(--navy));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .tool-card.coming-soon .tool-icon {
+    background: #c8d4e8;
+  }
+
+  .tool-text { flex: 1; min-width: 0; }
+  .tool-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .tool-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .tool-arrow {
+    color: var(--muted);
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .tool-card.coming-soon .tool-arrow {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+    color: var(--muted); text-transform: uppercase;
+  }
+
+  /* Info panel */
+  .info-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 18px;
+    margin-bottom: 20px;
+  }
+  .info-panel h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .info-panel p {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .info-panel .muted { color: var(--muted); margin-top: 6px; font-size: 12px; }
+
+  /* Install prompt */
+  .install-banner {
+    display: none;
+    background: #FEF5E7;
+    border: 1px solid #F5D9A3;
+    border-left: 4px solid #b07820;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .install-banner.show { display: block; }
+  .install-banner strong { color: #8a5a14; }
+  .install-banner .steps {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #5c3c0a;
+  }
+
+  /* Status strip */
+  .status-strip {
+    display: flex;
+    gap: 14px;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .status-item {
+    display: flex; align-items: center; gap: 5px;
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #d0d5dc;
+  }
+  .status-dot.green { background: #2d7a4f; }
+  .status-dot.amber { background: #b07820; }
+
+  footer {
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 20px;
+    line-height: 1.6;
+  }
+  footer strong { color: var(--navy); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-content">
+    <div class="brand-mark">IE</div>
+    <div class="accent-bar"></div>
+    <h1>Envirovue Tools</h1>
+    <div class="sub">Insight Environmental Building Consultants</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Install banner (shown only if not installed and on iOS Safari) -->
+  <div class="install-banner" id="installBanner">
+    <strong>📱 Install for offline use</strong>
+    <div class="steps">
+      Tap the <strong>Share</strong> button in Safari, then <strong>Add to Home Screen</strong>. The app will work offline after install.
+    </div>
+  </div>
+
+  <div class="section-label">Inspection Tools</div>
+  <div class="tool-grid">
+
+    <a href="home-inspector/" class="tool-card">
+      <div class="tool-icon">🏠</div>
+      <div class="tool-text">
+        <div class="tool-title">Home Inspector</div>
+        <div class="tool-desc">Field data capture · 8 sections · observation coding</div>
+      </div>
+      <div class="tool-arrow">›</div>
+    </a>
+
+    <a href="photo-tool/" class="tool-card">
+      <div class="tool-icon">📷</div>
+      <div class="tool-text">
+        <div class="tool-title">Photo Documentation</div>
+        <div class="tool-desc">Photo captions · auto-link to field notes · PDF export</div>
+      </div>
+      <div class="tool-arrow">›</div>
+    </a>
+
+    <div class="tool-card coming-soon">
+      <div class="tool-icon">🧪</div>
+      <div class="tool-text">
+        <div class="tool-title">Chain of Custody</div>
+        <div class="tool-desc">Asbestos & mold lab submissions · EMC / Sporecyte</div>
+      </div>
+      <div class="tool-arrow">Soon</div>
+    </div>
+
+  </div>
+
+  <div class="info-panel">
+    <h3>✓ Works offline after install</h3>
+    <p>Once installed to your home screen, all tools work without an internet connection. Your session data is saved locally on the device.</p>
+    <p class="muted">Tip: back up your sessions using the Save Session button in each tool, especially for larger inspections.</p>
+  </div>
+
+  <!-- Connection / install status -->
+  <div class="status-strip">
+    <div class="status-item" id="statusOnline">
+      <span class="status-dot" id="dotOnline"></span>
+      <span id="labelOnline">Checking...</span>
+    </div>
+    <div class="status-item" id="statusInstalled">
+      <span class="status-dot" id="dotInstalled"></span>
+      <span id="labelInstalled">Not installed</span>
+    </div>
+    <div class="status-item" id="statusCached">
+      <span class="status-dot" id="dotCached"></span>
+      <span id="labelCached">Cache pending</span>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <strong>Insight Environmental Building Consultants LLC</strong><br>
+  245 Kentucky St., Suite A · Petaluma, CA 94952 · 707-775-7800
+</footer>
+
+<script>
+// ═════════════════════════════════════════════
+//   PWA: Service Worker Registration
+// ═════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => {
+        console.log('SW registered:', reg.scope);
+        updateCachedStatus(true);
+      })
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
+
+// ═════════════════════════════════════════════
+//   INSTALL DETECTION (iOS-friendly)
+// ═════════════════════════════════════════════
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+         window.navigator.standalone === true;
+}
+
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+// Show install banner on iOS Safari if not already installed
+if (isIOS() && !isStandalone()) {
+  document.getElementById('installBanner').classList.add('show');
+}
+
+// Update install status
+function updateInstallStatus() {
+  const dot   = document.getElementById('dotInstalled');
+  const label = document.getElementById('labelInstalled');
+  if (isStandalone()) {
+    dot.classList.add('green');
+    label.textContent = 'Installed';
+  } else {
+    dot.classList.add('amber');
+    label.textContent = 'Not installed';
+  }
+}
+updateInstallStatus();
+
+// ═════════════════════════════════════════════
+//   ONLINE STATUS
+// ═════════════════════════════════════════════
+function updateOnlineStatus() {
+  const dot   = document.getElementById('dotOnline');
+  const label = document.getElementById('labelOnline');
+  if (navigator.onLine) {
+    dot.className = 'status-dot green';
+    label.textContent = 'Online';
+  } else {
+    dot.className = 'status-dot amber';
+    label.textContent = 'Offline · Using cache';
+  }
+}
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// ═════════════════════════════════════════════
+//   CACHE STATUS
+// ═════════════════════════════════════════════
+function updateCachedStatus(hasWorker) {
+  const dot   = document.getElementById('dotCached');
+  const label = document.getElementById('labelCached');
+  if (hasWorker) {
+    dot.className = 'status-dot green';
+    label.textContent = 'Ready offline';
+  } else {
+    dot.className = 'status-dot amber';
+    label.textContent = 'Cache pending';
+  }
+}
+</script>
+</body>
+</html>
