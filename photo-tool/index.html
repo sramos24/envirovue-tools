@@ -574,9 +574,11 @@
     }
     .pdf-card .pdf-card-meta { padding: 8px 10px; font-size: 11px; }
     .pdf-card .pdf-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
+    .pdf-card .pdf-img-id { font-weight: bold; color: #1a3a5c; font-family: monospace; font-size: 13px; letter-spacing: 0.02em; }
     .pdf-card .pdf-num { font-weight: bold; color: #1a3a5c; font-family: monospace; font-size: 11px; }
     .pdf-card .pdf-badge { font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 3px; font-family: monospace; }
-    .pdf-card .pdf-caption { font-size: 11px; color: #333; line-height: 1.4; margin-top: 3px; }
+    .pdf-card .pdf-caption { font-size: 11px; color: #333; line-height: 1.4; margin-top: 4px; }
+    .pdf-card .pdf-seq-num { font-size: 9px; color: #999; font-family: monospace; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
     .pdf-card .pdf-section-tag { font-size: 10px; color: #888; margin-top: 2px; font-family: monospace; }
 
     .pdf-badge.cat-repair   { background: #d0b074; color: #5a3800; }
@@ -606,6 +608,7 @@
 <body>
 
 <header>
+  <button class="btn btn-ghost btn-sm" id="navBtn" title="Switch tools" style="padding:5px 10px;font-size:15px;">☰</button>
   <div class="brand">Insight <span>Environmental</span> — Photo Documentation</div>
   <div class="actions">
     <button class="btn btn-accent btn-sm" id="linkBtn">🔗 Link Field Notes</button>
@@ -618,6 +621,20 @@
     <button class="btn btn-primary btn-sm" id="addBtn">+ Add Photos</button>
   </div>
 </header>
+
+<!-- Nav Menu Modal -->
+<div class="modal-overlay" id="navModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      Navigate
+      <button class="modal-close" data-close="navModal">✕</button>
+    </div>
+    <div class="modal-body">
+      <a href="../home-inspector/" class="btn btn-outline" style="width:100%;margin-bottom:8px;display:block;text-align:center;text-decoration:none;padding:12px;">📋 Switch to Home Inspector</a>
+      <a href="../" class="btn btn-outline" style="width:100%;display:block;text-align:center;text-decoration:none;padding:12px;">◀ Back to Envirovue Launcher</a>
+    </div>
+  </div>
+</div>
 
 <main>
   <!-- Property Bar -->
@@ -859,6 +876,11 @@ function wireEvents() {
   fi.addEventListener('change', e => handleFiles(e.target.files));
   document.getElementById('addBtn').addEventListener('click', () => fi.click());
 
+  // Nav menu
+  document.getElementById('navBtn').addEventListener('click', () => {
+    document.getElementById('navModal').classList.add('open');
+  });
+
   // Link Field Notes
   const mi = document.getElementById('mapInput');
   document.getElementById('linkBtn').addEventListener('click', () => mi.click());
@@ -987,7 +1009,7 @@ function handleFiles(files) {
         if (match) {
           photo.section     = match.section_label || photo.section;
           photo.category    = (match.code && CODE_TO_CAT[match.code]) || match.code_label || photo.category;
-          photo.caption     = match.finding_text  || '';
+          photo.caption     = match.short_text || match.finding_text || '';
           photo.photoId     = match.matchedKey;
           photo.linked      = true;
           photo.findingText = match.finding_text;
@@ -1051,7 +1073,7 @@ function handleMapFile(file) {
           if (m) {
             p.section     = m.section_label || p.section;
             p.category    = (m.code && CODE_TO_CAT[m.code]) || m.code_label || p.category;
-            p.caption     = m.finding_text  || p.caption;
+            p.caption     = m.short_text || m.finding_text || p.caption;
             p.photoId     = m.matchedKey;
             p.linked      = true;
             p.findingText = m.finding_text;
@@ -1097,8 +1119,80 @@ function updateLinkBanner() {
   const prop = photoMapMeta.property || 'Unknown property';
   document.getElementById('linkTitle').textContent = `Linked · ${prop}`;
   let detail = `<span class="match-count">${uploaded}</span> / ${total} photos uploaded`;
-  if (missing > 0) detail += ` · <span class="miss-count">${missing} waiting</span>`;
+  if (missing > 0) {
+    detail += ` · <span class="miss-count missing-link" style="cursor:pointer;text-decoration:underline;" id="missingLink">${missing} waiting</span>`;
+  }
   document.getElementById('linkDetail').innerHTML = detail;
+
+  // Wire up clickable missing count
+  const missingEl = document.getElementById('missingLink');
+  if (missingEl) {
+    missingEl.addEventListener('click', showMissingPhotos);
+  }
+}
+
+function showMissingPhotos() {
+  if (!photoMap) return;
+  // Build map of sequence → { ids, section, code, text }
+  const seqMap = {};
+  Object.entries(photoMap).forEach(([key, val]) => {
+    if (!val || val.sequence == null) return;
+    if (!seqMap[val.sequence]) {
+      seqMap[val.sequence] = {
+        ids: [],
+        section: val.section_label || val.section,
+        code: val.code_label || val.code,
+        text: val.finding_text || ''
+      };
+    }
+    seqMap[val.sequence].ids.push(key);
+  });
+  // Figure out which sequences are uploaded
+  const uploadedSeqs = new Set();
+  photos.forEach(p => {
+    if (p.linked && p.photoId && photoMap[p.photoId]) {
+      uploadedSeqs.add(photoMap[p.photoId].sequence);
+    }
+  });
+  // Build missing list
+  const missing = [];
+  Object.entries(seqMap).forEach(([seq, info]) => {
+    if (!uploadedSeqs.has(parseInt(seq))) {
+      // Prefer the IMG_ form for display
+      const displayId = info.ids.find(k => k.startsWith('IMG_')) || info.ids[0];
+      missing.push({ id: displayId, ...info });
+    }
+  });
+  if (!missing.length) {
+    toast('All photos are linked!');
+    return;
+  }
+  // Build a readable display
+  let html = `<p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+    These photo IDs are tagged in your field notes but no matching photo has been uploaded yet.
+    Check for typos or upload the missing photos.
+  </p>`;
+  html += '<div class="export-output" style="font-family:inherit;font-size:13px;">';
+  missing.forEach(m => {
+    const codeColor = {
+      'Repair': '#a07830', 'Due Diligence': '#5a9ab5',
+      'Recommended Maintenance': '#c07070', 'Rec. Maintenance': '#c07070',
+      'Information': '#1a6fa0', 'Monitor': '#50b050',
+      'Limitation': '#c0a030', 'System Description': '#888'
+    }[m.code] || '#666';
+    html += `<div style="padding:8px 10px;border-left:3px solid ${codeColor};background:#fff;margin-bottom:6px;border-radius:3px;">`;
+    html += `<div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--navy);">${escHtml(m.id)}</div>`;
+    html += `<div style="font-size:11px;color:var(--muted);margin:2px 0;">${escHtml(m.section)} · ${escHtml(m.code)}</div>`;
+    if (m.text) html += `<div style="font-size:12px;color:var(--text);margin-top:3px;">${escHtml(m.text.slice(0, 120))}${m.text.length > 120 ? '…' : ''}</div>`;
+    html += '</div>';
+  });
+  html += '</div>';
+
+  document.getElementById('exportOutput').innerHTML = html;
+  document.querySelector('#logModal .modal-header').firstChild.textContent = `Photos Waiting (${missing.length})`;
+  // Hide the copy button for this view since it's HTML
+  document.getElementById('copyLogBtn').style.display = 'none';
+  document.getElementById('logModal').classList.add('open');
 }
 
 function rematchAll() {
@@ -1555,17 +1649,17 @@ function buildPDFOutput() {
       const idx = photos.indexOf(p);
       const badgeCls = CAT_PRINT[p.category] || 'cat-general';
       const catLabel = p.category === '—' ? 'Unassigned' : p.category;
-      const idTag    = p.photoId || p.filename;
+      const idTag    = p.photoId || p.filename.replace(/\.[^.]+$/, '');
       html += `
         <div class="pdf-card" data-cat="${escAttr(p.category)}">
           <img src="${p.src}" alt="">
           <div class="pdf-card-meta">
             <div class="pdf-card-header">
-              <span class="pdf-num">#${idx + 1}</span>
+              <span class="pdf-img-id">${escHtml(idTag)}</span>
               <span class="pdf-badge ${badgeCls}">${escHtml(catLabel)}</span>
             </div>
+            <div class="pdf-seq-num">Photo #${idx + 1}</div>
             ${p.caption ? `<div class="pdf-caption">${escHtml(p.caption)}</div>` : ''}
-            <div class="pdf-section-tag">${escHtml(idTag)}</div>
           </div>
         </div>`;
     });
@@ -1579,6 +1673,10 @@ function buildPDFOutput() {
 //   LOG EXPORT
 // ═════════════════════════════════════════════
 function exportLog() {
+  // Reset modal in case it was used for "missing photos" view
+  document.getElementById('copyLogBtn').style.display = '';
+  document.querySelector('#logModal .modal-header').firstChild.textContent = 'Photo Log Export';
+
   const addr = document.getElementById('propAddress').value || 'Unknown';
   const date = document.getElementById('propDate').value    || 'Unknown';
   const insp = document.getElementById('propInspector').value || 'Steve Ramos';

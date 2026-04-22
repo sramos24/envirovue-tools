@@ -531,6 +531,11 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
       <button class="modal-close" id="moreClose">×</button>
     </div>
     <div class="modal-body">
+      <div style="font-size:10px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Navigate</div>
+      <a href="../photo-tool/" class="btn" style="width:100%;margin-bottom:6px;display:block;text-align:center;text-decoration:none;">📷 Switch to Photo Tool</a>
+      <a href="../" class="btn" style="width:100%;margin-bottom:14px;display:block;text-align:center;text-decoration:none;">◀ Back to Envirovue</a>
+
+      <div style="font-size:10px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Session</div>
       <button class="btn" style="width:100%;margin-bottom:8px;" id="saveJsonBtn">💾 Save Session (JSON backup)</button>
       <button class="btn" style="width:100%;margin-bottom:8px;" id="loadJsonBtn">📂 Load Session</button>
       <input type="file" id="loadFile" accept=".json" style="display:none;">
@@ -600,7 +605,18 @@ function createEmptyState() {
       exterior: '',
       client: '',
       weather: '',
-      occupancy: ''
+      occupancy: '',
+      // Property profile
+      sqft: '',
+      bedrooms: '',
+      bathrooms: '',
+      stories: '',
+      yearBuilt: '',
+      lotSize: '',
+      garage: '',
+      roofType: '',
+      heatingType: '',
+      coolingType: ''
     },
     sections: {}
   };
@@ -691,6 +707,7 @@ function renderGeneral() {
   return `
     <h2 class="page-title">General Information</h2>
     <p class="page-sub">Property metadata for the title page and General section of the report.</p>
+
     <div class="form-card">
       <div class="form-row">
         <label>Property Address *</label>
@@ -703,6 +720,71 @@ function renderGeneral() {
       <div class="form-row">
         <label>Client Name</label>
         <input id="g-client" type="text" value="${esc(g.client)}" placeholder="Optional">
+      </div>
+      <div class="form-row">
+        <label>Weather at Inspection</label>
+        <input id="g-weather" type="text" value="${esc(g.weather)}" placeholder="e.g. Sunny, 62°F, recent rain">
+      </div>
+      <div class="form-row">
+        <label>Occupancy</label>
+        <select id="g-occupancy">
+          <option value="">— select —</option>
+          <option ${g.occupancy==='Occupied - furnished'?'selected':''}>Occupied - furnished</option>
+          <option ${g.occupancy==='Vacant - unfurnished'?'selected':''}>Vacant - unfurnished</option>
+          <option ${g.occupancy==='Vacant - furnished'?'selected':''}>Vacant - furnished</option>
+        </select>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:700;color:var(--navy);margin:18px 4px 8px;text-transform:uppercase;letter-spacing:0.06em;">Property Profile</h3>
+    <div class="form-card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div class="form-row" style="margin:0;">
+          <label>Square Footage</label>
+          <input id="g-sqft" type="text" inputmode="numeric" value="${esc(g.sqft)}" placeholder="e.g. 1850">
+        </div>
+        <div class="form-row" style="margin:0;">
+          <label>Year Built</label>
+          <input id="g-yearBuilt" type="text" inputmode="numeric" value="${esc(g.yearBuilt)}" placeholder="e.g. 1968">
+        </div>
+        <div class="form-row" style="margin:0;">
+          <label>Bedrooms</label>
+          <input id="g-bedrooms" type="text" inputmode="numeric" value="${esc(g.bedrooms)}" placeholder="3">
+        </div>
+        <div class="form-row" style="margin:0;">
+          <label>Bathrooms</label>
+          <input id="g-bathrooms" type="text" value="${esc(g.bathrooms)}" placeholder="2.5">
+        </div>
+        <div class="form-row" style="margin:0;">
+          <label>Stories</label>
+          <select id="g-stories">
+            <option value="">—</option>
+            <option ${g.stories==='1'?'selected':''}>1</option>
+            <option ${g.stories==='1.5'?'selected':''}>1.5</option>
+            <option ${g.stories==='2'?'selected':''}>2</option>
+            <option ${g.stories==='2.5'?'selected':''}>2.5</option>
+            <option ${g.stories==='3'?'selected':''}>3</option>
+            <option ${g.stories==='Split level'?'selected':''}>Split level</option>
+          </select>
+        </div>
+        <div class="form-row" style="margin:0;">
+          <label>Lot Size</label>
+          <input id="g-lotSize" type="text" value="${esc(g.lotSize)}" placeholder="e.g. 0.25 ac / 6500 sf">
+        </div>
+      </div>
+
+      <div class="form-row" style="margin-top:12px;">
+        <label>Garage</label>
+        <select id="g-garage">
+          <option value="">— select —</option>
+          <option ${g.garage==='None'?'selected':''}>None</option>
+          <option ${g.garage==='Attached - 1 car'?'selected':''}>Attached - 1 car</option>
+          <option ${g.garage==='Attached - 2 car'?'selected':''}>Attached - 2 car</option>
+          <option ${g.garage==='Attached - 3 car'?'selected':''}>Attached - 3 car</option>
+          <option ${g.garage==='Detached - 1 car'?'selected':''}>Detached - 1 car</option>
+          <option ${g.garage==='Detached - 2 car'?'selected':''}>Detached - 2 car</option>
+          <option ${g.garage==='Carport'?'selected':''}>Carport</option>
+        </select>
       </div>
       <div class="form-row">
         <label>Construction Era</label>
@@ -739,16 +821,41 @@ function renderGeneral() {
         </select>
       </div>
       <div class="form-row">
-        <label>Weather at Inspection</label>
-        <input id="g-weather" type="text" value="${esc(g.weather)}" placeholder="e.g. Sunny, 62°F, recent rain">
+        <label>Roof Type</label>
+        <select id="g-roofType">
+          <option value="">— select —</option>
+          <option ${g.roofType==='Composition shingle'?'selected':''}>Composition shingle</option>
+          <option ${g.roofType==='Concrete tile'?'selected':''}>Concrete tile</option>
+          <option ${g.roofType==='Clay tile'?'selected':''}>Clay tile</option>
+          <option ${g.roofType==='Metal'?'selected':''}>Metal</option>
+          <option ${g.roofType==='Wood shake'?'selected':''}>Wood shake</option>
+          <option ${g.roofType==='Flat / Built-up'?'selected':''}>Flat / Built-up</option>
+          <option ${g.roofType==='TPO / Single-ply'?'selected':''}>TPO / Single-ply</option>
+          <option ${g.roofType==='Mixed'?'selected':''}>Mixed</option>
+        </select>
       </div>
       <div class="form-row">
-        <label>Occupancy</label>
-        <select id="g-occupancy">
+        <label>Heating Type</label>
+        <select id="g-heatingType">
           <option value="">— select —</option>
-          <option ${g.occupancy==='Occupied - furnished'?'selected':''}>Occupied - furnished</option>
-          <option ${g.occupancy==='Vacant - unfurnished'?'selected':''}>Vacant - unfurnished</option>
-          <option ${g.occupancy==='Vacant - furnished'?'selected':''}>Vacant - furnished</option>
+          <option ${g.heatingType==='Forced air gas furnace'?'selected':''}>Forced air gas furnace</option>
+          <option ${g.heatingType==='Heat pump'?'selected':''}>Heat pump</option>
+          <option ${g.heatingType==='Electric baseboard'?'selected':''}>Electric baseboard</option>
+          <option ${g.heatingType==='Hydronic / Radiant'?'selected':''}>Hydronic / Radiant</option>
+          <option ${g.heatingType==='Wall furnace'?'selected':''}>Wall furnace</option>
+          <option ${g.heatingType==='None / Space heaters'?'selected':''}>None / Space heaters</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Cooling Type</label>
+        <select id="g-coolingType">
+          <option value="">— select —</option>
+          <option ${g.coolingType==='Central AC'?'selected':''}>Central AC</option>
+          <option ${g.coolingType==='Heat pump'?'selected':''}>Heat pump</option>
+          <option ${g.coolingType==='Ductless mini-split'?'selected':''}>Ductless mini-split</option>
+          <option ${g.coolingType==='Evaporative cooler'?'selected':''}>Evaporative cooler</option>
+          <option ${g.coolingType==='Window units'?'selected':''}>Window units</option>
+          <option ${g.coolingType==='None'?'selected':''}>None</option>
         </select>
       </div>
     </div>
@@ -759,7 +866,11 @@ function wireGeneralForm() {
   const map = {
     'g-address': 'address', 'g-date': 'date', 'g-client': 'client',
     'g-era': 'era', 'g-foundation': 'foundation', 'g-exterior': 'exterior',
-    'g-weather': 'weather', 'g-occupancy': 'occupancy'
+    'g-weather': 'weather', 'g-occupancy': 'occupancy',
+    'g-sqft': 'sqft', 'g-bedrooms': 'bedrooms', 'g-bathrooms': 'bathrooms',
+    'g-stories': 'stories', 'g-yearBuilt': 'yearBuilt', 'g-lotSize': 'lotSize',
+    'g-garage': 'garage', 'g-roofType': 'roofType',
+    'g-heatingType': 'heatingType', 'g-coolingType': 'coolingType'
   };
   Object.keys(map).forEach(id => {
     const el = document.getElementById(id);
@@ -1049,6 +1160,34 @@ function parsePhotoIds(str) {
     });
 }
 
+// Proper-case labels for each section. Preserves acronyms like HVAC.
+const SECTION_LABELS = {
+  'GENERAL':    'General',
+  'ROOFING':    'Roofing',
+  'EXTERIORS':  'Exteriors',
+  'ELECTRICAL': 'Electrical',
+  'HVAC':       'HVAC',
+  'PLUMBING':   'Plumbing',
+  'INTERIORS':  'Interiors',
+  'STRUCTURAL': 'Structural'
+};
+
+// Produce a short caption from a finding's full text: first sentence,
+// or truncated at a word boundary ~120 chars. Used so Photo Tool captions
+// stay readable instead of carrying the entire finding.
+function shortenForCaption(text) {
+  if (!text) return '';
+  const t = String(text).trim();
+  // First sentence break within reasonable range
+  const m = t.match(/^([^.!?]{10,160}[.!?])\s/);
+  if (m) return m[1];
+  // No early sentence break — trim at word boundary
+  if (t.length <= 120) return t;
+  const cut = t.slice(0, 120);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > 60 ? cut.slice(0, lastSpace) : cut) + '…';
+}
+
 // Build a photo-id → finding-context map. Each id gets registered under both
 // its raw form (e.g. "1234") AND its IMG_NNNN form — so the Photo Tool can
 // match against whatever filename form iPhone hands it.
@@ -1080,13 +1219,16 @@ function buildPhotoMap() {
       if (!f.photoOn || !f.photos) return;
       const ids = parsePhotoIds(f.photos);
       if (!ids.length) return;
+      const fullText  = (f.text || '').trim();
+      const shortText = shortenForCaption(fullText);
       const finding = {
         section: sec,
-        section_label: sec.charAt(0) + sec.slice(1).toLowerCase(),
+        section_label: SECTION_LABELS[sec] || sec,
         box: f._box,
         code: f.code,
         code_label: CODE_LABEL[f.code] || f.code,
-        text: (f.text || '').trim(),
+        text: fullText,
+        short_text: shortText,
         photo_ids: ids
       };
       findings.push(finding);
@@ -1099,6 +1241,7 @@ function buildPhotoMap() {
           code: finding.code,
           code_label: finding.code_label,
           finding_text: finding.text,
+          short_text: finding.short_text,
           sequence: seq
         });
       });
@@ -1134,11 +1277,29 @@ function buildExportText() {
   if (g.address)    lines.push('Property address: ' + g.address);
   if (g.date)       lines.push('Inspection date: ' + formatDate(g.date));
   if (g.client)     lines.push('Client: ' + g.client);
-  if (g.era)        lines.push('Construction era: ' + g.era);
-  if (g.foundation) lines.push('Foundation: ' + g.foundation);
-  if (g.exterior)   lines.push('Exterior: ' + g.exterior);
   if (g.weather)    lines.push('Weather: ' + g.weather);
   if (g.occupancy)  lines.push('Occupancy: ' + g.occupancy);
+
+  // Property profile block — only included if any field set
+  const profile = [];
+  if (g.sqft)         profile.push('Square footage: ' + g.sqft);
+  if (g.yearBuilt)    profile.push('Year built: ' + g.yearBuilt);
+  if (g.era)          profile.push('Construction era: ' + g.era);
+  if (g.bedrooms)     profile.push('Bedrooms: ' + g.bedrooms);
+  if (g.bathrooms)    profile.push('Bathrooms: ' + g.bathrooms);
+  if (g.stories)      profile.push('Stories: ' + g.stories);
+  if (g.lotSize)      profile.push('Lot size: ' + g.lotSize);
+  if (g.garage)       profile.push('Garage: ' + g.garage);
+  if (g.foundation)   profile.push('Foundation: ' + g.foundation);
+  if (g.exterior)     profile.push('Exterior: ' + g.exterior);
+  if (g.roofType)     profile.push('Roof type: ' + g.roofType);
+  if (g.heatingType)  profile.push('Heating: ' + g.heatingType);
+  if (g.coolingType)  profile.push('Cooling: ' + g.coolingType);
+  if (profile.length) {
+    lines.push('');
+    lines.push('Property profile:');
+    profile.forEach(p => lines.push('- ' + p));
+  }
 
   INSPECT_SECTIONS.forEach(sec => {
     const s = state.sections[sec];
