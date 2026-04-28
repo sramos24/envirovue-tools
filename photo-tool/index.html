@@ -1611,7 +1611,17 @@ async function generatePDF() {
     pprog(5, 'Analyzing images...');
     const dims = {};
     await Promise.all(photos.map(async p => { dims[p.id] = await imgDims(p.src); }));
-    pprog(15, 'Rendering cover page...');
+    pprog(15, 'Compressing images for PDF...');
+
+    // Compress images specifically for PDF (800px wide, 55% quality)
+    // Photos display at ~260pt in the PDF — 800px is more than enough
+    const pdfImgs = {};
+    for (let i = 0; i < photos.length; i++) {
+      const p = photos[i];
+      pdfImgs[p.id] = await compressForPDF(p.src, 800, 0.55);
+      pprog(15 + Math.round(25 * (i+1) / photos.length), `Compressing ${i+1} of ${total}...`);
+    }
+    pprog(42, 'Rendering cover page...');
 
     // ── COVER ──
     doc.setFillColor(...PN); doc.rect(0, 0, PW, 80, 'F');
@@ -1655,11 +1665,11 @@ async function generatePDF() {
         const lh = cardH(doc, L, dims), rh = R ? cardH(doc, R, dims) : 0;
         const rowH = Math.max(lh, rh);
         if (y + rowH > PH - PMB) { doc.addPage(); y = PMT; }
-        drawCard(doc, L, PML, y, PCOLW, dims);
-        if (R) drawCard(doc, R, PML + PCOLW + PCGAP, y, PCOLW, dims);
+        drawCard(doc, L, PML, y, PCOLW, dims, rowH, pdfImgs);
+        if (R) drawCard(doc, R, PML + PCOLW + PCGAP, y, PCOLW, dims, rowH, pdfImgs);
         y += rowH + 14;
         rendered += R ? 2 : 1;
-        pprog(15 + Math.round(80 * rendered / total), `Photo ${rendered} of ${total}...`);
+        pprog(42 + Math.round(53 * rendered / total), `Photo ${rendered} of ${total}...`);
       }
     });
 
@@ -1698,33 +1708,46 @@ function downloadPDF() {
   toast('PDF downloaded');
 }
 
+function compressForPDF(dataUrl, maxW, quality) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
 function cardH(doc, p, dims) {
   const d = dims[p.id] || {w:4,h:3};
   const ih = Math.min(PCOLW * (d.h/d.w), PIMGMAXH);
-  let th = 36;
-  if (p.caption) {
-    doc.setFontSize(9);
-    th += doc.splitTextToSize(p.caption, PCOLW - 18).length * 11;
-  }
+  // Fixed text block: ID + badge line, PHOTO # line, 1 caption line
+  const th = 36 + (p.caption ? 11 : 0);
   return ih + th + 4;
 }
 
-function drawCard(doc, p, x, y, w, dims) {
+function drawCard(doc, p, x, y, w, dims, rowH, pdfImgs) {
   const d = dims[p.id] || {w:4,h:3};
   const ih = Math.min(w * (d.h/d.w), PIMGMAXH);
   const cc = PCATS[p.category] || PCATS['—'];
   const catLabel = p.category === '—' ? 'Unassigned' : p.category;
   const idTag = p.photoId || p.filename.replace(/\.[^.]+$/,'');
   const idx = photos.indexOf(p);
-  const ch = cardH(doc, p, dims);
+  const ch = rowH; // use row height for consistent card sizing
 
-  // Card bg + border
   doc.setFillColor(252,252,252); doc.setDrawColor(...PLG);
   doc.rect(x, y, w, ch, 'FD');
   doc.setFillColor(...cc.brd); doc.rect(x, y, 4, ch, 'F');
 
-  // Image
-  try { doc.addImage(p.src, 'JPEG', x+4, y, w-4, ih); }
+  // Use PDF-compressed image
+  const imgSrc = (pdfImgs && pdfImgs[p.id]) || p.src;
+  try { doc.addImage(imgSrc, 'JPEG', x+4, y, w-4, ih); }
   catch(e) { doc.setFillColor(230,230,230); doc.rect(x+4,y,w-4,ih,'F'); }
 
   doc.setDrawColor(...PLG); doc.setLineWidth(0.5);
@@ -1732,12 +1755,10 @@ function drawCard(doc, p, x, y, w, dims) {
 
   let t = y + ih + 14;
 
-  // IMG_ ID bold
   doc.setFont('courier','bold'); doc.setFontSize(11); doc.setTextColor(...PN);
   doc.text(idTag, x+10, t);
   const idW = doc.getTextWidth(idTag);
 
-  // Category badge
   doc.setFont('courier','bold'); doc.setFontSize(8);
   const bw = doc.getTextWidth(catLabel) + 10;
   const bx = x + 14 + idW;
@@ -1749,9 +1770,16 @@ function drawCard(doc, p, x, y, w, dims) {
   doc.text('PHOTO #' + (idx+1), x+10, t);
   t += 10;
 
+  // Caption — single line, truncated with ellipsis if needed
   if (p.caption) {
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(51,51,51);
-    doc.splitTextToSize(p.caption, w-18).forEach(ln => { doc.text(ln, x+10, t); t += 11; });
+    const maxCW = w - 18;
+    let cap = p.caption;
+    if (doc.getTextWidth(cap) > maxCW) {
+      while (cap.length > 0 && doc.getTextWidth(cap + '…') > maxCW) cap = cap.slice(0,-1);
+      cap += '…';
+    }
+    doc.text(cap, x+10, t);
   }
 }
 
