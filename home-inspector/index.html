@@ -421,6 +421,168 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 .btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
 .btn.danger  { background: #fff; color: #c53030; border-color: #f2c2c2; }
 
+/* ── PHOTO BUTTONS ON FINDINGS ─────────── */
+.photo-btns {
+  display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;
+  align-items: center;
+}
+.photo-btn {
+  padding: 6px 12px;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; color: var(--gray-700);
+  display: flex; align-items: center; gap: 5px;
+}
+.photo-btn:active { transform: scale(0.96); background: var(--gray-200); }
+.photo-btn .icon { font-size: 15px; }
+
+/* ── THUMBNAIL STRIP ─────────────────────── */
+.thumb-strip {
+  display: flex; gap: 6px; margin-top: 8px;
+  overflow-x: auto; padding: 4px 0;
+  -webkit-overflow-scrolling: touch;
+}
+.thumb-strip:empty { display: none; }
+.thumb-item {
+  position: relative; flex-shrink: 0;
+  width: 72px; height: 72px;
+  border-radius: 6px; overflow: hidden;
+  border: 2px solid var(--gray-300);
+  cursor: pointer;
+}
+.thumb-item img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.thumb-item .thumb-remove {
+  position: absolute; top: 2px; right: 2px;
+  background: rgba(0,0,0,0.6); color: #fff;
+  border: none; border-radius: 50%;
+  width: 20px; height: 20px;
+  font-size: 12px; line-height: 20px;
+  text-align: center; cursor: pointer;
+  display: none;
+}
+.thumb-item:hover .thumb-remove,
+.thumb-item:active .thumb-remove { display: block; }
+.thumb-count {
+  font-size: 11px; color: var(--gray-500);
+  align-self: center; flex-shrink: 0;
+  font-weight: 600;
+}
+
+/* ── PHOTO PICKER OVERLAY ────────────────── */
+.photo-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 500;
+  flex-direction: column;
+}
+.photo-overlay.active { display: flex; }
+.photo-overlay-head {
+  background: var(--navy);
+  padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top));
+  display: flex; align-items: center; gap: 12px;
+  color: #fff; flex-shrink: 0;
+}
+.photo-overlay-title {
+  flex: 1; font-size: 15px; font-weight: 600;
+}
+.photo-overlay-count {
+  font-size: 13px; color: #7ab3d8;
+  font-weight: 600;
+}
+.photo-overlay-cancel {
+  background: rgba(255,255,255,0.15);
+  border: none; color: #fff;
+  padding: 7px 14px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+}
+.photo-overlay-body {
+  flex: 1; overflow-y: auto;
+  padding: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+.picker-item {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 1;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: border-color 0.15s;
+}
+.picker-item.selected {
+  border-color: #34d058;
+}
+.picker-item img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.picker-check {
+  position: absolute; top: 6px; right: 6px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.4);
+  border: 2px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 14px; font-weight: 700;
+  transition: all 0.15s;
+}
+.picker-item.selected .picker-check {
+  background: #34d058;
+  border-color: #34d058;
+}
+.picker-order {
+  position: absolute; bottom: 4px; left: 4px;
+  background: rgba(0,0,0,0.6); color: #fff;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 6px; border-radius: 10px;
+  font-family: -apple-system, sans-serif;
+  display: none;
+}
+.picker-item.selected .picker-order { display: block; }
+.picker-fname {
+  position: absolute; bottom: 4px; right: 4px;
+  background: rgba(0,0,0,0.6); color: #ddd;
+  font-size: 9px; padding: 2px 5px; border-radius: 4px;
+  font-family: monospace; max-width: 80%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.photo-overlay-foot {
+  background: var(--navy);
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex; justify-content: space-between;
+  align-items: center; flex-shrink: 0;
+}
+.picker-save-btn {
+  background: #34d058; color: #fff; border: none;
+  padding: 10px 22px; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.picker-save-btn:disabled { opacity: 0.4; cursor: default; }
+.picker-save-btn:active:not(:disabled) { transform: scale(0.97); }
+.picker-source-btns {
+  display: flex; gap: 8px;
+}
+.picker-source-btn {
+  background: rgba(255,255,255,0.15);
+  border: none; color: #fff;
+  padding: 8px 14px; border-radius: var(--radius-sm);
+  font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+}
+.picker-source-btn:active { background: rgba(255,255,255,0.25); }
+
 /* toast */
 .toast {
   position: fixed; bottom: 20px; left: 50%;
@@ -547,6 +709,27 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
   </div>
 </div>
 
+<!-- Photo Picker Overlay -->
+<div class="photo-overlay" id="photoOverlay">
+  <div class="photo-overlay-head">
+    <button class="photo-overlay-cancel" id="pickerCancel">Cancel</button>
+    <div class="photo-overlay-title" id="pickerTitle">Select Photos</div>
+    <div class="photo-overlay-count" id="pickerCount">0 selected</div>
+  </div>
+  <div class="photo-overlay-body">
+    <div class="picker-grid" id="pickerGrid"></div>
+  </div>
+  <div class="photo-overlay-foot">
+    <div class="picker-source-btns">
+      <button class="picker-source-btn" id="pickerCamera"><span class="icon">📸</span> Camera</button>
+      <button class="picker-source-btn" id="pickerLibrary"><span class="icon">🖼</span> Add More</button>
+      <input type="file" id="pickerFileCamera" accept="image/*" capture="environment" style="display:none">
+      <input type="file" id="pickerFileLibrary" accept="image/*" multiple style="display:none">
+    </div>
+    <button class="picker-save-btn" id="pickerSave" disabled>Attach (0)</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -587,6 +770,107 @@ const CODE_LABEL = {
 };
 
 const STORAGE_KEY = 'insight_home_inspector_v1';
+const IDB_NAME    = 'insight_photos_db';
+const IDB_STORE   = 'photos';
+const IDB_VERSION = 1;
+const MAX_PHOTO_W = 1920;
+const PHOTO_QUALITY = 0.75;
+
+// ═══════════════════════════════════════════
+//  INDEXEDDB — photo blob storage
+// ═══════════════════════════════════════════
+let idb = null;
+
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) {
+        db.createObjectStore(IDB_STORE, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = e => { idb = e.target.result; resolve(idb); };
+    req.onerror = e => { console.warn('IDB error', e); reject(e); };
+  });
+}
+
+async function idbPut(photoObj) {
+  if (!idb) await openIDB();
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(photoObj);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e);
+  });
+}
+
+async function idbGet(id) {
+  if (!idb) await openIDB();
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = e => reject(e);
+  });
+}
+
+async function idbGetAll() {
+  if (!idb) await openIDB();
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = e => reject(e);
+  });
+}
+
+async function idbDelete(id) {
+  if (!idb) await openIDB();
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e);
+  });
+}
+
+async function idbClear() {
+  if (!idb) await openIDB();
+  return new Promise((resolve, reject) => {
+    const tx = idb.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).clear();
+    tx.oncomplete = () => resolve();
+    tx.onerror = e => reject(e);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  PHOTO COMPRESSION
+// ═══════════════════════════════════════════
+function compressImage(dataUrl) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > MAX_PHOTO_W) { h = Math.round(h * MAX_PHOTO_W / w); w = MAX_PHOTO_W; }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', PHOTO_QUALITY));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+// ═══════════════════════════════════════════
+//  PHOTO PICKER STATE
+// ═══════════════════════════════════════════
+let pickerFindingId  = null;   // which finding the picker is open for
+let pickerSec        = null;   // which section
+let pickerPool       = [];     // { id, src, filename, selected, order }
+let pickerNextPoolId = 1;
 
 // ═══════════════════════════════════════════
 //  STATE
@@ -883,7 +1167,7 @@ function wireGeneralForm() {
 
 function renderInspectionSection(sec) {
   const data = state.sections[sec];
-  const secLabel = sec.charAt(0) + sec.slice(1).toLowerCase();
+  const secLabel = SECTION_LABELS[sec] || sec;
   return `
     <h2 class="page-title">${secLabel}</h2>
     <p class="page-sub">Tap the buttons below each heading to add findings. Tap the mic icon to dictate.</p>
@@ -918,6 +1202,13 @@ function renderBox(sec, boxKey, items) {
 function renderFinding(sec, boxKey, f) {
   const cls = CODE_CLS[f.code] || '';
   const label = CODE_LABEL[f.code] || f.code;
+  const photoCount = (f.attachedPhotos || []).length;
+  const thumbsHtml = (f.attachedPhotos || []).map(p =>
+    `<div class="thumb-item" data-thumb-id="${p.id}" data-finding="${f.id}">
+       <img src="${p.thumb || p.src}" alt="" loading="lazy">
+       <button class="thumb-remove" data-remove-photo="${p.id}" data-finding-id="${f.id}">×</button>
+     </div>`
+  ).join('');
   return `
     <div class="finding ${cls}" data-id="${f.id}" data-sec="${sec}" data-box="${boxKey}">
       <div class="finding-head">
@@ -928,16 +1219,13 @@ function renderFinding(sec, boxKey, f) {
       <textarea data-text="${f.id}" rows="2" placeholder="Describe the finding...">${esc(f.text||'')}</textarea>
       <div class="finding-actions">
         <button class="mic-btn" data-mic-text="${f.id}" aria-label="Dictate">🎤</button>
-        <label class="photo-toggle">
-          <input type="checkbox" data-photo-tgl="${f.id}" ${f.photoOn?'checked':''}>
-          <span>Photo tag</span>
-        </label>
+        <div class="photo-btns">
+          <button class="photo-btn" data-open-picker="${f.id}" data-picker-sec="${sec}">
+            <span class="icon">📷</span> ${photoCount ? photoCount + ' photo' + (photoCount>1?'s':'') : 'Add photos'}
+          </button>
+        </div>
       </div>
-      <div class="photo-row ${f.photoOn?'active':''}" data-photo-row="${f.id}">
-        <span class="photo-prefix">photos:</span>
-        <input type="text" data-photo="${f.id}" value="${esc(f.photos||'')}" placeholder="e.g. 1234, 1235 or IMG_1234">
-        <button class="mic-btn" data-mic-photo="${f.id}" aria-label="Dictate photo number">🎤</button>
-      </div>
+      <div class="thumb-strip">${thumbsHtml}</div>
     </div>
   `;
 }
@@ -972,29 +1260,26 @@ function wireSectionEvents(sec) {
     autoResize(ta);
   });
 
-  // photo toggle
-  document.querySelectorAll('[data-photo-tgl]').forEach(cb => {
-    cb.addEventListener('change', () => {
-      const id = cb.dataset.photoTgl;
-      updateFinding(sec, id, { photoOn: cb.checked });
-      const row = document.querySelector(`[data-photo-row="${id}"]`);
-      if (row) row.classList.toggle('active', cb.checked);
+  // open photo picker
+  document.querySelectorAll('[data-open-picker]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openPhotoPicker(btn.dataset.openPicker, btn.dataset.pickerSec);
     });
   });
 
-  // photo input
-  document.querySelectorAll('[data-photo]').forEach(inp => {
-    inp.addEventListener('input', () => {
-      updateFinding(sec, inp.dataset.photo, { photos: inp.value });
+  // remove individual photo from thumbnail strip
+  document.querySelectorAll('[data-remove-photo]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const photoId   = btn.dataset.removePhoto;
+      const findingId = btn.dataset.findingId;
+      await removePhotoFromFinding(sec, findingId, photoId);
     });
   });
 
   // mic buttons
   document.querySelectorAll('[data-mic-text]').forEach(b => {
     b.addEventListener('click', () => startDictation(b, 'text'));
-  });
-  document.querySelectorAll('[data-mic-photo]').forEach(b => {
-    b.addEventListener('click', () => startDictation(b, 'photo'));
   });
 }
 
@@ -1009,13 +1294,11 @@ function addFinding(sec, boxKey, code) {
     id: newUid(),
     code,
     text: '',
-    photoOn: false,
-    photos: ''
+    attachedPhotos: []  // { id, filename, thumb (small dataURL) }
   };
   state.sections[sec][key].push(f);
   save();
   renderMain();
-  // focus new textarea
   setTimeout(() => {
     const ta = document.querySelector(`[data-text="${f.id}"]`);
     if (ta) { ta.focus(); ta.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
@@ -1024,7 +1307,13 @@ function addFinding(sec, boxKey, code) {
 
 function deleteFinding(sec, id) {
   const s = state.sections[sec];
+  // Clean up photos from IndexedDB
   ['descriptions','observations','limitations'].forEach(k => {
+    s[k].forEach(f => {
+      if (f.id === id && f.attachedPhotos) {
+        f.attachedPhotos.forEach(p => idbDelete(p.id).catch(() => {}));
+      }
+    });
     s[k] = s[k].filter(f => f.id !== id);
   });
   save();
@@ -1039,6 +1328,214 @@ function updateFinding(sec, id, patch) {
     });
   });
   save();
+}
+
+async function removePhotoFromFinding(sec, findingId, photoId) {
+  const s = state.sections[sec];
+  ['descriptions','observations','limitations'].forEach(k => {
+    s[k].forEach(f => {
+      if (f.id === findingId) {
+        f.attachedPhotos = (f.attachedPhotos || []).filter(p => p.id !== photoId);
+      }
+    });
+  });
+  await idbDelete(photoId).catch(() => {});
+  save();
+  renderMain();
+}
+
+// ═══════════════════════════════════════════
+//  PHOTO PICKER OVERLAY
+// ═══════════════════════════════════════════
+function openPhotoPicker(findingId, sec) {
+  pickerFindingId = findingId;
+  pickerSec = sec;
+  pickerPool = [];
+
+  // Pre-load existing attached photos as already-selected
+  const f = findFinding(sec, findingId);
+  if (f && f.attachedPhotos) {
+    f.attachedPhotos.forEach(p => {
+      pickerPool.push({
+        id: p.id, src: p.thumb || '', filename: p.filename,
+        selected: true, existing: true, order: pickerPool.length + 1
+      });
+    });
+  }
+
+  // Load full images for existing thumbs from IDB
+  if (pickerPool.length) {
+    pickerPool.forEach(async (p) => {
+      const stored = await idbGet(p.id);
+      if (stored && stored.src) p.src = stored.src;
+      renderPickerGrid();
+    });
+  }
+
+  renderPickerGrid();
+  updatePickerCount();
+  document.getElementById('photoOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePhotoPicker() {
+  document.getElementById('photoOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+  pickerFindingId = null;
+  pickerSec = null;
+  pickerPool = [];
+}
+
+function renderPickerGrid() {
+  const grid = document.getElementById('pickerGrid');
+  if (!pickerPool.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#aaa;">
+      <div style="font-size:40px;margin-bottom:12px;">📷</div>
+      <p style="font-size:14px;">Tap <strong>Camera</strong> to take a photo<br>or <strong>Add More</strong> to pick from your library</p>
+    </div>`;
+    return;
+  }
+  grid.innerHTML = pickerPool.map((p, i) => {
+    const selCount = pickerPool.filter(x => x.selected).sort((a,b) => a.order - b.order);
+    const orderNum = p.selected ? selCount.indexOf(p) + 1 : 0;
+    const shortName = p.filename ? p.filename.replace(/\.[^.]+$/, '') : '';
+    return `
+      <div class="picker-item ${p.selected?'selected':''}" data-pool-idx="${i}">
+        <img src="${p.src}" alt="" loading="lazy">
+        <div class="picker-check">${p.selected ? '✓' : ''}</div>
+        ${p.selected ? `<div class="picker-order">${orderNum}</div>` : ''}
+        ${shortName ? `<div class="picker-fname">${esc(shortName)}</div>` : ''}
+      </div>`;
+  }).join('');
+
+  // Wire click events on picker items
+  grid.querySelectorAll('.picker-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.poolIdx);
+      togglePickerItem(idx);
+    });
+  });
+}
+
+function togglePickerItem(idx) {
+  const p = pickerPool[idx];
+  if (!p) return;
+  if (p.selected) {
+    p.selected = false;
+    p.order = 0;
+  } else {
+    const maxOrder = Math.max(0, ...pickerPool.filter(x => x.selected).map(x => x.order));
+    p.selected = true;
+    p.order = maxOrder + 1;
+  }
+  renderPickerGrid();
+  updatePickerCount();
+}
+
+function updatePickerCount() {
+  const count = pickerPool.filter(p => p.selected).length;
+  document.getElementById('pickerCount').textContent = count + ' selected';
+  const btn = document.getElementById('pickerSave');
+  btn.disabled = count === 0;
+  btn.textContent = count ? `Attach (${count})` : 'Attach (0)';
+}
+
+async function handlePickerFiles(files) {
+  const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (!arr.length) return;
+  toast('Processing ' + arr.length + ' photo' + (arr.length>1?'s':'') + '...');
+  for (const file of arr) {
+    const dataUrl = await readFileAsDataURL(file);
+    const compressed = await compressImage(dataUrl);
+    const thumb = await makeThumbnail(compressed, 160);
+    const id = 'ph_' + Date.now() + '_' + (pickerNextPoolId++);
+    pickerPool.push({
+      id, src: compressed, thumb, filename: file.name,
+      selected: true, existing: false,
+      order: Math.max(0, ...pickerPool.filter(x => x.selected).map(x => x.order)) + 1
+    });
+  }
+  renderPickerGrid();
+  updatePickerCount();
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error('Read failed'));
+    r.readAsDataURL(file);
+  });
+}
+
+function makeThumbnail(dataUrl, size) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const scale = Math.min(size / w, size / h, 1);
+      w = Math.round(w * scale); h = Math.round(h * scale);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', 0.6));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+async function savePickerSelection() {
+  if (!pickerFindingId || !pickerSec) return;
+  const selected = pickerPool
+    .filter(p => p.selected)
+    .sort((a, b) => a.order - b.order);
+
+  // Save full images to IndexedDB, keep only thumbs in state
+  const attachedPhotos = [];
+  for (const p of selected) {
+    const thumb = p.thumb || await makeThumbnail(p.src, 160);
+    await idbPut({ id: p.id, src: p.src, filename: p.filename });
+    attachedPhotos.push({
+      id: p.id,
+      filename: p.filename,
+      thumb: thumb
+    });
+  }
+
+  // Remove photos that were deselected
+  const f = findFinding(pickerSec, pickerFindingId);
+  if (f && f.attachedPhotos) {
+    for (const old of f.attachedPhotos) {
+      if (!selected.find(s => s.id === old.id)) {
+        await idbDelete(old.id).catch(() => {});
+      }
+    }
+  }
+
+  updateFinding(pickerSec, pickerFindingId, {
+    attachedPhotos,
+    photoOn: attachedPhotos.length > 0,
+    photos: attachedPhotos.map(p => {
+      // Extract IMG_NNNN from filename for backward-compatible export
+      const m = p.filename.match(/IMG[\s_-]*E?(\d+)/i);
+      return m ? 'IMG_' + m[1] : p.filename.replace(/\.[^.]+$/, '');
+    }).join(', ')
+  });
+
+  closePhotoPicker();
+  renderMain();
+  toast(attachedPhotos.length + ' photo' + (attachedPhotos.length !== 1 ? 's' : '') + ' attached');
+}
+
+function findFinding(sec, id) {
+  const s = state.sections[sec];
+  if (!s) return null;
+  for (const k of ['descriptions','observations','limitations']) {
+    const f = s[k].find(f => f.id === id);
+    if (f) return f;
+  }
+  return null;
 }
 
 // ═══════════════════════════════════════════
@@ -1363,7 +1860,10 @@ function esc(str) {
 // ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Open IndexedDB for photo storage
+  try { await openIDB(); } catch(e) { console.warn('IndexedDB unavailable:', e); }
+
   load();
 
   document.querySelectorAll('.sb-item').forEach(el => {
@@ -1384,6 +1884,17 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sbOverlay').classList.remove('open');
   });
+
+  // ── Photo Picker events ──
+  document.getElementById('pickerCancel').addEventListener('click', closePhotoPicker);
+  document.getElementById('pickerSave').addEventListener('click', savePickerSelection);
+
+  const camInput = document.getElementById('pickerFileCamera');
+  const libInput = document.getElementById('pickerFileLibrary');
+  document.getElementById('pickerCamera').addEventListener('click', () => camInput.click());
+  document.getElementById('pickerLibrary').addEventListener('click', () => libInput.click());
+  camInput.addEventListener('change', e => { handlePickerFiles(e.target.files); camInput.value = ''; });
+  libInput.addEventListener('change', e => { handlePickerFiles(e.target.files); libInput.value = ''; });
 
   document.getElementById('exportBtn').addEventListener('click', openExport);
   document.getElementById('exportClose').addEventListener('click', () => {
@@ -1435,14 +1946,24 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('moreModal').classList.remove('active');
   });
 
-  document.getElementById('saveJsonBtn').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  document.getElementById('saveJsonBtn').addEventListener('click', async () => {
+    toast('Preparing session backup (including photos)...');
+    // Pull all photos from IDB and bundle into session
+    const allPhotos = await idbGetAll().catch(() => []);
+    const photoStore = {};
+    allPhotos.forEach(p => { photoStore[p.id] = { src: p.src, filename: p.filename }; });
+    const bundle = {
+      version: 3,
+      state,
+      photoStore
+    };
+    const blob = new Blob([JSON.stringify(bundle)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const addr = (state.general.address || 'inspection').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
     const a = document.createElement('a');
     a.href = url; a.download = `${addr}_session.json`; a.click();
     URL.revokeObjectURL(url);
-    toast('Session saved');
+    toast('Session saved (with photos)');
   });
 
   document.getElementById('loadJsonBtn').addEventListener('click', () => {
@@ -1452,30 +1973,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const file = ev.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
         const parsed = JSON.parse(reader.result);
-        if (parsed && parsed.general && parsed.sections) {
-          state = parsed;
-          // ensure structure
+
+        // Handle v3 bundle format (with photoStore)
+        if (parsed.version === 3 && parsed.state) {
+          state = parsed.state;
           INSPECT_SECTIONS.forEach(sec => {
             state.sections[sec] = state.sections[sec] || { descriptions:[], observations:[], limitations:[] };
           });
-          save();
-          renderMain();
-          document.getElementById('moreModal').classList.remove('active');
-          toast('Session loaded');
+          // Restore photos to IDB
+          if (parsed.photoStore) {
+            const entries = Object.entries(parsed.photoStore);
+            for (const [id, data] of entries) {
+              await idbPut({ id, src: data.src, filename: data.filename }).catch(() => {});
+            }
+            toast(`Session loaded · ${entries.length} photos restored`);
+          } else {
+            toast('Session loaded');
+          }
+        }
+        // Handle legacy v1/v2 format (state at top level)
+        else if (parsed.general && parsed.sections) {
+          state = parsed;
+          INSPECT_SECTIONS.forEach(sec => {
+            state.sections[sec] = state.sections[sec] || { descriptions:[], observations:[], limitations:[] };
+            // Ensure attachedPhotos exists on all findings
+            ['descriptions','observations','limitations'].forEach(k => {
+              (state.sections[sec][k] || []).forEach(f => {
+                f.attachedPhotos = f.attachedPhotos || [];
+              });
+            });
+          });
+          toast('Session loaded (legacy format)');
         } else {
           toast('Invalid session file');
+          return;
         }
-      } catch (e) { toast('Could not read file'); }
+
+        save();
+        renderMain();
+        document.getElementById('moreModal').classList.remove('active');
+      } catch (e) { console.error(e); toast('Could not read file'); }
     };
     reader.readAsText(file);
   });
 
-  document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('clearBtn').addEventListener('click', async () => {
     if (!confirm('Clear ALL data? This cannot be undone.')) return;
     state = createEmptyState();
+    await idbClear().catch(() => {});
     save();
     currentSection = 'GENERAL';
     renderMain();

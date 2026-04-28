@@ -6,7 +6,7 @@
 // Bump this version whenever you update any file in the repo.
 // Users will get the fresh version next time they open the app
 // while online — the old cache is purged automatically.
-const CACHE_VERSION = 'envirovue-v1.0.3';
+const CACHE_VERSION = 'envirovue-v1.2.0';
 
 // All files that should work offline
 const PRECACHE_URLS = [
@@ -65,8 +65,9 @@ self.addEventListener('fetch', event => {
   // Only handle same-origin requests (skip external fonts/APIs — let them fail gracefully offline)
   const url = new URL(req.url);
   if (url.origin !== location.origin) {
-    // Allow Google Fonts to be cached opportunistically if reached
-    if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
+    // Cache CDN resources (jsPDF, Google Fonts) for offline use
+    if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com') ||
+        url.hostname.includes('cdnjs.cloudflare.com')) {
       event.respondWith(cacheFirstWithNetworkFallback(req));
     }
     return;

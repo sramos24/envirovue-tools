@@ -513,96 +513,11 @@
     opacity: 1;
   }
 
-  @media print { .compress-panel, .link-banner { display: none !important; } }
-
-  /* ── PDF PRINT STYLES ── */
+  /* Print: hide UI (PDF is now generated programmatically) */
   @media print {
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-
-    body { background: white !important; font-family: Arial, sans-serif; }
-    header, .upload-zone, .toolbar, .property-bar, .card-footer,
-    .drag-handle, .section-select, .cat-select, .caption-input,
-    .modal-overlay, .link-banner, .toast { display: none !important; }
-
-    main { max-width: 100%; padding: 0; margin: 0; }
-
-    .pdf-cover {
-      display: flex !important;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      page-break-after: always;
-      text-align: center;
-    }
-    .pdf-cover h1 { font-size: 28px; color: #1a3a5c; margin-bottom: 8px; }
-    .pdf-cover .sub { font-size: 16px; color: #2e6da4; margin-bottom: 32px; }
-    .pdf-cover table { border-collapse: collapse; width: 380px; }
-    .pdf-cover td { padding: 8px 14px; font-size: 13px; border: 1px solid #ccc; }
-    .pdf-cover td:first-child { background: #d9e2f3; font-weight: bold; color: #1a3a5c; width: 140px; }
-
-    .pdf-section-header {
-      display: block !important;
-      background: #2e6da4 !important;
-      color: white !important;
-      font-size: 15px;
-      font-weight: bold;
-      padding: 8px 12px;
-      margin: 20px 0 12px 0;
-      page-break-after: avoid;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .pdf-photo-grid {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      page-break-inside: auto;
-    }
-
-    .pdf-card {
-      display: block !important;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      overflow: hidden;
-      page-break-inside: avoid;
-      break-inside: avoid;
-    }
-    .pdf-card img {
-      width: 100%; height: 200px; object-fit: cover; display: block;
-    }
-    .pdf-card .pdf-card-meta { padding: 8px 10px; font-size: 11px; }
-    .pdf-card .pdf-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap; }
-    .pdf-card .pdf-img-id { font-weight: bold; color: #1a3a5c; font-family: monospace; font-size: 13px; letter-spacing: 0.02em; }
-    .pdf-card .pdf-num { font-weight: bold; color: #1a3a5c; font-family: monospace; font-size: 11px; }
-    .pdf-card .pdf-badge { font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 3px; font-family: monospace; }
-    .pdf-card .pdf-caption { font-size: 11px; color: #333; line-height: 1.4; margin-top: 4px; }
-    .pdf-card .pdf-seq-num { font-size: 9px; color: #999; font-family: monospace; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .pdf-card .pdf-section-tag { font-size: 10px; color: #888; margin-top: 2px; font-family: monospace; }
-
-    .pdf-badge.cat-repair   { background: #d0b074; color: #5a3800; }
-    .pdf-badge.cat-dd       { background: #a1d3e9; color: #1a3a5c; }
-    .pdf-badge.cat-rm       { background: #f1bebe; color: #6b1a1a; }
-    .pdf-badge.cat-info     { background: #2ba3e4; color: #fff; }
-    .pdf-badge.cat-monitor  { background: #b2f4b2; color: #1a4a1a; }
-    .pdf-badge.cat-limit    { background: #f9e8b8; color: #5a4a00; }
-    .pdf-badge.cat-sd       { background: #c3c3c3; color: #333; }
-    .pdf-badge.cat-general  { background: #d9e2f3; color: #1a3a5c; }
-
-    .pdf-card[data-cat="Repair"]             { border-left: 4px solid #a07830; }
-    .pdf-card[data-cat="Due Diligence"]      { border-left: 4px solid #5a9ab5; }
-    .pdf-card[data-cat="Rec. Maintenance"]   { border-left: 4px solid #c07070; }
-    .pdf-card[data-cat="Information"]        { border-left: 4px solid #1a6fa0; }
-    .pdf-card[data-cat="Monitor"]            { border-left: 4px solid #50b050; }
-    .pdf-card[data-cat="Limitation"]         { border-left: 4px solid #c0a030; }
-    .pdf-card[data-cat="System Description"] { border-left: 4px solid #888888; }
-
-    .photo-grid, .photo-list, .section-group { display: none !important; }
-    .pdf-output { display: block !important; }
+    header, .upload-zone, .toolbar, .property-bar, .compress-panel,
+    .link-banner, .modal-overlay, .toast { display: none !important; }
   }
-
-  .pdf-output { display: none; }
 </style>
 </head>
 <body>
@@ -725,7 +640,6 @@
   </div>
 
   <div id="photoContainer"></div>
-  <div class="pdf-output" id="pdfOutput"></div>
 </main>
 
 <!-- Log Export Modal -->
@@ -755,18 +669,31 @@
       Export as PDF
       <button class="modal-close" data-close="pdfModal">✕</button>
     </div>
-    <div class="modal-body">
-      <p style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:10px;">Your PDF is ready to print.</p>
-      <p style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:14px;">
-        A print dialog will open. To save as PDF:<br>
-        &nbsp;&nbsp;<strong>Mac:</strong> Click <em>PDF → Save as PDF</em> in the bottom-left of the dialog.<br>
-        &nbsp;&nbsp;<strong>Windows:</strong> Select <em>Microsoft Print to PDF</em>.<br><br>
-        For best results use <strong>landscape orientation</strong> and set margins to <strong>Minimum</strong>.
-        Photos are laid out 2 per row, grouped by section.
-      </p>
-      <div style="display:flex;gap:10px;justify-content:flex-end;">
-        <button class="btn btn-outline" data-close="pdfModal">Cancel</button>
-        <button class="btn btn-green" id="doPrintBtn">Open Print Dialog →</button>
+    <div class="modal-body" id="pdfModalBody">
+      <div id="pdfProgress" style="display:none;">
+        <div style="text-align:center;padding:30px 0;">
+          <div style="font-size:28px;margin-bottom:12px;">📄</div>
+          <p style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:8px;" id="pdfProgressText">Building PDF...</p>
+          <div style="background:var(--border);border-radius:8px;height:8px;width:100%;max-width:300px;margin:0 auto;">
+            <div id="pdfProgressBar" style="background:var(--blue);height:100%;border-radius:8px;width:0%;transition:width 0.2s;"></div>
+          </div>
+          <p style="font-size:12px;color:var(--muted);margin-top:8px;" id="pdfProgressDetail"></p>
+        </div>
+      </div>
+      <div id="pdfReady" style="display:none;">
+        <div style="text-align:center;padding:20px 0;">
+          <div style="font-size:36px;margin-bottom:10px;">✅</div>
+          <p style="font-size:15px;font-weight:600;color:var(--green);margin-bottom:4px;">PDF Ready</p>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:16px;" id="pdfReadyInfo"></p>
+          <button class="btn btn-green" id="pdfDownloadBtn" style="font-size:15px;padding:12px 28px;">⬇ Download PDF</button>
+        </div>
+      </div>
+      <div id="pdfError" style="display:none;">
+        <div style="text-align:center;padding:20px 0;">
+          <div style="font-size:28px;margin-bottom:10px;">⚠️</div>
+          <p style="font-size:14px;color:#c53030;margin-bottom:8px;" id="pdfErrorText">Error generating PDF</p>
+          <button class="btn btn-outline" data-close="pdfModal">Close</button>
+        </div>
       </div>
     </div>
   </div>
@@ -898,7 +825,7 @@ function wireEvents() {
   document.getElementById('pdfBtn').addEventListener('click', exportPDF);
   document.getElementById('logBtn').addEventListener('click', exportLog);
   document.getElementById('copyLogBtn').addEventListener('click', copyLog);
-  document.getElementById('doPrintBtn').addEventListener('click', doPrint);
+  document.getElementById('pdfDownloadBtn').addEventListener('click', downloadPDF);
 
   // Clear
   document.getElementById('clearBtn').addEventListener('click', clearAll);
@@ -1609,64 +1536,216 @@ function restoreSession(file) {
 }
 
 // ═════════════════════════════════════════════
-//   PDF EXPORT
+//   PDF EXPORT (programmatic via jsPDF)
 // ═════════════════════════════════════════════
+const PW = 612, PH = 792; // US Letter pts
+const PML = 40, PMR = 40, PMT = 50, PMB = 40;
+const PUSABLE = PW - PML - PMR;
+const PCGAP = 12;
+const PCOLW = (PUSABLE - PCGAP) / 2;
+const PIMGMAXH = 190;
+
+const PN = [26,58,92], PB = [46,109,164], PI = [217,226,243];
+const PBK = [0,0,0], PGR = [120,130,140], PLG = [200,208,218], PW2 = [255,255,255];
+
+const PCATS = {
+  'Repair':             { bg:[208,176,116], brd:[160,120,48],  tx:[90,56,0] },
+  'Due Diligence':      { bg:[161,211,233], brd:[90,154,181],  tx:[26,58,92] },
+  'Rec. Maintenance':   { bg:[241,190,190], brd:[192,112,112], tx:[107,26,26] },
+  'Information':        { bg:[208,238,255], brd:[26,111,160],  tx:[10,74,110] },
+  'Monitor':            { bg:[178,244,178], brd:[80,176,80],   tx:[26,74,26] },
+  'Limitation':         { bg:[249,232,184], brd:[192,160,48],  tx:[90,74,0] },
+  'System Description': { bg:[195,195,195], brd:[136,136,136], tx:[51,51,51] },
+  '—':                  { bg:[217,226,243], brd:[46,109,164],  tx:[26,58,92] }
+};
+
+let pdfBlob = null;
+
 function exportPDF() {
   if (!photos.length) { alert('No photos to export.'); return; }
-  buildPDFOutput();
+  document.getElementById('pdfProgress').style.display = 'block';
+  document.getElementById('pdfReady').style.display = 'none';
+  document.getElementById('pdfError').style.display = 'none';
+  document.getElementById('pdfProgressBar').style.width = '0%';
+  document.getElementById('pdfProgressText').textContent = 'Building PDF...';
+  document.getElementById('pdfProgressDetail').textContent = 'Loading images...';
   document.getElementById('pdfModal').classList.add('open');
+  pdfBlob = null;
+  setTimeout(() => generatePDF(), 100);
 }
 
-function doPrint() {
-  document.getElementById('pdfModal').classList.remove('open');
-  setTimeout(() => window.print(), 300);
+function pprog(pct, detail) {
+  document.getElementById('pdfProgressBar').style.width = pct + '%';
+  if (detail) document.getElementById('pdfProgressDetail').textContent = detail;
 }
 
-function buildPDFOutput() {
-  const addr = document.getElementById('propAddress').value  || '—';
-  const date = document.getElementById('propDate').value     || '—';
-  const insp = document.getElementById('propInspector').value|| 'Steve Ramos';
-  const total = photos.length;
-
-  let html = `
-    <div class="pdf-cover">
-      <h1>Photo Documentation</h1>
-      <div class="sub">Insight Environmental Building Consultants LLC</div>
-      <table>
-        <tr><td>Property</td><td>${escHtml(addr)}</td></tr>
-        <tr><td>Date</td><td>${escHtml(date)}</td></tr>
-        <tr><td>Inspector</td><td>${escHtml(insp)}</td></tr>
-        <tr><td>Total Photos</td><td>${total}</td></tr>
-      </table>
-    </div>`;
-
-  SECTIONS.forEach(sec => {
-    const secPhotos = photos.filter(p => p.section === sec).sort((a,b) => a.order - b.order);
-    if (!secPhotos.length) return;
-    html += `<div class="pdf-section-header">${sec}</div>`;
-    html += `<div class="pdf-photo-grid">`;
-    secPhotos.forEach(p => {
-      const idx = photos.indexOf(p);
-      const badgeCls = CAT_PRINT[p.category] || 'cat-general';
-      const catLabel = p.category === '—' ? 'Unassigned' : p.category;
-      const idTag    = p.photoId || p.filename.replace(/\.[^.]+$/, '');
-      html += `
-        <div class="pdf-card" data-cat="${escAttr(p.category)}">
-          <img src="${p.src}" alt="">
-          <div class="pdf-card-meta">
-            <div class="pdf-card-header">
-              <span class="pdf-img-id">${escHtml(idTag)}</span>
-              <span class="pdf-badge ${badgeCls}">${escHtml(catLabel)}</span>
-            </div>
-            <div class="pdf-seq-num">Photo #${idx + 1}</div>
-            ${p.caption ? `<div class="pdf-caption">${escHtml(p.caption)}</div>` : ''}
-          </div>
-        </div>`;
-    });
-    html += `</div>`;
+function imgDims(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight });
+    img.onerror = () => resolve({ w: 4, h: 3 });
+    img.src = src;
   });
+}
 
-  document.getElementById('pdfOutput').innerHTML = html;
+async function generatePDF() {
+  try {
+    if (typeof window.jspdf === 'undefined')
+      throw new Error('jsPDF library not loaded. Check your internet connection and reload.');
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
+
+    const addr  = document.getElementById('propAddress').value   || '—';
+    const date  = document.getElementById('propDate').value      || '—';
+    const insp  = document.getElementById('propInspector').value || 'Steve Ramos';
+    const total = photos.length;
+
+    pprog(5, 'Analyzing images...');
+    const dims = {};
+    await Promise.all(photos.map(async p => { dims[p.id] = await imgDims(p.src); }));
+    pprog(15, 'Rendering cover page...');
+
+    // ── COVER ──
+    doc.setFillColor(...PN); doc.rect(0, 0, PW, 80, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(...PW2);
+    doc.text('INSIGHT ENVIRONMENTAL BUILDING CONSULTANTS LLC', PW/2, 48, {align:'center'});
+    doc.setFillColor(...PB); doc.rect(0, 80, PW, 4, 'F');
+
+    doc.setFontSize(28); doc.setTextColor(...PN);
+    doc.text('Photo Documentation', PW/2, 220, {align:'center'});
+    doc.setFillColor(...PB); doc.rect((PW-120)/2, 238, 120, 3, 'F');
+
+    const tx = (PW-340)/2; let ty = 300;
+    [['Property',addr],['Date',date],['Inspector',insp],['Total Photos',String(total)]].forEach(r => {
+      doc.setFillColor(...PI); doc.setDrawColor(...PLG); doc.rect(tx, ty, 120, 30, 'FD');
+      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(...PN);
+      doc.text(r[0], tx+10, ty+19);
+      doc.setFillColor(...PW2); doc.rect(tx+120, ty, 220, 30, 'FD');
+      doc.setFont('helvetica','normal'); doc.setTextColor(...PBK);
+      doc.text(r[1], tx+130, ty+19);
+      ty += 30;
+    });
+    doc.setFontSize(8); doc.setTextColor(...PGR);
+    doc.text('Insight Environmental Building Consultants LLC', PW/2, PH-50, {align:'center'});
+    doc.text('Petaluma, CA · 707-775-7800', PW/2, PH-38, {align:'center'});
+
+    // ── SECTIONS ──
+    let rendered = 0;
+    SECTIONS.forEach(sec => {
+      const sp = photos.filter(p => p.section === sec).sort((a,b) => a.order - b.order);
+      if (!sp.length) return;
+      doc.addPage();
+      let y = PMT;
+      // section header
+      doc.setFillColor(...PB); doc.rect(PML, y, PUSABLE, 26, 'F');
+      doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(...PW2);
+      doc.text(sec.toUpperCase(), PML+12, y+18);
+      y += 34;
+
+      for (let i = 0; i < sp.length; i += 2) {
+        const L = sp[i], R = sp[i+1] || null;
+        const lh = cardH(doc, L, dims), rh = R ? cardH(doc, R, dims) : 0;
+        const rowH = Math.max(lh, rh);
+        if (y + rowH > PH - PMB) { doc.addPage(); y = PMT; }
+        drawCard(doc, L, PML, y, PCOLW, dims);
+        if (R) drawCard(doc, R, PML + PCOLW + PCGAP, y, PCOLW, dims);
+        y += rowH + 14;
+        rendered += R ? 2 : 1;
+        pprog(15 + Math.round(80 * rendered / total), `Photo ${rendered} of ${total}...`);
+      }
+    });
+
+    // ── FOOTERS ──
+    const pc = doc.getNumberOfPages();
+    for (let p = 1; p <= pc; p++) {
+      doc.setPage(p);
+      const fy = PH - 24;
+      doc.setFillColor(...PN); doc.rect(0, fy-8, PW, 1, 'F');
+      doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(...PGR);
+      doc.text('Confidential — For Client Use Only', PML, fy+2);
+      doc.text(addr, PW/2, fy+2, {align:'center'});
+      doc.text(`Page ${p} of ${pc}`, PW - PMR, fy+2, {align:'right'});
+    }
+
+    pprog(98, 'Finalizing...');
+    pdfBlob = doc.output('blob');
+    const mb = (pdfBlob.size / 1048576).toFixed(1);
+    document.getElementById('pdfProgress').style.display = 'none';
+    document.getElementById('pdfReady').style.display = 'block';
+    document.getElementById('pdfReadyInfo').textContent = `${total} photos · ${pc} pages · ${mb} MB`;
+  } catch (err) {
+    console.error('PDF error:', err);
+    document.getElementById('pdfProgress').style.display = 'none';
+    document.getElementById('pdfError').style.display = 'block';
+    document.getElementById('pdfErrorText').textContent = err.message || 'Unknown error';
+  }
+}
+
+function downloadPDF() {
+  if (!pdfBlob) return;
+  const addr = (document.getElementById('propAddress').value || 'inspection').replace(/[^a-z0-9]+/gi,'_').slice(0,40).toLowerCase();
+  const u = URL.createObjectURL(pdfBlob);
+  const a = document.createElement('a'); a.href = u; a.download = `${addr}_Photo_Documentation.pdf`; a.click();
+  URL.revokeObjectURL(u);
+  toast('PDF downloaded');
+}
+
+function cardH(doc, p, dims) {
+  const d = dims[p.id] || {w:4,h:3};
+  const ih = Math.min(PCOLW * (d.h/d.w), PIMGMAXH);
+  let th = 36;
+  if (p.caption) {
+    doc.setFontSize(9);
+    th += doc.splitTextToSize(p.caption, PCOLW - 18).length * 11;
+  }
+  return ih + th + 4;
+}
+
+function drawCard(doc, p, x, y, w, dims) {
+  const d = dims[p.id] || {w:4,h:3};
+  const ih = Math.min(w * (d.h/d.w), PIMGMAXH);
+  const cc = PCATS[p.category] || PCATS['—'];
+  const catLabel = p.category === '—' ? 'Unassigned' : p.category;
+  const idTag = p.photoId || p.filename.replace(/\.[^.]+$/,'');
+  const idx = photos.indexOf(p);
+  const ch = cardH(doc, p, dims);
+
+  // Card bg + border
+  doc.setFillColor(252,252,252); doc.setDrawColor(...PLG);
+  doc.rect(x, y, w, ch, 'FD');
+  doc.setFillColor(...cc.brd); doc.rect(x, y, 4, ch, 'F');
+
+  // Image
+  try { doc.addImage(p.src, 'JPEG', x+4, y, w-4, ih); }
+  catch(e) { doc.setFillColor(230,230,230); doc.rect(x+4,y,w-4,ih,'F'); }
+
+  doc.setDrawColor(...PLG); doc.setLineWidth(0.5);
+  doc.line(x+4, y+ih, x+w, y+ih);
+
+  let t = y + ih + 14;
+
+  // IMG_ ID bold
+  doc.setFont('courier','bold'); doc.setFontSize(11); doc.setTextColor(...PN);
+  doc.text(idTag, x+10, t);
+  const idW = doc.getTextWidth(idTag);
+
+  // Category badge
+  doc.setFont('courier','bold'); doc.setFontSize(8);
+  const bw = doc.getTextWidth(catLabel) + 10;
+  const bx = x + 14 + idW;
+  doc.setFillColor(...cc.bg); doc.roundedRect(bx, t-8, bw, 12, 2, 2, 'F');
+  doc.setTextColor(...cc.tx); doc.text(catLabel, bx+5, t);
+
+  t += 11;
+  doc.setFont('courier','normal'); doc.setFontSize(7); doc.setTextColor(...PGR);
+  doc.text('PHOTO #' + (idx+1), x+10, t);
+  t += 10;
+
+  if (p.caption) {
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(51,51,51);
+    doc.splitTextToSize(p.caption, w-18).forEach(ln => { doc.text(ln, x+10, t); t += 11; });
+  }
 }
 
 // ═════════════════════════════════════════════
@@ -1734,6 +1813,7 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
 }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <script>
 // PWA: Register the root service worker (handles all tools)
 if ('serviceWorker' in navigator) {
