@@ -6,7 +6,7 @@
 // Bump this version whenever you update any file in the repo.
 // Users will get the fresh version next time they open the app
 // while online — the old cache is purged automatically.
-const CACHE_VERSION = 'envirovue-v1.2.0';
+const CACHE_VERSION = 'envirovue-v1.2.2';
 
 // All files that should work offline
 const PRECACHE_URLS = [
@@ -21,7 +21,8 @@ const PRECACHE_URLS = [
   './home-inspector/manifest.json',
   './photo-tool/',
   './photo-tool/index.html',
-  './photo-tool/manifest.json'
+  './photo-tool/manifest.json',
+  './photo-tool/jspdf.min.js'
 ];
 
 // ── INSTALL ──────────────────────────────────
@@ -67,7 +68,7 @@ self.addEventListener('fetch', event => {
   if (url.origin !== location.origin) {
     // Cache CDN resources (jsPDF, Google Fonts) for offline use
     if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com') ||
-        url.hostname.includes('cdnjs.cloudflare.com')) {
+        url.hostname.includes('cdnjs.cloudflare.com') || url.hostname.includes('unpkg.com')) {
       event.respondWith(cacheFirstWithNetworkFallback(req));
     }
     return;

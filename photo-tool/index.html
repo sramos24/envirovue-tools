@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Photo Tool">
 <title>Insight Environmental — Photo Documentation</title>
+<script src="jspdf.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
@@ -1590,8 +1591,14 @@ function imgDims(src) {
 
 async function generatePDF() {
   try {
+    // Wait for jsPDF to load (up to 5 seconds)
+    let attempts = 0;
+    while (typeof window.jspdf === 'undefined' && attempts < 25) {
+      await new Promise(r => setTimeout(r, 200));
+      attempts++;
+    }
     if (typeof window.jspdf === 'undefined')
-      throw new Error('jsPDF library not loaded. Check your internet connection and reload.');
+      throw new Error('jsPDF library failed to load. Try reloading the page while online.');
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
@@ -1813,7 +1820,6 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
 }
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <script>
 // PWA: Register the root service worker (handles all tools)
 if ('serviceWorker' in navigator) {
