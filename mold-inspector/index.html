@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1F3864">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mold Inspector">
+<title>Mold Inspector — Insight Environmental</title>
+<style>
+:root {
+  --navy:    #1F3864;
+  --blue:    #2E6DA4;
+  --steel:   #4a7fa8;
+  --ice:     #d9e2f3;
+  --teal:    #1a7a6e;
+  --teal-lt: #d4f0ec;
+  --bg:      #EDF1F7;
+  --surface: #ffffff;
+  --border:  #c8d4e8;
+  --text:    #1a2535;
+  --muted:   #6b7e96;
+  --gray-100:#F1F3F5;
+  --gray-200:#E2E8F0;
+  --gray-300:#CBD5E0;
+  --radius:  12px;
+  --radius-sm:8px;
+  --shadow:  0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg:0 8px 24px rgba(0,0,0,0.15);
+
+  /* WDI color */
+  --wdi-bg:  #FFD7D7;
+  --wdi-brd: #c53030;
+  --wdi-txt: #742020;
+
+  /* Condition colors */
+  --c1-bg:  #E2EFDA; --c1-brd: #4a9a4a;
+  --c2-bg:  #FCE4D6; --c2-brd: #c07030;
+  --c3-bg:  #FFD7D7; --c3-brd: #c53030;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+input, textarea, select, button { font-family: inherit; font-size: inherit; }
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--teal);
+  color: #fff;
+  padding: 12px 14px;
+  padding-top: calc(12px + env(safe-area-inset-top));
+  padding-left: calc(14px + env(safe-area-inset-left));
+  padding-right: calc(14px + env(safe-area-inset-right));
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 10px;
+}
+.menu-btn {
+  background: none; border: none; color: #fff;
+  font-size: 22px; padding: 4px 8px; cursor: pointer;
+}
+.menu-btn:active { background: rgba(255,255,255,0.15); border-radius: 4px; }
+.hdr-title { flex: 1; min-width: 0; }
+.hdr-co { font-size: 14px; font-weight: 700; }
+.hdr-sec { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+.hdr-btns { display: flex; gap: 6px; }
+.hdr-btn {
+  background: rgba(255,255,255,0.15); border: none; color: #fff;
+  padding: 7px 12px; border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 13px; font-weight: 500;
+}
+.hdr-btn:active { background: rgba(255,255,255,0.3); }
+.hdr-btn.primary { background: #fff; color: var(--teal); }
+
+/* ── LAYOUT ── */
+.layout { display: flex; min-height: calc(100vh - 60px); }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 240px; background: #fff;
+  border-right: 1px solid var(--border);
+  padding: 12px 0; flex-shrink: 0;
+}
+.sb-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--muted);
+  padding: 8px 16px 4px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px; cursor: pointer; font-size: 14px;
+  color: var(--text); border-left: 3px solid transparent;
+  user-select: none;
+}
+.sb-item:active { background: var(--gray-100); }
+.sb-item.active {
+  background: var(--teal-lt);
+  border-left-color: var(--teal);
+  color: var(--teal);
+  font-weight: 600;
+}
+.sb-count {
+  margin-left: auto;
+  background: var(--gray-200); color: var(--text);
+  font-size: 11px; font-weight: 600;
+  padding: 1px 7px; border-radius: 10px;
+  min-width: 20px; text-align: center;
+}
+.sb-item.active .sb-count { background: var(--teal); color: #fff; }
+.sb-item.has-items .sb-count { background: #FEE2AA; color: #8a5a14; }
+.sb-item.active.has-items .sb-count { background: var(--teal); color: #fff; }
+
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 50;
+}
+
+/* ── MAIN ── */
+.main { flex: 1; padding: 16px; min-width: 0; max-width: 900px; }
+.page-title { font-size: 20px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.page-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+
+/* ── CARDS ── */
+.card {
+  background: #fff; border-radius: var(--radius);
+  padding: 16px; box-shadow: var(--shadow);
+  margin-bottom: 14px;
+}
+.card-title {
+  font-size: 14px; font-weight: 700; color: var(--navy);
+  margin-bottom: 12px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── FORM ROWS ── */
+.form-row { margin-bottom: 12px; }
+.form-row:last-child { margin-bottom: 0; }
+.form-row label {
+  display: block; font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--muted); margin-bottom: 4px;
+}
+.form-row input, .form-row textarea, .form-row select {
+  width: 100%; padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff; color: var(--text); font-size: 15px;
+}
+.form-row textarea { resize: vertical; min-height: 72px; line-height: 1.45; }
+.form-row input:focus, .form-row textarea:focus, .form-row select:focus {
+  outline: none; border-color: var(--teal);
+  box-shadow: 0 0 0 2px rgba(26,122,110,0.15);
+}
+.form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-row.inline { display: flex; align-items: center; gap: 10px; }
+.form-row.inline label { margin: 0; white-space: nowrap; }
+.form-row.inline input { flex: 1; }
+
+/* ── CHECKBOX GROUP ── */
+.checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+.checkbox-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  background: var(--gray-100); border-radius: var(--radius-sm);
+  cursor: pointer; user-select: none;
+}
+.checkbox-item input[type="checkbox"] {
+  width: 18px; height: 18px; cursor: pointer; accent-color: var(--teal);
+}
+.checkbox-item .cb-label { font-size: 14px; font-weight: 500; }
+.checkbox-item .cb-desc { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+/* ── RADIO GROUP ── */
+.radio-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.radio-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 14px;
+  background: var(--gray-100); border-radius: 20px;
+  cursor: pointer; font-size: 13px; font-weight: 500;
+  border: 2px solid transparent;
+}
+.radio-item input[type="radio"] { display: none; }
+.radio-item.selected {
+  background: var(--teal-lt); border-color: var(--teal); color: var(--teal);
+}
+
+/* ── ROOM CARDS ── */
+.room-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px; overflow: hidden;
+}
+.room-head {
+  background: var(--gray-100); padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; user-select: none;
+}
+.room-name-input {
+  flex: 1; background: transparent; border: none;
+  font-size: 14px; font-weight: 600; color: var(--navy);
+  cursor: text;
+}
+.room-name-input:focus { outline: none; }
+.room-toggle { color: var(--muted); font-size: 16px; transition: transform 0.2s; }
+.room-toggle.open { transform: rotate(180deg); }
+.room-del {
+  background: none; border: none; color: var(--muted);
+  font-size: 18px; cursor: pointer; padding: 0 4px;
+}
+.room-del:active { color: #c53030; }
+.room-body { padding: 12px 14px; }
+.room-body.collapsed { display: none; }
+
+/* Findings toggle row */
+.finding-toggles {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 10px;
+}
+.ftoggle {
+  padding: 6px 12px; border-radius: 16px;
+  border: 1.5px solid var(--border); background: #fff;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  color: var(--muted); transition: all 0.15s;
+}
+.ftoggle.active {
+  border-color: var(--teal); background: var(--teal-lt); color: var(--teal);
+}
+.ftoggle.warn.active { border-color: #c53030; background: var(--wdi-bg); color: var(--wdi-txt); }
+
+/* ── SAMPLE ROWS ── */
+.sample-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px; margin-bottom: 10px;
+  position: relative;
+}
+.sample-row.outdoor { border-left: 4px solid #c0a030; background: #FEFBF0; }
+.sample-row.wdi     { border-left: 4px solid var(--wdi-brd); background: var(--wdi-bg); }
+.sample-row.normal  { border-left: 4px solid var(--c1-brd); }
+.sample-row.elevated{ border-left: 4px solid var(--c2-brd); background: var(--c2-bg); }
+.sample-head {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.sample-type-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 10px; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.badge-outdoor { background: #FFF2CC; color: #8a6010; }
+.badge-interior { background: var(--ice); color: var(--navy); }
+.badge-wdi      { background: var(--wdi-bg); color: var(--wdi-txt); }
+.sample-del {
+  background: none; border: none; color: var(--muted);
+  font-size: 18px; cursor: pointer; margin-left: auto;
+}
+.sample-del:active { color: #c53030; }
+
+.wdi-warning {
+  background: var(--wdi-bg); border: 1px solid var(--wdi-brd);
+  border-radius: var(--radius-sm); padding: 8px 12px;
+  font-size: 12px; font-weight: 600; color: var(--wdi-txt);
+  margin-top: 8px; display: none;
+}
+.wdi-warning.show { display: block; }
+
+/* ── ADD BUTTONS ── */
+.add-btn {
+  width: 100%; padding: 10px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff; color: var(--muted);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; text-align: center;
+  transition: all 0.15s;
+}
+.add-btn:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-lt); }
+.add-btn:active { transform: scale(0.98); }
+.add-btn.primary { border-color: var(--teal); color: var(--teal); }
+
+/* ── MIC ── */
+.mic-row { display: flex; align-items: flex-start; gap: 8px; }
+.mic-row textarea { flex: 1; }
+.mic-btn {
+  background: var(--navy); color: #fff; border: none;
+  border-radius: 50%; width: 36px; height: 36px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; margin-top: 1px;
+}
+.mic-btn:active { transform: scale(0.92); }
+.mic-btn.listening { background: #c53030; animation: pulse 1s infinite; }
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(197,48,48,0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(197,48,48,0); }
+}
+
+/* ── MODALS ── */
+.modal-back {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 200;
+  align-items: center; justify-content: center; padding: 16px;
+}
+.modal-back.active { display: flex; }
+.modal {
+  background: #fff; border-radius: var(--radius);
+  max-width: 700px; width: 100%;
+  max-height: 90vh; display: flex; flex-direction: column;
+  box-shadow: var(--shadow-lg);
+}
+.modal-head {
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.modal-title { flex: 1; font-size: 16px; font-weight: 700; color: var(--navy); }
+.modal-close { background: none; border: none; font-size: 22px; color: var(--muted); cursor: pointer; }
+.modal-body { padding: 14px 16px; overflow-y: auto; flex: 1; }
+.modal-body textarea {
+  width: 100%; min-height: 380px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 10px; font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 12px; line-height: 1.55; color: var(--text); resize: vertical;
+}
+.modal-foot {
+  padding: 12px 16px; border-top: 1px solid var(--border);
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;
+}
+.btn {
+  padding: 9px 14px; border: 1px solid var(--border);
+  background: #fff; color: var(--text);
+  border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.btn.primary { background: var(--teal); color: #fff; border-color: var(--teal); }
+.btn.danger  { color: #c53030; border-color: #f2c2c2; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--navy); color: #fff;
+  padding: 10px 18px; border-radius: 22px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  opacity: 0; transition: all 0.3s;
+  z-index: 300; pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed; inset: calc(60px + env(safe-area-inset-top)) 0 0 0;
+    transform: translateX(-100%); transition: transform 0.25s;
+    z-index: 60; width: 260px; right: auto;
+    overflow-y: auto; box-shadow: var(--shadow-lg);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; position: fixed; inset: 0; z-index: 55; }
+  .main { padding: 12px; }
+  .form-2col { grid-template-columns: 1fr; }
+}
+@media (min-width: 769px) {
+  .menu-btn { display: none; }
+  .sidebar-overlay { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <button class="menu-btn" id="menuBtn">☰</button>
+  <div class="hdr-title">
+    <div class="hdr-co">Insight Environmental — Mold Inspector</div>
+    <div class="hdr-sec" id="hdrSec">General Information</div>
+  </div>
+  <div class="hdr-btns">
+    <button class="hdr-btn" id="menuMore">•••</button>
+    <button class="hdr-btn primary" id="exportBtn">Export</button>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sbOverlay"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-label">Inspection</div>
+    <div class="sb-item" data-sec="GENERAL">🏠 <span>General</span><span class="sb-count" id="cnt-GENERAL">—</span></div>
+    <div class="sb-item" data-sec="BUILDING">🏗 <span>Building</span><span class="sb-count" id="cnt-BUILDING">—</span></div>
+    <div class="sb-item" data-sec="ENVIRONMENT">🌡 <span>Environment & Tools</span><span class="sb-count" id="cnt-ENVIRONMENT">—</span></div>
+    <div class="sb-label">Findings</div>
+    <div class="sb-item" data-sec="VISUAL">🔍 <span>Visual Inspection</span><span class="sb-count" id="cnt-VISUAL">0</span></div>
+    <div class="sb-label">Lab Results</div>
+    <div class="sb-item" data-sec="AIR">💨 <span>Air Samples</span><span class="sb-count" id="cnt-AIR">0</span></div>
+    <div class="sb-item" data-sec="SURFACE">🧫 <span>Surface Samples</span><span class="sb-count" id="cnt-SURFACE">0</span></div>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-back" id="exportModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Field Notes Export</div>
+      <button class="modal-close" id="exportClose">×</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">
+        Copy and paste into your Claude Project (Mold Report Generator) to generate the formatted .docx report.
+      </p>
+      <textarea id="exportText" readonly></textarea>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="dlTxtBtn">Download .txt</button>
+      <button class="btn primary" id="copyBtn">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- Options Modal -->
+<div class="modal-back" id="moreModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head">
+      <div class="modal-title">Options</div>
+      <button class="modal-close" id="moreClose">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Navigate</div>
+      <a href="../home-inspector/" class="btn" style="width:100%;margin-bottom:6px;display:block;text-align:center;text-decoration:none;">🏠 Home Inspector</a>
+      <a href="../photo-tool/" class="btn" style="width:100%;margin-bottom:6px;display:block;text-align:center;text-decoration:none;">📷 Photo Tool</a>
+      <a href="../" class="btn" style="width:100%;margin-bottom:14px;display:block;text-align:center;text-decoration:none;">◀ Envirovue Launcher</a>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Session</div>
+      <button class="btn" style="width:100%;margin-bottom:8px;" id="saveBtn">💾 Save Session</button>
+      <button class="btn" style="width:100%;margin-bottom:8px;" id="loadBtn">📂 Load Session</button>
+      <input type="file" id="loadFile" accept=".json" style="display:none">
+      <button class="btn danger" style="width:100%;" id="clearBtn">🗑 Clear All Data</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════
+const STORAGE_KEY = 'insight_mold_inspector_v1';
+const SECTIONS = ['GENERAL','BUILDING','ENVIRONMENT','VISUAL','AIR','SURFACE'];
+
+const WDI_SPECIES = ['Chaetomium','Fusarium','Stachybotrys','Stachybotrys chartarum','Trichoderma','Ulocladium','Wallemia','Gliomastix'];
+
+const PURPOSES = [
+  'Characterize indoor fungal ecology',
+  'Investigate occupant complaints',
+  'Pre-purchase assessment',
+  'Post-remediation clearance',
+  'Moisture mapping only',
+  'Other'
+];
+
+const VISUAL_FLAGS = [
+  { key: 'mold',    label: 'Visible Mold', warn: true },
+  { key: 'odor',    label: 'Mold Odor', warn: true },
+  { key: 'stain',   label: 'Water Staining', warn: false },
+  { key: 'moisture',label: 'Elevated Moisture', warn: false },
+  { key: 'damage',  label: 'Water Damage', warn: false },
+  { key: 'clean',   label: 'Clean & Dry', warn: false }
+];
+
+const DEFAULT_ROOMS = [
+  'Kitchen','Living Room','Dining Room',
+  'Primary Bedroom','Bedroom','Bathroom',
+  'Hallway Bathroom','Side Attic','Crawlspace'
+];
+
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let state = createEmptyState();
+let currentSection = 'GENERAL';
+let uid = 1;
+let currentRecBtn = null, currentRec = null;
+
+function createEmptyState() {
+  return {
+    general: {
+      address: '', client: '', occupancy: '',
+      purpose: '', purposeOther: '',
+      inspectionDate: new Date().toISOString().slice(0,10),
+      reportDate: '',
+      labNumber: '', analyst: '', approver: ''
+    },
+    building: {
+      construction: 'Wood frame',
+      foundation: '', crawlspaceDetails: '',
+      roofing: '', lot: '',
+      finishes: '', hvac: '',
+      config: '', levels: ''
+    },
+    environment: {
+      tempF: '', rhPct: '', groundConditions: '',
+      tools: { air: false, surface: false, moisture: false, ir: false }
+    },
+    rooms: [],
+    airSamples: [],
+    surfaceSamples: []
+  };
+}
+
+function newUid() { return 'u' + (Date.now()) + '_' + (uid++); }
+
+// ═══════════════════════════════════════════
+//  STORAGE
+// ═══════════════════════════════════════════
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    if (p && p.general) {
+      // Merge to ensure all keys present
+      state.general    = Object.assign(createEmptyState().general, p.general || {});
+      state.building   = Object.assign(createEmptyState().building, p.building || {});
+      state.environment = Object.assign(createEmptyState().environment, p.environment || {});
+      state.environment.tools = Object.assign({air:false,surface:false,moisture:false,ir:false}, (p.environment||{}).tools || {});
+      state.rooms = p.rooms || [];
+      state.airSamples = p.airSamples || [];
+      state.surfaceSamples = p.surfaceSamples || [];
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+function renderMain() {
+  const el = document.getElementById('main');
+  document.getElementById('hdrSec').textContent = secLabel(currentSection);
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.toggle('active', i.dataset.sec === currentSection));
+  updateCounts();
+  switch(currentSection) {
+    case 'GENERAL':     el.innerHTML = renderGeneral(); wireGeneral(); break;
+    case 'BUILDING':    el.innerHTML = renderBuilding(); wireBuilding(); break;
+    case 'ENVIRONMENT': el.innerHTML = renderEnvironment(); wireEnvironment(); break;
+    case 'VISUAL':      el.innerHTML = renderVisual(); wireVisual(); break;
+    case 'AIR':         el.innerHTML = renderAir(); wireAir(); break;
+    case 'SURFACE':     el.innerHTML = renderSurface(); wireSurface(); break;
+  }
+}
+
+function secLabel(s) {
+  return {GENERAL:'General Information',BUILDING:'Building Description',
+          ENVIRONMENT:'Environment & Tools',VISUAL:'Visual Inspection',
+          AIR:'Air Samples',SURFACE:'Surface Samples'}[s] || s;
+}
+
+function updateCounts() {
+  document.getElementById('cnt-GENERAL').textContent   = state.general.address ? '✓' : '—';
+  document.getElementById('cnt-BUILDING').textContent  = state.building.construction ? '✓' : '—';
+  document.getElementById('cnt-ENVIRONMENT').textContent = state.environment.tempF ? '✓' : '—';
+  document.getElementById('cnt-VISUAL').textContent    = state.rooms.length;
+  document.getElementById('cnt-AIR').textContent       = state.airSamples.length;
+  document.getElementById('cnt-SURFACE').textContent   = state.surfaceSamples.length;
+  document.querySelectorAll('.sb-item').forEach(el => {
+    const cnt = document.getElementById('cnt-' + el.dataset.sec);
+    if (!cnt) return;
+    const v = cnt.textContent;
+    const hasItems = !isNaN(parseInt(v)) && parseInt(v) > 0;
+    el.classList.toggle('has-items', hasItems || v === '✓');
+  });
+}
+
+// ── GENERAL ──
+function renderGeneral() {
+  const g = state.general;
+  return `
+  <h2 class="page-title">General Information</h2>
+  <p class="page-sub">Property and client details for the report header.</p>
+  <div class="card">
+    <div class="form-row"><label>Property Address *</label><input id="g-address" value="${esc(g.address)}" placeholder="106 Baltimore Ave, Corte Madera, CA 94925"></div>
+    <div class="form-row"><label>Client Name *</label><input id="g-client" value="${esc(g.client)}" placeholder="Emilie Cowan"></div>
+    <div class="form-row"><label>Occupancy Type</label>
+      <select id="g-occupancy">
+        <option value="">— select —</option>
+        ${['Owner-Occupied, Single-Family Dwelling','Tenant-Occupied, Single-Family','Tenant-Occupied, Condo/Apartment','Vacant','Other'].map(o=>`<option ${g.occupancy===o?'selected':''}>${o}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-2col">
+      <div class="form-row"><label>Inspection Date</label><input id="g-inspDate" type="date" value="${esc(g.inspectionDate)}"></div>
+      <div class="form-row"><label>Report Date</label><input id="g-reportDate" type="date" value="${esc(g.reportDate)}"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🎯 Inspection Purpose</div>
+    <div class="radio-group" id="purpose-group">
+      ${PURPOSES.map(p => `<label class="radio-item ${g.purpose===p?'selected':''}"><input type="radio" name="purpose" value="${p}"> ${p}</label>`).join('')}
+    </div>
+    ${g.purpose === 'Other' ? `<div class="form-row" style="margin-top:10px;"><label>Describe purpose</label><input id="g-purposeOther" value="${esc(g.purposeOther)}" placeholder="Describe inspection purpose"></div>` : ''}
+  </div>
+  <div class="card">
+    <div class="card-title">🧪 Lab Information</div>
+    <div class="form-row"><label>Lab Report Number</label><input id="g-labNum" value="${esc(g.labNumber)}" placeholder="AQ-52498"></div>
+    <div class="form-2col">
+      <div class="form-row"><label>Lab Analyst</label><input id="g-analyst" value="${esc(g.analyst)}" placeholder="B. Delbridge"></div>
+      <div class="form-row"><label>Approved By</label><input id="g-approver" value="${esc(g.approver)}" placeholder="Dylan McIntosh"></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:6px;">Default lab: Sporecyte / Techcyte, Inc. (PJLA #128180)</p>
+  </div>`;
+}
+function wireGeneral() {
+  wire('g-address','general','address');
+  wire('g-client','general','client');
+  wire('g-occupancy','general','occupancy');
+  wire('g-inspDate','general','inspectionDate');
+  wire('g-reportDate','general','reportDate');
+  wire('g-labNum','general','labNumber');
+  wire('g-analyst','general','analyst');
+  wire('g-approver','general','approver');
+  if (document.getElementById('g-purposeOther')) wire('g-purposeOther','general','purposeOther');
+  document.querySelectorAll('[name="purpose"]').forEach(r => {
+    r.addEventListener('change', () => {
+      state.general.purpose = r.value; save();
+      const oEl = document.getElementById('g-purposeOther');
+      if (r.value === 'Other' && !oEl) {
+        // Re-render to show Other input
+        const rg = document.getElementById('purpose-group');
+        if (rg) {
+          const div = document.createElement('div');
+          div.className = 'form-row'; div.style.marginTop = '10px';
+          div.innerHTML = `<label>Describe purpose</label><input id="g-purposeOther" placeholder="Describe inspection purpose">`;
+          rg.parentNode.appendChild(div);
+          wire('g-purposeOther','general','purposeOther');
+        }
+      }
+    });
+  });
+  document.querySelectorAll('.radio-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const r = el.querySelector('input[type=radio]');
+      if (r) { r.checked = true; r.dispatchEvent(new Event('change')); }
+      document.querySelectorAll('.radio-item').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+    });
+  });
+}
+
+// ── BUILDING ──
+function renderBuilding() {
+  const b = state.building;
+  const sel = (val, opts) => opts.map(o => `<option ${val===o?'selected':''}>${o}</option>`).join('');
+  return `
+  <h2 class="page-title">Building Description</h2>
+  <p class="page-sub">Construction characteristics for Section 2 of the report.</p>
+  <div class="card">
+    <div class="form-2col">
+      <div class="form-row"><label>Construction Type</label>
+        <select id="b-construction"><option>Wood frame</option><option>Masonry</option><option>Steel frame</option><option>Mixed</option></select>
+      </div>
+      <div class="form-row"><label>Roofing</label>
+        <select id="b-roofing">
+          <option value="">— select —</option>
+          ${sel(b.roofing,['Asphalt shingles','Composition shingle','Concrete tile','Clay tile','Metal','Flat / Built-up','TPO','Mixed'])}
+        </select>
+      </div>
+    </div>
+    <div class="form-2col">
+      <div class="form-row"><label>Foundation</label>
+        <select id="b-foundation">
+          <option value="">— select —</option>
+          ${sel(b.foundation,['Concrete perimeter','Concrete slab on grade','Pier and post','Raised concrete','Mixed'])}
+        </select>
+      </div>
+      <div class="form-row"><label>Lot</label>
+        <select id="b-lot">
+          <option value="">— select —</option>
+          ${sel(b.lot,['Flat','Hillside','Sloped','Hillside with retaining walls'])}
+        </select>
+      </div>
+    </div>
+    <div class="form-row"><label>Crawlspace Details (if applicable)</label>
+      <input id="b-crawl" value="${esc(b.crawlspaceDetails)}" placeholder="Soil liner present? Access status? Visible issues? Or: No crawlspace">
+    </div>
+    <div class="form-row"><label>Interior Finishes</label>
+      <input id="b-finishes" value="${esc(b.finishes)}" placeholder="Drywall walls and ceilings, hardwood floors, dual-pane windows">
+    </div>
+    <div class="form-row"><label>HVAC</label>
+      <select id="b-hvac">
+        <option value="">— select —</option>
+        ${sel(b.hvac,['Forced-air gas furnace with central AC','Forced-air gas furnace, no AC','Heat pump','Ductless mini-split','Electric baseboard','Hydronic radiant','Window units','None'])}
+      </select>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🏠 Building Configuration</div>
+    <div class="form-row"><label>Number of Levels</label>
+      <select id="b-levels">
+        <option value="">— select —</option>
+        ${sel(b.levels,['Single-story','Two-story','Three-story','Split-level'])}
+      </select>
+    </div>
+    <div class="form-row"><label>Room Breakdown</label>
+      <div class="mic-row">
+        <textarea id="b-config" placeholder="Lower level: kitchen, living room, dining room, bedroom, bathroom. Upper level: primary bedroom, guest bedroom, hallway bathroom, side attic.">${esc(b.config)}</textarea>
+        <button class="mic-btn" id="mic-bconfig">🎤</button>
+      </div>
+    </div>
+  </div>`;
+}
+function wireBuilding() {
+  const map = {
+    'b-construction':'construction','b-roofing':'roofing',
+    'b-foundation':'foundation','b-lot':'lot',
+    'b-crawl':'crawlspaceDetails','b-finishes':'finishes',
+    'b-hvac':'hvac','b-levels':'levels','b-config':'config'
+  };
+  Object.keys(map).forEach(id => wireDeep(id, 'building', map[id]));
+  document.getElementById('mic-bconfig').addEventListener('click', () =>
+    startDictation(document.getElementById('mic-bconfig'), 'b-config'));
+}
+
+// ── ENVIRONMENT & TOOLS ──
+function renderEnvironment() {
+  const e = state.environment;
+  const t = e.tools;
+  return `
+  <h2 class="page-title">Environment & Tools</h2>
+  <p class="page-sub">Conditions at time of inspection and methods employed.</p>
+  <div class="card">
+    <div class="card-title">🌡 Environmental Conditions</div>
+    <div class="form-2col">
+      <div class="form-row"><label>Interior Temp (°F)</label><input id="e-temp" type="number" value="${esc(e.tempF)}" placeholder="70"></div>
+      <div class="form-row"><label>Interior RH (%)</label><input id="e-rh" type="number" value="${esc(e.rhPct)}" placeholder="55"></div>
+    </div>
+    <div class="form-row"><label>Ground / Soil Conditions</label>
+      <select id="e-ground">
+        <option value="">— select —</option>
+        ${['Dry','Moist','Wet','Saturated','Not applicable (slab)','Recent rain','Standing water observed'].map(o=>`<option ${e.groundConditions===o?'selected':''}>${o}</option>`).join('')}
+      </select>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🔧 Inspection Tools Used</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Select all tools employed. Methodology sections in the report are included or omitted based on this selection.</p>
+    <div class="checkbox-group">
+      <label class="checkbox-item">
+        <input type="checkbox" id="t-air" ${t.air?'checked':''}>
+        <div><div class="cb-label">💨 Air Sampling (Spore Trap Cassettes)</div>
+          <div class="cb-desc">Zefon Air-O-Cell, 75L per cassette, 15 LPM, Sporecyte lab</div></div>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" id="t-surface" ${t.surface?'checked':''}>
+        <div><div class="cb-label">🧫 Surface Sampling (Tape Lift or Swab)</div>
+          <div class="cb-desc">Sterile tape lift or swab, submitted to lab for microscopic analysis</div></div>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" id="t-moisture" ${t.moisture?'checked':''}>
+        <div><div class="cb-label">💧 Moisture Meter</div>
+          <div class="cb-desc">Electrical impedance, normal range below 15%</div></div>
+      </label>
+      <label class="checkbox-item">
+        <input type="checkbox" id="t-ir" ${t.ir?'checked':''}>
+        <div><div class="cb-label">📡 Infrared (IR) Camera</div>
+          <div class="cb-desc">Thermal imaging for concealed moisture screening</div></div>
+      </label>
+    </div>
+  </div>`;
+}
+function wireEnvironment() {
+  wireDeep('e-temp','environment','tempF');
+  wireDeep('e-ground','environment','groundConditions');
+  const rhEl = document.getElementById('e-rh');
+  if (rhEl) rhEl.addEventListener('input', () => {
+    state.environment.rhPct = rhEl.value; save(); updateCounts();
+  });
+  ['air','surface','moisture','ir'].forEach(t => {
+    const el = document.getElementById('t-' + t);
+    if (el) el.addEventListener('change', () => {
+      state.environment.tools[t] = el.checked; save();
+    });
+  });
+}
+
+// ── VISUAL INSPECTION ──
+function renderVisual() {
+  const rooms = state.rooms;
+  const roomsHtml = rooms.map((r, i) => renderRoomCard(r, i)).join('');
+  return `
+  <h2 class="page-title">Visual Inspection</h2>
+  <p class="page-sub">Add each area inspected. Flag conditions found in each space.</p>
+  <div id="rooms-container">${roomsHtml}</div>
+  <div class="card" style="padding:10px;">
+    <div class="card-title" style="margin-bottom:8px;">Quick Add Room</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+      ${DEFAULT_ROOMS.map(r => `<button class="ftoggle" data-quick-room="${esc(r)}">${r}</button>`).join('')}
+    </div>
+    <button class="add-btn" id="addRoomBtn">+ Add Custom Room</button>
+  </div>`;
+}
+
+function renderRoomCard(room, idx) {
+  const collapsed = room.collapsed !== false;
+  const flags = room.flags || {};
+  const flagHtml = VISUAL_FLAGS.map(f =>
+    `<button class="ftoggle ${flags[f.key]?'active':''}${f.warn&&flags[f.key]?' warn':''}" data-flag="${f.key}" data-ridx="${idx}">${f.label}</button>`
+  ).join('');
+
+  const hasIssue = VISUAL_FLAGS.filter(f => f.warn).some(f => flags[f.key]);
+
+  return `
+  <div class="room-card ${hasIssue?'border-wdi':''}" data-ridx="${idx}">
+    <div class="room-head">
+      <input class="room-name-input" value="${esc(room.name||'')}" placeholder="Room name" data-rname="${idx}">
+      ${hasIssue?'<span style="color:var(--wdi-brd);font-size:13px;font-weight:700;">⚠ Issue</span>':''}
+      <button class="room-toggle ${collapsed?'':'open'}" data-rtoggle="${idx}">▼</button>
+      <button class="room-del" data-rdel="${idx}">×</button>
+    </div>
+    <div class="room-body ${collapsed?'collapsed':''}" id="rb-${idx}">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">Flag conditions observed:</p>
+      <div class="finding-toggles">${flagHtml}</div>
+      <div class="form-row" style="margin-top:4px;">
+        <label>Moisture Reading</label>
+        <input value="${esc(room.moisture||'')}" data-rfield="moisture" data-ridx="${idx}" placeholder="e.g. 8–12% normal, or 22% elevated at south wall">
+      </div>
+      <div class="form-row">
+        <label>Observations / Notes</label>
+        <div class="mic-row">
+          <textarea data-rfield="notes" data-ridx="${idx}" placeholder="Describe visible conditions, surfaces inspected, any notable findings...">${esc(room.notes||'')}</textarea>
+          <button class="mic-btn" data-rmic="${idx}">🎤</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function wireVisual() {
+  // Quick-add
+  document.querySelectorAll('[data-quick-room]').forEach(btn => {
+    btn.addEventListener('click', () => addRoom(btn.dataset.quickRoom));
+  });
+  document.getElementById('addRoomBtn').addEventListener('click', () => addRoom(''));
+
+  // Room events
+  document.querySelectorAll('[data-rname]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const i = parseInt(inp.dataset.rname);
+      state.rooms[i].name = inp.value; save();
+    });
+    inp.addEventListener('click', e => e.stopPropagation());
+  });
+  document.querySelectorAll('[data-rtoggle]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const i = parseInt(btn.dataset.rtoggle);
+      state.rooms[i].collapsed = !state.rooms[i].collapsed;
+      save(); renderMain();
+    });
+  });
+  document.querySelectorAll('[data-rdel]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.rdel);
+      if (!confirm('Remove this room?')) return;
+      state.rooms.splice(i, 1); save(); renderMain();
+    });
+  });
+  document.querySelectorAll('[data-flag]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.ridx), key = btn.dataset.flag;
+      if (!state.rooms[i].flags) state.rooms[i].flags = {};
+      state.rooms[i].flags[key] = !state.rooms[i].flags[key];
+      save(); renderMain();
+    });
+  });
+  document.querySelectorAll('[data-rfield]').forEach(el => {
+    el.addEventListener('input', () => {
+      const i = parseInt(el.dataset.ridx);
+      state.rooms[i][el.dataset.rfield] = el.value; save();
+    });
+  });
+  document.querySelectorAll('[data-rmic]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.rmic);
+      const ta = document.querySelector(`[data-rfield="notes"][data-ridx="${i}"]`);
+      startDictation(btn, null, ta);
+    });
+  });
+}
+
+function addRoom(name) {
+  state.rooms.push({ id: newUid(), name, flags: {}, moisture: '', notes: '', collapsed: false });
+  save(); renderMain();
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.room-card');
+    if (cards.length) cards[cards.length-1].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
+
+// ── AIR SAMPLES ──
+function renderAir() {
+  const samples = state.airSamples;
+  return `
+  <h2 class="page-title">Air Samples</h2>
+  <p class="page-sub">Enter each air sample. Outdoor controls first, then interior samples.</p>
+  ${state.environment.tools.air ? '' : '<div style="background:#FEF5E7;border:1px solid #F5D9A3;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#8a6010;">⚠ Air sampling was not checked in Environment & Tools. Enable it there if air samples were collected.</div>'}
+  <div id="air-container">
+    ${samples.map((s,i) => renderSampleCard(s, i, 'air')).join('')}
+  </div>
+  <div style="display:flex;gap:8px;margin-top:4px;">
+    <button class="add-btn" id="addOutdoorBtn" style="flex:1;">+ Add Outdoor Control</button>
+    <button class="add-btn primary" id="addInteriorBtn" style="flex:1;">+ Add Interior Sample</button>
+  </div>`;
+}
+
+function renderSampleCard(s, idx, type) {
+  const isWDI = detectWDI(s.species || '');
+  const rowClass = s.isOutdoor ? 'outdoor' : (isWDI ? 'wdi' : (parseFloat(s.total) > 0 ? 'normal' : ''));
+  return `
+  <div class="sample-row ${rowClass}" data-sidx="${idx}" data-stype="${type}">
+    <div class="sample-head">
+      <span class="sample-type-badge ${s.isOutdoor?'badge-outdoor':isWDI?'badge-wdi':'badge-interior'}">
+        ${s.isOutdoor ? '🌿 Outdoor Control' : (isWDI ? '⚠ WDI Detected' : '🏠 Interior')}
+      </span>
+      <button class="sample-del" data-sdel="${idx}" data-stype="${type}">×</button>
+    </div>
+    <div class="form-2col">
+      <div class="form-row"><label>Sample ID</label><input value="${esc(s.sampleId||'')}" data-sf="sampleId" data-sidx="${idx}" data-stype="${type}" placeholder="42370054"></div>
+      <div class="form-row"><label>Location</label><input value="${esc(s.location||'')}" data-sf="location" data-sidx="${idx}" data-stype="${type}" placeholder="${s.isOutdoor?'Outdoors #1':'Kitchen'}"></div>
+    </div>
+    <div class="form-2col">
+      <div class="form-row"><label>Total (spores/m³)</label><input type="number" value="${esc(s.total||'')}" data-sf="total" data-sidx="${idx}" data-stype="${type}" placeholder="266"></div>
+      <div class="form-row"><label>Level</label>
+        <select data-sf="level" data-sidx="${idx}" data-stype="${type}">
+          ${['Exterior','Main Level','Lower Level','Upper Level','Basement','Attic'].map(l=>`<option ${s.level===l?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Species Breakdown</label>
+      <div class="mic-row">
+        <textarea data-sf="species" data-sidx="${idx}" data-stype="${type}" placeholder="Basidiospores 93, Ascospores 93, Cladosporium 67">${esc(s.species||'')}</textarea>
+        <button class="mic-btn" data-smic="${idx}" data-stype="${type}">🎤</button>
+      </div>
+    </div>
+    <div class="wdi-warning ${isWDI?'show':''}" id="wdi-${idx}-${type}">
+      ⚠ WDI species detected: ${getWDI(s.species||'')}. This will trigger a WDI finding in the report.
+    </div>
+  </div>`;
+}
+
+function detectWDI(text) {
+  return WDI_SPECIES.some(w => text.toLowerCase().includes(w.toLowerCase()));
+}
+function getWDI(text) {
+  return WDI_SPECIES.filter(w => text.toLowerCase().includes(w.toLowerCase())).join(', ') || 'Unknown';
+}
+
+function wireAir() {
+  document.getElementById('addOutdoorBtn').addEventListener('click', () => {
+    state.airSamples.push({ id: newUid(), isOutdoor: true, sampleId:'', location:'', level:'Exterior', total:'', species:'' });
+    save(); renderMain();
+  });
+  document.getElementById('addInteriorBtn').addEventListener('click', () => {
+    state.airSamples.push({ id: newUid(), isOutdoor: false, sampleId:'', location:'', level:'Main Level', total:'', species:'' });
+    save(); renderMain();
+  });
+  wireSampleFields('air');
+}
+
+function wireSampleFields(type) {
+  const arr = type === 'air' ? state.airSamples : state.surfaceSamples;
+  document.querySelectorAll(`[data-stype="${type}"][data-sf]`).forEach(el => {
+    el.addEventListener('input', () => {
+      const idx = parseInt(el.dataset.sidx);
+      if (arr[idx] !== undefined) {
+        arr[idx][el.dataset.sf] = el.value; save();
+        // Live WDI check
+        if (el.dataset.sf === 'species' && type === 'air') {
+          const wdiEl = document.getElementById(`wdi-${idx}-${type}`);
+          if (wdiEl) {
+            const isWDI = detectWDI(el.value);
+            wdiEl.classList.toggle('show', isWDI);
+            wdiEl.textContent = isWDI ? `⚠ WDI species detected: ${getWDI(el.value)}. This will trigger a WDI finding in the report.` : '';
+          }
+        }
+      }
+    });
+    el.addEventListener('change', () => {
+      const idx = parseInt(el.dataset.sidx);
+      if (arr[idx] !== undefined) { arr[idx][el.dataset.sf] = el.value; save(); }
+    });
+  });
+  document.querySelectorAll(`[data-stype="${type}"][data-sdel]`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.sdel);
+      if (!confirm('Remove this sample?')) return;
+      arr.splice(idx, 1); save(); renderMain();
+    });
+  });
+  document.querySelectorAll(`[data-stype="${type}"][data-smic]`).forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.smic);
+      const ta = document.querySelector(`[data-stype="${type}"][data-sf="species"][data-sidx="${idx}"]`);
+      startDictation(btn, null, ta);
+    });
+  });
+}
+
+// ── SURFACE SAMPLES ──
+function renderSurface() {
+  const samples = state.surfaceSamples;
+  return `
+  <h2 class="page-title">Surface Samples</h2>
+  <p class="page-sub">Tape lifts, swabs, or other surface samples submitted to the lab.</p>
+  ${state.environment.tools.surface ? '' : '<div style="background:#FEF5E7;border:1px solid #F5D9A3;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#8a6010;">⚠ Surface sampling was not checked in Environment & Tools. Enable it there if surface samples were collected.</div>'}
+  <div id="surface-container">
+    ${samples.map((s,i) => renderSurfaceCard(s, i)).join('')}
+  </div>
+  <button class="add-btn primary" id="addSurfBtn" style="margin-top:4px;">+ Add Surface Sample</button>`;
+}
+
+function renderSurfaceCard(s, idx) {
+  return `
+  <div class="sample-row" data-sidx="${idx}" data-stype="surface">
+    <div class="sample-head">
+      <span class="sample-type-badge badge-interior">🧫 Surface Sample ${idx + 1}</span>
+      <button class="sample-del" data-sdel="${idx}" data-stype="surface">×</button>
+    </div>
+    <div class="form-2col">
+      <div class="form-row"><label>Sample ID</label><input value="${esc(s.sampleId||'')}" data-sf="sampleId" data-sidx="${idx}" data-stype="surface" placeholder="1"></div>
+      <div class="form-row"><label>Sample Type</label>
+        <select data-sf="sampleType" data-sidx="${idx}" data-stype="surface">
+          ${['Tape Lift','Swab','Bulk','Other'].map(t=>`<option ${s.sampleType===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-row"><label>Location / Substrate</label><input value="${esc(s.location||'')}" data-sf="location" data-sidx="${idx}" data-stype="surface" placeholder="Side Attic — Wood framing"></div>
+    <div class="form-row">
+      <label>Lab Findings</label>
+      <div class="mic-row">
+        <textarea data-sf="findings" data-sidx="${idx}" data-stype="surface" placeholder="Basidiospores (background); Cladosporium (background). No fungal growth detected.">${esc(s.findings||'')}</textarea>
+        <button class="mic-btn" data-smic="${idx}" data-stype="surface">🎤</button>
+      </div>
+    </div>
+    <div class="form-row"><label>Assessment</label>
+      <select data-sf="assessment" data-sidx="${idx}" data-stype="surface">
+        ${['Normal — Background Deposition','WDI Species Detected','Active Fungal Growth','Elevated — Further Evaluation Needed'].map(a=>`<option ${s.assessment===a?'selected':''}>${a}</option>`).join('')}
+      </select>
+    </div>
+  </div>`;
+}
+
+function wireSurface() {
+  document.getElementById('addSurfBtn').addEventListener('click', () => {
+    state.surfaceSamples.push({ id: newUid(), sampleId:'', sampleType:'Swab', location:'', findings:'', assessment:'Normal — Background Deposition' });
+    save(); renderMain();
+  });
+  wireSampleFields('surface');
+}
+
+// ═══════════════════════════════════════════
+//  EXPORT — generates the Claude Project prompt
+// ═══════════════════════════════════════════
+function buildExport() {
+  const g = state.general;
+  const b = state.building;
+  const e = state.environment;
+  const t = e.tools;
+  const lines = [];
+
+  const L = (label, val) => { if (val) lines.push(`${label}: ${val}`); };
+
+  lines.push('MOLD INSPECTION FIELD DATA');
+  lines.push('Insight Environmental Building Consultants LLC');
+  lines.push('Steve Ramos, CMC #1411011 | CAC-17-6062');
+  lines.push('='.repeat(50));
+  lines.push('');
+
+  // General
+  lines.push('── GENERAL INFORMATION ──');
+  L('Property address', g.address);
+  L('Client', g.client);
+  L('Occupancy', g.occupancy);
+  L('Inspection purpose', g.purpose === 'Other' ? g.purposeOther : g.purpose);
+  L('Inspection date', formatDate(g.inspectionDate));
+  L('Report date', g.reportDate ? formatDate(g.reportDate) : formatDate(tomorrow(g.inspectionDate)));
+  lines.push('');
+
+  // Lab
+  if (g.labNumber || g.analyst) {
+    lines.push('── LAB INFORMATION ──');
+    lines.push('Laboratory: Sporecyte / Techcyte, Inc. (PJLA Accreditation #128180)');
+    L('Lab report number', g.labNumber);
+    L('Analyst', g.analyst);
+    L('Approved by', g.approver);
+    const sampleCount = state.airSamples.length + state.surfaceSamples.length;
+    if (sampleCount) lines.push(`Total samples: ${sampleCount} (${state.airSamples.length} air + ${state.surfaceSamples.length} surface)`);
+    lines.push('');
+  }
+
+  // Building
+  lines.push('── BUILDING DESCRIPTION ──');
+  L('Construction', b.construction);
+  L('Foundation', b.foundation);
+  L('Crawlspace', b.crawlspaceDetails);
+  L('Roofing', b.roofing);
+  L('Lot', b.lot);
+  L('Interior finishes', b.finishes);
+  L('HVAC', b.hvac);
+  L('Configuration', b.levels);
+  L('Room breakdown', b.config);
+  lines.push('');
+
+  // Environment
+  lines.push('── ENVIRONMENTAL CONDITIONS ──');
+  L('Interior temperature', e.tempF ? e.tempF + '°F' : '');
+  L('Interior relative humidity', e.rhPct ? e.rhPct + '%' : '');
+  L('Ground/soil conditions', e.groundConditions);
+  lines.push('');
+
+  // Tools
+  lines.push('── TOOLS USED ──');
+  if (t.air) lines.push('✓ Air sampling (spore trap cassettes)');
+  if (t.surface) lines.push('✓ Surface sampling');
+  if (t.moisture) lines.push('✓ Moisture meter');
+  if (t.ir) lines.push('✓ Infrared (IR) camera');
+  if (!t.air && !t.surface && !t.moisture && !t.ir) lines.push('None specified');
+  lines.push('');
+
+  // Visual inspection
+  if (state.rooms.length) {
+    lines.push('── VISUAL INSPECTION FINDINGS ──');
+    state.rooms.forEach(room => {
+      lines.push('');
+      lines.push(`Area: ${room.name || 'Unnamed Room'}`);
+      const flags = room.flags || {};
+      const activeFlags = VISUAL_FLAGS.filter(f => flags[f.key]).map(f => f.label);
+      if (activeFlags.length) lines.push('Conditions observed: ' + activeFlags.join(', '));
+      if (room.moisture) lines.push('Moisture readings: ' + room.moisture);
+      if (room.notes) lines.push('Notes: ' + room.notes);
+      if (!activeFlags.length && !room.notes) lines.push('Clean and dry, no findings.');
+    });
+    lines.push('');
+  }
+
+  // Air samples
+  if (state.airSamples.length) {
+    lines.push('── AIR SAMPLE RESULTS ──');
+    lines.push('(Analysis method: 1-SOP-3537, Analytical sensitivity: 13 spores/m³, 75L per cassette)');
+    lines.push('');
+    const outdoor = state.airSamples.filter(s => s.isOutdoor);
+    const interior = state.airSamples.filter(s => !s.isOutdoor);
+    if (outdoor.length) {
+      lines.push('OUTDOOR CONTROL SAMPLES:');
+      outdoor.forEach(s => {
+        lines.push(`  Sample ID: ${s.sampleId || '—'}`);
+        lines.push(`  Location: ${s.location || '—'}`);
+        lines.push(`  Total: ${s.total || '—'} spores/m³`);
+        if (s.species) lines.push(`  Species: ${s.species}`);
+        lines.push('');
+      });
+    }
+    if (interior.length) {
+      lines.push('INTERIOR SAMPLES:');
+      interior.forEach(s => {
+        const isWDI = detectWDI(s.species || '');
+        lines.push(`  Sample ID: ${s.sampleId || '—'}`);
+        lines.push(`  Location: ${s.location || '—'}`);
+        lines.push(`  Level: ${s.level || '—'}`);
+        lines.push(`  Total: ${s.total || '—'} spores/m³`);
+        if (s.species) lines.push(`  Species: ${s.species}`);
+        if (isWDI) lines.push(`  *** WDI DETECTED: ${getWDI(s.species || '')} ***`);
+        lines.push('');
+      });
+    }
+  }
+
+  // Surface samples
+  if (state.surfaceSamples.length) {
+    lines.push('── SURFACE SAMPLE RESULTS ──');
+    lines.push('');
+    state.surfaceSamples.forEach((s, i) => {
+      lines.push(`Sample ${i + 1}:`);
+      lines.push(`  Sample ID: ${s.sampleId || i + 1}`);
+      lines.push(`  Type: ${s.sampleType || 'Swab'}`);
+      lines.push(`  Location/Substrate: ${s.location || '—'}`);
+      lines.push(`  Lab findings: ${s.findings || '—'}`);
+      lines.push(`  Assessment: ${s.assessment || '—'}`);
+      lines.push('');
+    });
+  }
+
+  lines.push('='.repeat(50));
+  lines.push('END OF FIELD DATA — Generate the complete mold inspection report .docx per the system prompt instructions.');
+
+  return lines.join('\n');
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  if (!y || !m || !d) return iso;
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `${months[parseInt(m,10)-1]} ${parseInt(d,10)}, ${y}`;
+}
+function tomorrow(iso) {
+  if (!iso) return '';
+  const d = new Date(iso + 'T12:00:00');
+  d.setDate(d.getDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+// ═══════════════════════════════════════════
+//  WIRE HELPERS
+// ═══════════════════════════════════════════
+function wire(id, section, field) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => { state[section][field] = el.value; save(); updateCounts(); });
+  el.addEventListener('change', () => { state[section][field] = el.value; save(); updateCounts(); });
+}
+function wireDeep(id, section, field) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('input', () => { state[section][field] = el.value; save(); updateCounts(); });
+  el.addEventListener('change', () => { state[section][field] = el.value; save(); updateCounts(); });
+}
+
+// ═══════════════════════════════════════════
+//  SPEECH
+// ═══════════════════════════════════════════
+function startDictation(btn, inputId, targetEl) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { toast('Speech recognition not supported'); return; }
+  if (currentRec && currentRecBtn === btn) {
+    try { currentRec.stop(); } catch(e) {} return;
+  }
+  if (currentRec) { try { currentRec.stop(); } catch(e) {} }
+  const target = targetEl || (inputId ? document.getElementById(inputId) : null);
+  if (!target) return;
+  const rec = new SR();
+  rec.lang = 'en-US'; rec.continuous = false; rec.interimResults = false;
+  btn.classList.add('listening');
+  currentRec = rec; currentRecBtn = btn;
+  rec.onresult = ev => {
+    let said = '';
+    for (const r of ev.results) said += r[0].transcript;
+    const cur = (target.value || '').trimEnd();
+    target.value = cur ? cur + ' ' + said : said;
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  rec.onerror = () => toast('Mic error');
+  rec.onend = () => { btn.classList.remove('listening'); currentRec = null; currentRecBtn = null; };
+  try { rec.start(); toast('🎤 Listening...'); } catch(e) { btn.classList.remove('listening'); }
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  load();
+
+  document.querySelectorAll('.sb-item').forEach(el => {
+    el.addEventListener('click', () => {
+      currentSection = el.dataset.sec;
+      renderMain();
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sbOverlay').classList.remove('open');
+      window.scrollTo(0,0);
+    });
+  });
+
+  document.getElementById('menuBtn').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sbOverlay').classList.toggle('open');
+  });
+  document.getElementById('sbOverlay').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sbOverlay').classList.remove('open');
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    document.getElementById('exportText').value = buildExport();
+    document.getElementById('exportModal').classList.add('active');
+  });
+  document.getElementById('exportClose').addEventListener('click', () =>
+    document.getElementById('exportModal').classList.remove('active'));
+  document.getElementById('copyBtn').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(document.getElementById('exportText').value); toast('Copied!'); }
+    catch(e) { const ta = document.getElementById('exportText'); ta.select(); document.execCommand('copy'); toast('Copied'); }
+  });
+  document.getElementById('dlTxtBtn').addEventListener('click', () => {
+    const text = document.getElementById('exportText').value;
+    const addr = (state.general.address || 'mold').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `${addr}_mold_field_notes.txt`; a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  document.getElementById('menuMore').addEventListener('click', () =>
+    document.getElementById('moreModal').classList.add('active'));
+  document.getElementById('moreClose').addEventListener('click', () =>
+    document.getElementById('moreModal').classList.remove('active'));
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    const addr = (state.general.address || 'mold').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `${addr}_mold_session.json`; a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Session saved');
+  });
+
+  const loadFile = document.getElementById('loadFile');
+  document.getElementById('loadBtn').addEventListener('click', () => loadFile.click());
+  loadFile.addEventListener('change', ev => {
+    const file = ev.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const p = JSON.parse(reader.result);
+        if (p && p.general) {
+          state.general    = Object.assign(createEmptyState().general, p.general || {});
+          state.building   = Object.assign(createEmptyState().building, p.building || {});
+          state.environment = Object.assign(createEmptyState().environment, p.environment || {});
+          state.environment.tools = Object.assign({air:false,surface:false,moisture:false,ir:false}, (p.environment||{}).tools||{});
+          state.rooms = p.rooms || [];
+          state.airSamples = p.airSamples || [];
+          state.surfaceSamples = p.surfaceSamples || [];
+          save(); renderMain();
+          document.getElementById('moreModal').classList.remove('active');
+          toast('Session loaded');
+        } else { toast('Invalid session file'); }
+      } catch(e) { toast('Could not read file'); }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    if (!confirm('Clear all data? This cannot be undone.')) return;
+    state = createEmptyState(); save(); currentSection = 'GENERAL'; renderMain();
+    document.getElementById('moreModal').classList.remove('active');
+    toast('Data cleared');
+  });
+
+  document.querySelectorAll('.modal-back').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+  });
+
+  renderMain();
+});
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('../sw.js', { scope: '../' })
+      .catch(err => console.warn('SW failed:', err));
+  });
+}
+</script>
+</body>
+</html>
