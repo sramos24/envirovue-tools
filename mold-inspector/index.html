@@ -346,6 +346,153 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 .btn.primary { background: var(--teal); color: #fff; border-color: var(--teal); }
 .btn.danger  { color: #c53030; border-color: #f2c2c2; }
 
+/* ── CONDITION BUTTONS ── */
+.condition-row {
+  display: flex; gap: 6px; margin-bottom: 10px; align-items: center;
+}
+.condition-row label {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  white-space: nowrap; margin-right: 4px;
+}
+.cond-btn {
+  flex: 1; padding: 8px 4px; border-radius: 8px;
+  border: 2px solid var(--border); background: #fff;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  text-align: center; transition: all 0.15s; color: var(--muted);
+}
+.cond-btn:active { transform: scale(0.96); }
+.cond-btn.c1.active { border-color: var(--c1-brd); background: var(--c1-bg); color: #205720; }
+.cond-btn.c2.active { border-color: var(--c2-brd); background: var(--c2-bg); color: #6b3310; }
+.cond-btn.c3.active { border-color: var(--c3-brd); background: var(--wdi-bg); color: var(--wdi-txt); }
+
+.room-card.cond-2 { border-left: 4px solid var(--c2-brd); }
+.room-card.cond-3 { border-left: 4px solid var(--c3-brd); }
+
+.remediation-section {
+  display: none; margin-top: 10px;
+  padding: 10px 12px;
+  background: #fff8f5; border: 1px solid var(--c2-brd);
+  border-radius: var(--radius-sm);
+}
+.remediation-section.show { display: block; }
+.remediation-section.cond3 { background: #fff5f5; border-color: var(--c3-brd); }
+.remediation-section label {
+  font-size: 11px; font-weight: 700; color: var(--c2-brd);
+  text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 6px;
+}
+.remediation-section.cond3 label { color: var(--c3-brd); }
+.remediation-section textarea {
+  width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 8px 10px; font-size: 14px; resize: vertical; min-height: 60px; line-height: 1.4;
+}
+.remediation-section textarea:focus { outline: none; border-color: var(--c2-brd); }
+
+/* ── THUMBNAIL STRIP ── */
+.thumb-strip {
+  display: flex; gap: 6px; margin-top: 8px; overflow-x: auto; padding: 2px 0;
+  -webkit-overflow-scrolling: touch;
+}
+.thumb-strip:empty { display: none; }
+.thumb-item {
+  position: relative; flex-shrink: 0;
+  width: 72px; height: 72px;
+  border-radius: 6px; overflow: hidden;
+  border: 2px solid var(--border); cursor: pointer;
+}
+.thumb-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb-remove {
+  position: absolute; top: 2px; right: 2px;
+  background: rgba(0,0,0,0.65); color: #fff;
+  border: none; border-radius: 50%; width: 20px; height: 20px;
+  font-size: 12px; line-height: 20px; text-align: center; cursor: pointer;
+  display: none;
+}
+.thumb-item:hover .thumb-remove,
+.thumb-item:active .thumb-remove { display: block; }
+
+/* ── PHOTO PICKER OVERLAY ── */
+.photo-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.88); z-index: 500; flex-direction: column;
+}
+.photo-overlay.active { display: flex; }
+.photo-overlay-head {
+  background: var(--teal); padding: 12px 16px;
+  padding-top: calc(12px + env(safe-area-inset-top));
+  display: flex; align-items: center; gap: 12px;
+  color: #fff; flex-shrink: 0;
+}
+.photo-overlay-title { flex: 1; font-size: 15px; font-weight: 600; }
+.photo-overlay-count { font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 600; }
+.photo-overlay-cancel {
+  background: rgba(255,255,255,0.15); border: none; color: #fff;
+  padding: 7px 14px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;
+}
+.photo-overlay-body {
+  flex: 1; overflow-y: auto; padding: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+.picker-item {
+  position: relative; border-radius: 8px; overflow: hidden;
+  aspect-ratio: 1; cursor: pointer;
+  border: 3px solid transparent; transition: border-color 0.15s;
+}
+.picker-item.selected { border-color: #34d058; }
+.picker-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.picker-check {
+  position: absolute; top: 6px; right: 6px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(0,0,0,0.4); border: 2px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 14px; font-weight: 700; transition: all 0.15s;
+}
+.picker-item.selected .picker-check { background: #34d058; border-color: #34d058; }
+.picker-order {
+  position: absolute; bottom: 4px; left: 4px;
+  background: rgba(0,0,0,0.6); color: #fff;
+  font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; display: none;
+}
+.picker-item.selected .picker-order { display: block; }
+.picker-fname {
+  position: absolute; bottom: 4px; right: 4px;
+  background: rgba(0,0,0,0.6); color: #ddd;
+  font-size: 9px; padding: 2px 5px; border-radius: 4px; font-family: monospace;
+  max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.photo-overlay-foot {
+  background: var(--teal); padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+}
+.picker-source-btns { display: flex; gap: 8px; }
+.picker-source-btn {
+  background: rgba(255,255,255,0.15); border: none; color: #fff;
+  padding: 8px 14px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;
+}
+.picker-source-btn:active { background: rgba(255,255,255,0.25); }
+.picker-save-btn {
+  background: #34d058; color: #fff; border: none;
+  padding: 10px 22px; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.picker-save-btn:disabled { opacity: 0.4; cursor: default; }
+.picker-save-btn:active:not(:disabled) { transform: scale(0.97); }
+
+.photo-add-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 12px; background: var(--teal-lt);
+  border: 1.5px solid var(--teal); border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 600; color: var(--teal);
+  cursor: pointer; transition: all 0.15s;
+}
+.photo-add-btn:active { transform: scale(0.96); }
+
 /* ── TOAST ── */
 .toast {
   position: fixed; bottom: 20px; left: 50%;
@@ -403,12 +550,32 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
     <div class="sb-item" data-sec="ENVIRONMENT">🌡 <span>Environment & Tools</span><span class="sb-count" id="cnt-ENVIRONMENT">—</span></div>
     <div class="sb-label">Findings</div>
     <div class="sb-item" data-sec="VISUAL">🔍 <span>Visual Inspection</span><span class="sb-count" id="cnt-VISUAL">0</span></div>
-    <div class="sb-label">Lab Results</div>
-    <div class="sb-item" data-sec="AIR">💨 <span>Air Samples</span><span class="sb-count" id="cnt-AIR">0</span></div>
-    <div class="sb-item" data-sec="SURFACE">🧫 <span>Surface Samples</span><span class="sb-count" id="cnt-SURFACE">0</span></div>
+    <div class="sb-label">Lab</div>
+    <div class="sb-item" data-sec="LABNOTES">🧪 <span>Lab Notes</span><span class="sb-count" id="cnt-LABNOTES">—</span></div>
   </aside>
 
   <main class="main" id="main"></main>
+</div>
+
+<!-- Photo Picker Overlay -->
+<div class="photo-overlay" id="photoOverlay">
+  <div class="photo-overlay-head">
+    <button class="photo-overlay-cancel" id="pickerCancel">Cancel</button>
+    <div class="photo-overlay-title" id="pickerTitle">Select Photos</div>
+    <div class="photo-overlay-count" id="pickerCount">0 selected</div>
+  </div>
+  <div class="photo-overlay-body">
+    <div class="picker-grid" id="pickerGrid"></div>
+  </div>
+  <div class="photo-overlay-foot">
+    <div class="picker-source-btns">
+      <button class="picker-source-btn" id="pickerCamera">📸 Camera</button>
+      <button class="picker-source-btn" id="pickerLibrary">🖼 Library</button>
+      <input type="file" id="pickerFileCamera" accept="image/*" capture="environment" style="display:none">
+      <input type="file" id="pickerFileLibrary" accept="image/*" multiple style="display:none">
+    </div>
+    <button class="picker-save-btn" id="pickerSave" disabled>Attach (0)</button>
+  </div>
 </div>
 
 <!-- Export Modal -->
@@ -459,7 +626,17 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
 //  CONSTANTS
 // ═══════════════════════════════════════════
 const STORAGE_KEY = 'insight_mold_inspector_v1';
-const SECTIONS = ['GENERAL','BUILDING','ENVIRONMENT','VISUAL','AIR','SURFACE'];
+const SECTIONS = ['GENERAL','BUILDING','ENVIRONMENT','VISUAL','LABNOTES'];
+
+const IDB_NAME  = 'insight_mold_photos_v1';
+const IDB_STORE = 'photos';
+const MAX_PHOTO_W = 1920;
+const PHOTO_QUALITY = 0.75;
+
+let idb = null;
+let pickerRoomId   = null;
+let pickerPool     = [];
+let pickerNextPoolId = 1;
 
 const WDI_SPECIES = ['Chaetomium','Fusarium','Stachybotrys','Stachybotrys chartarum','Trichoderma','Ulocladium','Wallemia','Gliomastix'];
 
@@ -501,23 +678,18 @@ function createEmptyState() {
       address: '', client: '', occupancy: '',
       purpose: '', purposeOther: '',
       inspectionDate: new Date().toISOString().slice(0,10),
-      reportDate: '',
-      labNumber: '', analyst: '', approver: ''
+      reportDate: '', labNumber: '', analyst: '', approver: ''
     },
     building: {
-      construction: 'Wood frame',
-      foundation: '', crawlspaceDetails: '',
-      roofing: '', lot: '',
-      finishes: '', hvac: '',
-      config: '', levels: ''
+      construction: 'Wood frame', foundation: '', crawlspaceDetails: '',
+      roofing: '', lot: '', finishes: '', hvac: '', config: '', levels: ''
     },
     environment: {
       tempF: '', rhPct: '', groundConditions: '',
       tools: { air: false, surface: false, moisture: false, ir: false }
     },
     rooms: [],
-    airSamples: [],
-    surfaceSamples: []
+    labNotes: { general: '', wdiNotes: '', sampleNotes: '', recommendations: '' }
   };
 }
 
@@ -535,14 +707,12 @@ function load() {
     if (!raw) return;
     const p = JSON.parse(raw);
     if (p && p.general) {
-      // Merge to ensure all keys present
-      state.general    = Object.assign(createEmptyState().general, p.general || {});
-      state.building   = Object.assign(createEmptyState().building, p.building || {});
+      state.general     = Object.assign(createEmptyState().general, p.general || {});
+      state.building    = Object.assign(createEmptyState().building, p.building || {});
       state.environment = Object.assign(createEmptyState().environment, p.environment || {});
       state.environment.tools = Object.assign({air:false,surface:false,moisture:false,ir:false}, (p.environment||{}).tools || {});
-      state.rooms = p.rooms || [];
-      state.airSamples = p.airSamples || [];
-      state.surfaceSamples = p.surfaceSamples || [];
+      state.rooms    = p.rooms || [];
+      state.labNotes = Object.assign(createEmptyState().labNotes, p.labNotes || {});
     }
   } catch(e) {}
 }
@@ -556,19 +726,18 @@ function renderMain() {
   document.querySelectorAll('.sb-item').forEach(i => i.classList.toggle('active', i.dataset.sec === currentSection));
   updateCounts();
   switch(currentSection) {
-    case 'GENERAL':     el.innerHTML = renderGeneral(); wireGeneral(); break;
-    case 'BUILDING':    el.innerHTML = renderBuilding(); wireBuilding(); break;
+    case 'GENERAL':     el.innerHTML = renderGeneral();     wireGeneral(); break;
+    case 'BUILDING':    el.innerHTML = renderBuilding();    wireBuilding(); break;
     case 'ENVIRONMENT': el.innerHTML = renderEnvironment(); wireEnvironment(); break;
-    case 'VISUAL':      el.innerHTML = renderVisual(); wireVisual(); break;
-    case 'AIR':         el.innerHTML = renderAir(); wireAir(); break;
-    case 'SURFACE':     el.innerHTML = renderSurface(); wireSurface(); break;
+    case 'VISUAL':      el.innerHTML = renderVisual();      wireVisual(); break;
+    case 'LABNOTES':    el.innerHTML = renderLabNotes();    wireLabNotes(); break;
   }
 }
 
 function secLabel(s) {
   return {GENERAL:'General Information',BUILDING:'Building Description',
           ENVIRONMENT:'Environment & Tools',VISUAL:'Visual Inspection',
-          AIR:'Air Samples',SURFACE:'Surface Samples'}[s] || s;
+          LABNOTES:'Lab Notes & Interpretation'}[s] || s;
 }
 
 function updateCounts() {
@@ -576,14 +745,13 @@ function updateCounts() {
   document.getElementById('cnt-BUILDING').textContent  = state.building.construction ? '✓' : '—';
   document.getElementById('cnt-ENVIRONMENT').textContent = state.environment.tempF ? '✓' : '—';
   document.getElementById('cnt-VISUAL').textContent    = state.rooms.length;
-  document.getElementById('cnt-AIR').textContent       = state.airSamples.length;
-  document.getElementById('cnt-SURFACE').textContent   = state.surfaceSamples.length;
+  document.getElementById('cnt-LABNOTES').textContent  = state.labNotes.general ? '✓' : '—';
   document.querySelectorAll('.sb-item').forEach(el => {
     const cnt = document.getElementById('cnt-' + el.dataset.sec);
     if (!cnt) return;
     const v = cnt.textContent;
-    const hasItems = !isNaN(parseInt(v)) && parseInt(v) > 0;
-    el.classList.toggle('has-items', hasItems || v === '✓');
+    const hasItems = (!isNaN(parseInt(v)) && parseInt(v) > 0) || v === '✓';
+    el.classList.toggle('has-items', hasItems);
   });
 }
 
@@ -817,51 +985,90 @@ function renderVisual() {
 function renderRoomCard(room, idx) {
   const collapsed = room.collapsed !== false;
   const flags = room.flags || {};
+  const cond = room.condition || '';
+  const photos = room.attachedPhotos || [];
   const flagHtml = VISUAL_FLAGS.map(f =>
     `<button class="ftoggle ${flags[f.key]?'active':''}${f.warn&&flags[f.key]?' warn':''}" data-flag="${f.key}" data-ridx="${idx}">${f.label}</button>`
   ).join('');
 
   const hasIssue = VISUAL_FLAGS.filter(f => f.warn).some(f => flags[f.key]);
+  const condClass = cond === '2' ? 'cond-2' : cond === '3' ? 'cond-3' : '';
+
+  const thumbsHtml = photos.map(p =>
+    `<div class="thumb-item">
+       <img src="${p.thumb||p.src}" alt="" loading="lazy">
+       <button class="thumb-remove" data-remove-photo="${p.id}" data-ridx="${idx}">×</button>
+     </div>`
+  ).join('');
+
+  const remClass = (cond === '2' || cond === '3') ? 'show' : '';
+  const remCond3 = cond === '3' ? 'cond3' : '';
 
   return `
-  <div class="room-card ${hasIssue?'border-wdi':''}" data-ridx="${idx}">
+  <div class="room-card ${condClass}" data-ridx="${idx}">
     <div class="room-head">
       <input class="room-name-input" value="${esc(room.name||'')}" placeholder="Room name" data-rname="${idx}">
-      ${hasIssue?'<span style="color:var(--wdi-brd);font-size:13px;font-weight:700;">⚠ Issue</span>':''}
+      ${cond ? `<span class="sample-type-badge ${cond==='1'?'badge-interior':cond==='2'?'badge-wdi':'badge-wdi'}" style="${cond==='1'?'background:var(--c1-bg);color:#205720':cond==='2'?'background:var(--c2-bg);color:#6b3310':'background:var(--wdi-bg);color:var(--wdi-txt)'}">C${cond}</span>` : ''}
+      ${hasIssue?'<span style="color:var(--wdi-brd);font-size:12px;font-weight:700;">⚠</span>':''}
       <button class="room-toggle ${collapsed?'':'open'}" data-rtoggle="${idx}">▼</button>
       <button class="room-del" data-rdel="${idx}">×</button>
     </div>
     <div class="room-body ${collapsed?'collapsed':''}" id="rb-${idx}">
-      <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">Flag conditions observed:</p>
+
+      <!-- Condition assignment -->
+      <div class="condition-row">
+        <label>Condition</label>
+        <button class="cond-btn c1 ${cond==='1'?'active':''}" data-cond="1" data-ridx="${idx}">C1 Normal</button>
+        <button class="cond-btn c2 ${cond==='2'?'active':''}" data-cond="2" data-ridx="${idx}">C2 Settled</button>
+        <button class="cond-btn c3 ${cond==='3'?'active':''}" data-cond="3" data-ridx="${idx}">C3 Growth</button>
+      </div>
+
+      <!-- Remediation notes — shown for C2/C3 -->
+      <div class="remediation-section ${remClass} ${remCond3}" id="rem-${idx}">
+        <label>⚠ Remediation Notes</label>
+        <div class="mic-row">
+          <textarea data-rfield="remediation" data-ridx="${idx}" placeholder="Describe remediation scope, affected materials, affected area size, recommended protocol...">${esc(room.remediation||'')}</textarea>
+          <button class="mic-btn" data-rmic-rem="${idx}">🎤</button>
+        </div>
+      </div>
+
+      <!-- Observation flags -->
+      <p style="font-size:12px;color:var(--muted);margin:10px 0 6px;">Flag conditions observed:</p>
       <div class="finding-toggles">${flagHtml}</div>
-      <div class="form-row" style="margin-top:4px;">
+
+      <div class="form-row" style="margin-top:8px;">
         <label>Moisture Reading</label>
         <input value="${esc(room.moisture||'')}" data-rfield="moisture" data-ridx="${idx}" placeholder="e.g. 8–12% normal, or 22% elevated at south wall">
       </div>
       <div class="form-row">
         <label>Observations / Notes</label>
         <div class="mic-row">
-          <textarea data-rfield="notes" data-ridx="${idx}" placeholder="Describe visible conditions, surfaces inspected, any notable findings...">${esc(room.notes||'')}</textarea>
+          <textarea data-rfield="notes" data-ridx="${idx}" placeholder="Describe surfaces inspected, visible conditions, locations, extent...">${esc(room.notes||'')}</textarea>
           <button class="mic-btn" data-rmic="${idx}">🎤</button>
         </div>
       </div>
+
+      <!-- Photos -->
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px;">
+        <button class="photo-add-btn" data-open-picker="${idx}">
+          📷 ${photos.length ? photos.length + ' photo' + (photos.length>1?'s':'') : 'Add photos'}
+        </button>
+        ${photos.length ? `<span style="font-size:12px;color:var(--muted);">${photos.length} attached</span>` : ''}
+      </div>
+      <div class="thumb-strip">${thumbsHtml}</div>
+
     </div>
   </div>`;
 }
 
 function wireVisual() {
-  // Quick-add
   document.querySelectorAll('[data-quick-room]').forEach(btn => {
     btn.addEventListener('click', () => addRoom(btn.dataset.quickRoom));
   });
   document.getElementById('addRoomBtn').addEventListener('click', () => addRoom(''));
 
-  // Room events
   document.querySelectorAll('[data-rname]').forEach(inp => {
-    inp.addEventListener('input', () => {
-      const i = parseInt(inp.dataset.rname);
-      state.rooms[i].name = inp.value; save();
-    });
+    inp.addEventListener('input', () => { state.rooms[parseInt(inp.dataset.rname)].name = inp.value; save(); });
     inp.addEventListener('click', e => e.stopPropagation());
   });
   document.querySelectorAll('[data-rtoggle]').forEach(btn => {
@@ -876,6 +1083,9 @@ function wireVisual() {
     btn.addEventListener('click', () => {
       const i = parseInt(btn.dataset.rdel);
       if (!confirm('Remove this room?')) return;
+      // Clean up photos from IDB
+      const room = state.rooms[i];
+      if (room && room.attachedPhotos) room.attachedPhotos.forEach(p => idbDelete(p.id).catch(()=>{}));
       state.rooms.splice(i, 1); save(); renderMain();
     });
   });
@@ -887,17 +1097,40 @@ function wireVisual() {
       save(); renderMain();
     });
   });
+  // Condition buttons
+  document.querySelectorAll('[data-cond]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.ridx), c = btn.dataset.cond;
+      state.rooms[i].condition = state.rooms[i].condition === c ? '' : c;
+      save(); renderMain();
+    });
+  });
   document.querySelectorAll('[data-rfield]').forEach(el => {
     el.addEventListener('input', () => {
-      const i = parseInt(el.dataset.ridx);
-      state.rooms[i][el.dataset.rfield] = el.value; save();
+      state.rooms[parseInt(el.dataset.ridx)][el.dataset.rfield] = el.value; save();
     });
   });
   document.querySelectorAll('[data-rmic]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const i = parseInt(btn.dataset.rmic);
-      const ta = document.querySelector(`[data-rfield="notes"][data-ridx="${i}"]`);
+      const ta = document.querySelector(`[data-rfield="notes"][data-ridx="${btn.dataset.rmic}"]`);
       startDictation(btn, null, ta);
+    });
+  });
+  document.querySelectorAll('[data-rmic-rem]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ta = document.querySelector(`[data-rfield="remediation"][data-ridx="${btn.dataset.rmicRem}"]`);
+      startDictation(btn, null, ta);
+    });
+  });
+  // Photo picker button
+  document.querySelectorAll('[data-open-picker]').forEach(btn => {
+    btn.addEventListener('click', () => openPhotoPicker(parseInt(btn.dataset.openPicker)));
+  });
+  // Remove individual photo
+  document.querySelectorAll('[data-remove-photo]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      await removePhotoFromRoom(parseInt(btn.dataset.ridx), btn.dataset.removePhoto);
     });
   });
 }
@@ -911,179 +1144,296 @@ function addRoom(name) {
   }, 50);
 }
 
-// ── AIR SAMPLES ──
-function renderAir() {
-  const samples = state.airSamples;
+// ── LAB NOTES ──
+function renderLabNotes() {
+  const L = state.labNotes;
   return `
-  <h2 class="page-title">Air Samples</h2>
-  <p class="page-sub">Enter each air sample. Outdoor controls first, then interior samples.</p>
-  ${state.environment.tools.air ? '' : '<div style="background:#FEF5E7;border:1px solid #F5D9A3;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#8a6010;">⚠ Air sampling was not checked in Environment & Tools. Enable it there if air samples were collected.</div>'}
-  <div id="air-container">
-    ${samples.map((s,i) => renderSampleCard(s, i, 'air')).join('')}
+  <h2 class="page-title">Lab Notes & Interpretation</h2>
+  <p class="page-sub">Key findings from the lab report for inclusion in the report narrative. The actual lab report PDF will be attached to your Claude Project prompt separately.</p>
+  <div class="card">
+    <div class="card-title">🧪 Lab Report Reference</div>
+    <div class="form-2col">
+      <div class="form-row"><label>Lab Report Number</label><input id="ln-labnum" value="${esc(state.general.labNumber)}" placeholder="AQ-52498"></div>
+      <div class="form-row"><label>Outdoor Baseline</label><input id="ln-baseline" value="${esc(L.baseline||'')}" placeholder="e.g. 266–307 spores/m³"></div>
+    </div>
+    <div class="form-row"><label>Outdoor Species Dominant</label>
+      <input id="ln-outdoorsp" value="${esc(L.outdoorSp||'')}" placeholder="e.g. Basidiospores, Ascospores, Cladosporium">
+    </div>
   </div>
-  <div style="display:flex;gap:8px;margin-top:4px;">
-    <button class="add-btn" id="addOutdoorBtn" style="flex:1;">+ Add Outdoor Control</button>
-    <button class="add-btn primary" id="addInteriorBtn" style="flex:1;">+ Add Interior Sample</button>
-  </div>`;
-}
-
-function renderSampleCard(s, idx, type) {
-  const isWDI = detectWDI(s.species || '');
-  const rowClass = s.isOutdoor ? 'outdoor' : (isWDI ? 'wdi' : (parseFloat(s.total) > 0 ? 'normal' : ''));
-  return `
-  <div class="sample-row ${rowClass}" data-sidx="${idx}" data-stype="${type}">
-    <div class="sample-head">
-      <span class="sample-type-badge ${s.isOutdoor?'badge-outdoor':isWDI?'badge-wdi':'badge-interior'}">
-        ${s.isOutdoor ? '🌿 Outdoor Control' : (isWDI ? '⚠ WDI Detected' : '🏠 Interior')}
-      </span>
-      <button class="sample-del" data-sdel="${idx}" data-stype="${type}">×</button>
-    </div>
-    <div class="form-2col">
-      <div class="form-row"><label>Sample ID</label><input value="${esc(s.sampleId||'')}" data-sf="sampleId" data-sidx="${idx}" data-stype="${type}" placeholder="42370054"></div>
-      <div class="form-row"><label>Location</label><input value="${esc(s.location||'')}" data-sf="location" data-sidx="${idx}" data-stype="${type}" placeholder="${s.isOutdoor?'Outdoors #1':'Kitchen'}"></div>
-    </div>
-    <div class="form-2col">
-      <div class="form-row"><label>Total (spores/m³)</label><input type="number" value="${esc(s.total||'')}" data-sf="total" data-sidx="${idx}" data-stype="${type}" placeholder="266"></div>
-      <div class="form-row"><label>Level</label>
-        <select data-sf="level" data-sidx="${idx}" data-stype="${type}">
-          ${['Exterior','Main Level','Lower Level','Upper Level','Basement','Attic'].map(l=>`<option ${s.level===l?'selected':''}>${l}</option>`).join('')}
-        </select>
+  <div class="card">
+    <div class="card-title">⚠ WDI Findings</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Note any Water Damage Indicator species detected. Claude will use this for the WDI interpretation section.</p>
+    <div class="form-row">
+      <label>WDI Species & Locations</label>
+      <div class="mic-row">
+        <textarea id="ln-wdi" placeholder="e.g. Chaetomium 13 spores/m³ in Kitchen (1 spore at sensitivity floor)&#10;Stachybotrys chartarum 27 spores/m³ in Living Room&#10;No WDI detected">${esc(L.wdiNotes)}</textarea>
+        <button class="mic-btn" id="mic-wdi">🎤</button>
       </div>
     </div>
     <div class="form-row">
-      <label>Species Breakdown</label>
+      <label>WDI Interpretation Notes</label>
       <div class="mic-row">
-        <textarea data-sf="species" data-sidx="${idx}" data-stype="${type}" placeholder="Basidiospores 93, Ascospores 93, Cladosporium 67">${esc(s.species||'')}</textarea>
-        <button class="mic-btn" data-smic="${idx}" data-stype="${type}">🎤</button>
+        <textarea id="ln-wdiinterp" placeholder="e.g. Single Chaetomium spore at sensitivity floor — incidental detection, corroborated by prior inspection findings and documented leak history">${esc(L.wdiInterp||'')}</textarea>
+        <button class="mic-btn" id="mic-wdiinterp">🎤</button>
       </div>
     </div>
-    <div class="wdi-warning ${isWDI?'show':''}" id="wdi-${idx}-${type}">
-      ⚠ WDI species detected: ${getWDI(s.species||'')}. This will trigger a WDI finding in the report.
-    </div>
-  </div>`;
-}
-
-function detectWDI(text) {
-  return WDI_SPECIES.some(w => text.toLowerCase().includes(w.toLowerCase()));
-}
-function getWDI(text) {
-  return WDI_SPECIES.filter(w => text.toLowerCase().includes(w.toLowerCase())).join(', ') || 'Unknown';
-}
-
-function wireAir() {
-  document.getElementById('addOutdoorBtn').addEventListener('click', () => {
-    state.airSamples.push({ id: newUid(), isOutdoor: true, sampleId:'', location:'', level:'Exterior', total:'', species:'' });
-    save(); renderMain();
-  });
-  document.getElementById('addInteriorBtn').addEventListener('click', () => {
-    state.airSamples.push({ id: newUid(), isOutdoor: false, sampleId:'', location:'', level:'Main Level', total:'', species:'' });
-    save(); renderMain();
-  });
-  wireSampleFields('air');
-}
-
-function wireSampleFields(type) {
-  const arr = type === 'air' ? state.airSamples : state.surfaceSamples;
-  document.querySelectorAll(`[data-stype="${type}"][data-sf]`).forEach(el => {
-    el.addEventListener('input', () => {
-      const idx = parseInt(el.dataset.sidx);
-      if (arr[idx] !== undefined) {
-        arr[idx][el.dataset.sf] = el.value; save();
-        // Live WDI check
-        if (el.dataset.sf === 'species' && type === 'air') {
-          const wdiEl = document.getElementById(`wdi-${idx}-${type}`);
-          if (wdiEl) {
-            const isWDI = detectWDI(el.value);
-            wdiEl.classList.toggle('show', isWDI);
-            wdiEl.textContent = isWDI ? `⚠ WDI species detected: ${getWDI(el.value)}. This will trigger a WDI finding in the report.` : '';
-          }
-        }
-      }
-    });
-    el.addEventListener('change', () => {
-      const idx = parseInt(el.dataset.sidx);
-      if (arr[idx] !== undefined) { arr[idx][el.dataset.sf] = el.value; save(); }
-    });
-  });
-  document.querySelectorAll(`[data-stype="${type}"][data-sdel]`).forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.sdel);
-      if (!confirm('Remove this sample?')) return;
-      arr.splice(idx, 1); save(); renderMain();
-    });
-  });
-  document.querySelectorAll(`[data-stype="${type}"][data-smic]`).forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.smic);
-      const ta = document.querySelector(`[data-stype="${type}"][data-sf="species"][data-sidx="${idx}"]`);
-      startDictation(btn, null, ta);
-    });
-  });
-}
-
-// ── SURFACE SAMPLES ──
-function renderSurface() {
-  const samples = state.surfaceSamples;
-  return `
-  <h2 class="page-title">Surface Samples</h2>
-  <p class="page-sub">Tape lifts, swabs, or other surface samples submitted to the lab.</p>
-  ${state.environment.tools.surface ? '' : '<div style="background:#FEF5E7;border:1px solid #F5D9A3;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#8a6010;">⚠ Surface sampling was not checked in Environment & Tools. Enable it there if surface samples were collected.</div>'}
-  <div id="surface-container">
-    ${samples.map((s,i) => renderSurfaceCard(s, i)).join('')}
   </div>
-  <button class="add-btn primary" id="addSurfBtn" style="margin-top:4px;">+ Add Surface Sample</button>`;
-}
-
-function renderSurfaceCard(s, idx) {
-  return `
-  <div class="sample-row" data-sidx="${idx}" data-stype="surface">
-    <div class="sample-head">
-      <span class="sample-type-badge badge-interior">🧫 Surface Sample ${idx + 1}</span>
-      <button class="sample-del" data-sdel="${idx}" data-stype="surface">×</button>
-    </div>
-    <div class="form-2col">
-      <div class="form-row"><label>Sample ID</label><input value="${esc(s.sampleId||'')}" data-sf="sampleId" data-sidx="${idx}" data-stype="surface" placeholder="1"></div>
-      <div class="form-row"><label>Sample Type</label>
-        <select data-sf="sampleType" data-sidx="${idx}" data-stype="surface">
-          ${['Tape Lift','Swab','Bulk','Other'].map(t=>`<option ${s.sampleType===t?'selected':''}>${t}</option>`).join('')}
-        </select>
-      </div>
-    </div>
-    <div class="form-row"><label>Location / Substrate</label><input value="${esc(s.location||'')}" data-sf="location" data-sidx="${idx}" data-stype="surface" placeholder="Side Attic — Wood framing"></div>
+  <div class="card">
+    <div class="card-title">📊 Interior Sample Notes</div>
     <div class="form-row">
-      <label>Lab Findings</label>
+      <label>Sample Results Summary</label>
       <div class="mic-row">
-        <textarea data-sf="findings" data-sidx="${idx}" data-stype="surface" placeholder="Basidiospores (background); Cladosporium (background). No fungal growth detected.">${esc(s.findings||'')}</textarea>
-        <button class="mic-btn" data-smic="${idx}" data-stype="surface">🎤</button>
+        <textarea id="ln-samples" placeholder="e.g. Kitchen 53 spores/m³ — Cladosporium 27, Basidiospores 13, Chaetomium 13&#10;Primary Bedroom 53 spores/m³ — Basidiospores 40, Cladosporium 13&#10;Front Bedroom 173 spores/m³ — Asp/Pen 107, Clad 40, Basidio 13&#10;Bedroom Bath 0 spores detected">${esc(L.sampleNotes)}</textarea>
+        <button class="mic-btn" id="mic-samples">🎤</button>
       </div>
     </div>
-    <div class="form-row"><label>Assessment</label>
-      <select data-sf="assessment" data-sidx="${idx}" data-stype="surface">
-        ${['Normal — Background Deposition','WDI Species Detected','Active Fungal Growth','Elevated — Further Evaluation Needed'].map(a=>`<option ${s.assessment===a?'selected':''}>${a}</option>`).join('')}
-      </select>
+    <div class="form-row">
+      <label>Surface Sample Findings (if any)</label>
+      <div class="mic-row">
+        <textarea id="ln-surface" placeholder="e.g. Side Attic swab — Basidiospores (background), Cladosporium (background). No fungal growth detected.">${esc(L.surfaceNotes||'')}</textarea>
+        <button class="mic-btn" id="mic-surface">🎤</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 Special Recommendations</div>
+    <div class="form-row">
+      <div class="mic-row">
+        <textarea id="ln-recs" placeholder="e.g. Invasive investigation recommended for hallway bathroom wall assembly and kitchen ceiling substrates due to Chaetomium detection and documented leak history.">${esc(L.recommendations)}</textarea>
+        <button class="mic-btn" id="mic-recs">🎤</button>
+      </div>
     </div>
   </div>`;
 }
 
-function wireSurface() {
-  document.getElementById('addSurfBtn').addEventListener('click', () => {
-    state.surfaceSamples.push({ id: newUid(), sampleId:'', sampleType:'Swab', location:'', findings:'', assessment:'Normal — Background Deposition' });
-    save(); renderMain();
+function wireLabNotes() {
+  const map = {
+    'ln-wdi': 'wdiNotes', 'ln-wdiinterp': 'wdiInterp',
+    'ln-samples': 'sampleNotes', 'ln-surface': 'surfaceNotes',
+    'ln-recs': 'recommendations', 'ln-baseline': 'baseline',
+    'ln-outdoorsp': 'outdoorSp'
+  };
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => { state.labNotes[map[id]] = el.value; save(); updateCounts(); });
   });
-  wireSampleFields('surface');
+  // Lab number syncs with general
+  const lnEl = document.getElementById('ln-labnum');
+  if (lnEl) lnEl.addEventListener('input', () => { state.general.labNumber = lnEl.value; save(); });
+  // Mic buttons
+  ['wdi','wdiinterp','samples','surface','recs'].forEach(k => {
+    const btn = document.getElementById('mic-' + k);
+    const ta = document.getElementById('ln-' + k) || document.getElementById('ln-' + k.replace('interp','Interp'));
+    if (btn && ta) btn.addEventListener('click', () => startDictation(btn, null, ta));
+  });
+}
+
+// ═══════════════════════════════════════════
+//  INDEXEDDB — photo storage
+// ═══════════════════════════════════════════
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE, { keyPath: 'id' });
+    };
+    req.onsuccess  = e => { idb = e.target.result; resolve(idb); };
+    req.onerror    = e => { console.warn('IDB error', e); reject(e); };
+  });
+}
+function idbPut(obj) {
+  return new Promise((res, rej) => {
+    const tx = idb.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(obj);
+    tx.oncomplete = () => res(); tx.onerror = e => rej(e);
+  });
+}
+function idbGet(id) {
+  return new Promise((res, rej) => {
+    const tx = idb.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(id);
+    req.onsuccess = () => res(req.result || null); req.onerror = e => rej(e);
+  });
+}
+function idbDelete(id) {
+  return new Promise((res, rej) => {
+    const tx = idb.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).delete(id);
+    tx.oncomplete = () => res(); tx.onerror = e => rej(e);
+  });
+}
+function idbGetAll() {
+  return new Promise((res, rej) => {
+    const tx = idb.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).getAll();
+    req.onsuccess = () => res(req.result || []); req.onerror = e => rej(e);
+  });
+}
+function idbClearAll() {
+  return new Promise((res, rej) => {
+    const tx = idb.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).clear();
+    tx.oncomplete = () => res(); tx.onerror = e => rej(e);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  PHOTO PICKER
+// ═══════════════════════════════════════════
+function compressImage(dataUrl, maxW, quality) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(c.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
+function makeThumbnail(dataUrl) {
+  return compressImage(dataUrl, 160, 0.6);
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(new Error('Read failed'));
+    r.readAsDataURL(file);
+  });
+}
+
+function openPhotoPicker(roomIdx) {
+  pickerRoomId = roomIdx;
+  pickerPool   = [];
+  const room   = state.rooms[roomIdx];
+  if (room && room.attachedPhotos) {
+    room.attachedPhotos.forEach(p => {
+      pickerPool.push({ id: p.id, src: p.thumb || '', filename: p.filename, selected: true, existing: true, order: pickerPool.length + 1 });
+    });
+    // Load full images for existing from IDB
+    pickerPool.forEach(async p => {
+      const stored = await idbGet(p.id).catch(() => null);
+      if (stored && stored.src) { p.src = stored.src; renderPickerGrid(); }
+    });
+  }
+  renderPickerGrid();
+  updatePickerCount();
+  document.getElementById('photoOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePhotoPicker() {
+  document.getElementById('photoOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+  pickerRoomId = null; pickerPool = [];
+}
+
+function renderPickerGrid() {
+  const grid = document.getElementById('pickerGrid');
+  if (!pickerPool.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#aaa;">
+      <div style="font-size:40px;margin-bottom:12px;">📷</div>
+      <p style="font-size:14px;">Tap <strong>Camera</strong> to take a photo or <strong>Library</strong> to choose existing photos</p>
+    </div>`;
+    return;
+  }
+  const selected = pickerPool.filter(p => p.selected).sort((a, b) => a.order - b.order);
+  grid.innerHTML = pickerPool.map((p, i) => {
+    const orderNum = p.selected ? selected.indexOf(p) + 1 : 0;
+    const shortName = p.filename ? p.filename.replace(/\.[^.]+$/, '').slice(-10) : '';
+    return `<div class="picker-item ${p.selected?'selected':''}" data-pool-idx="${i}">
+      <img src="${p.src}" alt="" loading="lazy">
+      <div class="picker-check">${p.selected ? '✓' : ''}</div>
+      ${p.selected ? `<div class="picker-order">${orderNum}</div>` : ''}
+      ${shortName ? `<div class="picker-fname">${esc(shortName)}</div>` : ''}
+    </div>`;
+  }).join('');
+  grid.querySelectorAll('.picker-item').forEach(el => {
+    el.addEventListener('click', () => togglePickerItem(parseInt(el.dataset.poolIdx)));
+  });
+}
+
+function togglePickerItem(idx) {
+  const p = pickerPool[idx]; if (!p) return;
+  if (p.selected) {
+    p.selected = false; p.order = 0;
+  } else {
+    p.selected = true;
+    p.order = Math.max(0, ...pickerPool.filter(x => x.selected).map(x => x.order)) + 1;
+  }
+  renderPickerGrid(); updatePickerCount();
+}
+
+function updatePickerCount() {
+  const count = pickerPool.filter(p => p.selected).length;
+  document.getElementById('pickerCount').textContent = count + ' selected';
+  const btn = document.getElementById('pickerSave');
+  btn.disabled = count === 0;
+  btn.textContent = count ? `Attach (${count})` : 'Attach (0)';
+}
+
+async function handlePickerFiles(files) {
+  const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (!arr.length) return;
+  toast('Processing ' + arr.length + ' photo' + (arr.length>1?'s':'') + '...');
+  for (const file of arr) {
+    const raw = await readFileAsDataURL(file);
+    const compressed = await compressImage(raw, MAX_PHOTO_W, PHOTO_QUALITY);
+    const thumb = await makeThumbnail(compressed);
+    const id = 'mph_' + Date.now() + '_' + (pickerNextPoolId++);
+    pickerPool.push({
+      id, src: compressed, thumb, filename: file.name, selected: true, existing: false,
+      order: Math.max(0, ...pickerPool.filter(x => x.selected).map(x => x.order)) + 1
+    });
+  }
+  renderPickerGrid(); updatePickerCount();
+}
+
+async function savePickerSelection() {
+  if (pickerRoomId === null) return;
+  const selected = pickerPool.filter(p => p.selected).sort((a, b) => a.order - b.order);
+  const attachedPhotos = [];
+  for (const p of selected) {
+    const thumb = p.thumb || await makeThumbnail(p.src);
+    await idbPut({ id: p.id, src: p.src, filename: p.filename }).catch(()=>{});
+    attachedPhotos.push({ id: p.id, filename: p.filename, thumb });
+  }
+  // Delete deselected photos from IDB
+  const room = state.rooms[pickerRoomId];
+  if (room && room.attachedPhotos) {
+    for (const old of room.attachedPhotos) {
+      if (!selected.find(s => s.id === old.id)) idbDelete(old.id).catch(()=>{});
+    }
+  }
+  if (room) room.attachedPhotos = attachedPhotos;
+  save(); closePhotoPicker(); renderMain();
+  toast(attachedPhotos.length + ' photo' + (attachedPhotos.length!==1?'s':'') + ' attached');
+}
+
+async function removePhotoFromRoom(roomIdx, photoId) {
+  const room = state.rooms[roomIdx]; if (!room) return;
+  room.attachedPhotos = (room.attachedPhotos || []).filter(p => p.id !== photoId);
+  await idbDelete(photoId).catch(()=>{});
+  save(); renderMain();
 }
 
 // ═══════════════════════════════════════════
 //  EXPORT — generates the Claude Project prompt
 // ═══════════════════════════════════════════
 function buildExport() {
-  const g = state.general;
-  const b = state.building;
-  const e = state.environment;
-  const t = e.tools;
+  const g = state.general, b = state.building, e = state.environment;
+  const t = e.tools, L = state.labNotes;
   const lines = [];
-
-  const L = (label, val) => { if (val) lines.push(`${label}: ${val}`); };
+  const add = (label, val) => { if (val) lines.push(`${label}: ${val}`); };
 
   lines.push('MOLD INSPECTION FIELD DATA');
   lines.push('Insight Environmental Building Consultants LLC');
@@ -1091,122 +1441,104 @@ function buildExport() {
   lines.push('='.repeat(50));
   lines.push('');
 
-  // General
   lines.push('── GENERAL INFORMATION ──');
-  L('Property address', g.address);
-  L('Client', g.client);
-  L('Occupancy', g.occupancy);
-  L('Inspection purpose', g.purpose === 'Other' ? g.purposeOther : g.purpose);
-  L('Inspection date', formatDate(g.inspectionDate));
-  L('Report date', g.reportDate ? formatDate(g.reportDate) : formatDate(tomorrow(g.inspectionDate)));
+  add('Property address', g.address);
+  add('Client', g.client);
+  add('Occupancy', g.occupancy);
+  add('Inspection purpose', g.purpose === 'Other' ? g.purposeOther : g.purpose);
+  add('Inspection date', formatDate(g.inspectionDate));
+  add('Report date', g.reportDate ? formatDate(g.reportDate) : formatDate(tomorrow(g.inspectionDate)));
   lines.push('');
 
-  // Lab
   if (g.labNumber || g.analyst) {
     lines.push('── LAB INFORMATION ──');
     lines.push('Laboratory: Sporecyte / Techcyte, Inc. (PJLA Accreditation #128180)');
-    L('Lab report number', g.labNumber);
-    L('Analyst', g.analyst);
-    L('Approved by', g.approver);
-    const sampleCount = state.airSamples.length + state.surfaceSamples.length;
-    if (sampleCount) lines.push(`Total samples: ${sampleCount} (${state.airSamples.length} air + ${state.surfaceSamples.length} surface)`);
+    add('Lab report number', g.labNumber);
+    add('Analyst', g.analyst);
+    add('Approved by', g.approver);
     lines.push('');
   }
 
-  // Building
   lines.push('── BUILDING DESCRIPTION ──');
-  L('Construction', b.construction);
-  L('Foundation', b.foundation);
-  L('Crawlspace', b.crawlspaceDetails);
-  L('Roofing', b.roofing);
-  L('Lot', b.lot);
-  L('Interior finishes', b.finishes);
-  L('HVAC', b.hvac);
-  L('Configuration', b.levels);
-  L('Room breakdown', b.config);
+  add('Construction', b.construction);
+  add('Foundation', b.foundation);
+  add('Crawlspace', b.crawlspaceDetails);
+  add('Roofing', b.roofing);
+  add('Lot', b.lot);
+  add('Interior finishes', b.finishes);
+  add('HVAC', b.hvac);
+  add('Configuration', b.levels);
+  add('Room breakdown', b.config);
   lines.push('');
 
-  // Environment
   lines.push('── ENVIRONMENTAL CONDITIONS ──');
-  L('Interior temperature', e.tempF ? e.tempF + '°F' : '');
-  L('Interior relative humidity', e.rhPct ? e.rhPct + '%' : '');
-  L('Ground/soil conditions', e.groundConditions);
+  add('Interior temperature', e.tempF ? e.tempF + '°F' : '');
+  add('Interior relative humidity', e.rhPct ? e.rhPct + '%' : '');
+  add('Ground/soil conditions', e.groundConditions);
   lines.push('');
 
-  // Tools
   lines.push('── TOOLS USED ──');
-  if (t.air) lines.push('✓ Air sampling (spore trap cassettes)');
+  if (t.air)     lines.push('✓ Air sampling (spore trap cassettes)');
   if (t.surface) lines.push('✓ Surface sampling');
-  if (t.moisture) lines.push('✓ Moisture meter');
-  if (t.ir) lines.push('✓ Infrared (IR) camera');
+  if (t.moisture)lines.push('✓ Moisture meter');
+  if (t.ir)      lines.push('✓ Infrared (IR) camera');
   if (!t.air && !t.surface && !t.moisture && !t.ir) lines.push('None specified');
   lines.push('');
 
-  // Visual inspection
   if (state.rooms.length) {
     lines.push('── VISUAL INSPECTION FINDINGS ──');
     state.rooms.forEach(room => {
       lines.push('');
       lines.push(`Area: ${room.name || 'Unnamed Room'}`);
+      if (room.condition) lines.push(`IICRC Condition: ${room.condition} (${room.condition==='1'?'Normal Fungal Ecology':room.condition==='2'?'Settled Spores / Elevated Moisture':'Actual Growth'})`);
       const flags = room.flags || {};
       const activeFlags = VISUAL_FLAGS.filter(f => flags[f.key]).map(f => f.label);
       if (activeFlags.length) lines.push('Conditions observed: ' + activeFlags.join(', '));
+      else lines.push('Conditions observed: Clean and dry, no visible mold, water staining, or moisture damage.');
       if (room.moisture) lines.push('Moisture readings: ' + room.moisture);
       if (room.notes) lines.push('Notes: ' + room.notes);
-      if (!activeFlags.length && !room.notes) lines.push('Clean and dry, no findings.');
+      const photoCount = (room.attachedPhotos || []).length;
+      if (photoCount) lines.push(`Photos: ${photoCount} photo${photoCount>1?'s':''} attached to this area`);
+      if (room.remediation && (room.condition === '2' || room.condition === '3')) {
+        lines.push('Remediation notes: ' + room.remediation);
+      }
     });
     lines.push('');
-  }
 
-  // Air samples
-  if (state.airSamples.length) {
-    lines.push('── AIR SAMPLE RESULTS ──');
-    lines.push('(Analysis method: 1-SOP-3537, Analytical sensitivity: 13 spores/m³, 75L per cassette)');
-    lines.push('');
-    const outdoor = state.airSamples.filter(s => s.isOutdoor);
-    const interior = state.airSamples.filter(s => !s.isOutdoor);
-    if (outdoor.length) {
-      lines.push('OUTDOOR CONTROL SAMPLES:');
-      outdoor.forEach(s => {
-        lines.push(`  Sample ID: ${s.sampleId || '—'}`);
-        lines.push(`  Location: ${s.location || '—'}`);
-        lines.push(`  Total: ${s.total || '—'} spores/m³`);
-        if (s.species) lines.push(`  Species: ${s.species}`);
-        lines.push('');
-      });
-    }
-    if (interior.length) {
-      lines.push('INTERIOR SAMPLES:');
-      interior.forEach(s => {
-        const isWDI = detectWDI(s.species || '');
-        lines.push(`  Sample ID: ${s.sampleId || '—'}`);
-        lines.push(`  Location: ${s.location || '—'}`);
-        lines.push(`  Level: ${s.level || '—'}`);
-        lines.push(`  Total: ${s.total || '—'} spores/m³`);
-        if (s.species) lines.push(`  Species: ${s.species}`);
-        if (isWDI) lines.push(`  *** WDI DETECTED: ${getWDI(s.species || '')} ***`);
-        lines.push('');
-      });
-    }
-  }
-
-  // Surface samples
-  if (state.surfaceSamples.length) {
-    lines.push('── SURFACE SAMPLE RESULTS ──');
-    lines.push('');
-    state.surfaceSamples.forEach((s, i) => {
-      lines.push(`Sample ${i + 1}:`);
-      lines.push(`  Sample ID: ${s.sampleId || i + 1}`);
-      lines.push(`  Type: ${s.sampleType || 'Swab'}`);
-      lines.push(`  Location/Substrate: ${s.location || '—'}`);
-      lines.push(`  Lab findings: ${s.findings || '—'}`);
-      lines.push(`  Assessment: ${s.assessment || '—'}`);
+    // Condition summary
+    const c2 = state.rooms.filter(r => r.condition === '2').map(r => r.name).filter(Boolean);
+    const c3 = state.rooms.filter(r => r.condition === '3').map(r => r.name).filter(Boolean);
+    if (c2.length || c3.length) {
+      lines.push('── CONDITION SUMMARY ──');
+      if (c3.length) lines.push(`Condition 3 (Actual Growth): ${c3.join(', ')}`);
+      if (c2.length) lines.push(`Condition 2 (Settled Spores): ${c2.join(', ')}`);
+      const c1 = state.rooms.filter(r => r.condition === '1').map(r => r.name).filter(Boolean);
+      if (c1.length) lines.push(`Condition 1 (Normal): ${c1.join(', ')}`);
       lines.push('');
-    });
+    }
+  }
+
+  if (L.baseline || L.wdiNotes || L.sampleNotes) {
+    lines.push('── LAB RESULTS & INTERPRETATION ──');
+    add('Outdoor baseline', L.baseline);
+    add('Outdoor dominant species', L.outdoorSp);
+    lines.push('');
+    if (L.sampleNotes) { lines.push('Interior sample results:'); lines.push(L.sampleNotes); lines.push(''); }
+    if (L.surfaceNotes) { lines.push('Surface sample results:'); lines.push(L.surfaceNotes); lines.push(''); }
+    if (L.wdiNotes) { lines.push('WDI findings:'); lines.push(L.wdiNotes); lines.push(''); }
+    if (L.wdiInterp) { lines.push('WDI interpretation:'); lines.push(L.wdiInterp); lines.push(''); }
+  }
+
+  if (L.recommendations) {
+    lines.push('── SPECIAL RECOMMENDATIONS ──');
+    lines.push(L.recommendations);
+    lines.push('');
   }
 
   lines.push('='.repeat(50));
-  lines.push('END OF FIELD DATA — Generate the complete mold inspection report .docx per the system prompt instructions.');
+  lines.push('END OF FIELD DATA');
+  lines.push('Generate the complete mold inspection report .docx per the system prompt instructions.');
+  lines.push('Note: The lab report PDF (Chain of Custody and results) will be attached to the prompt separately.');
 
   return lines.join('\n');
 }
@@ -1287,7 +1619,10 @@ function esc(s) {
 // ═══════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Open IndexedDB
+  try { await openIDB(); } catch(e) { console.warn('IndexedDB unavailable'); }
+
   load();
 
   document.querySelectorAll('.sb-item').forEach(el => {
@@ -1367,12 +1702,25 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsText(file);
   });
 
-  document.getElementById('clearBtn').addEventListener('click', () => {
+  document.getElementById('clearBtn').addEventListener('click', async () => {
     if (!confirm('Clear all data? This cannot be undone.')) return;
-    state = createEmptyState(); save(); currentSection = 'GENERAL'; renderMain();
+    state = createEmptyState();
+    await idbClearAll().catch(() => {});
+    save(); currentSection = 'GENERAL'; renderMain();
     document.getElementById('moreModal').classList.remove('active');
     toast('Data cleared');
   });
+
+  // ── Photo picker events ──
+  document.getElementById('pickerCancel').addEventListener('click', closePhotoPicker);
+  document.getElementById('pickerSave').addEventListener('click', savePickerSelection);
+
+  const camInput = document.getElementById('pickerFileCamera');
+  const libInput = document.getElementById('pickerFileLibrary');
+  document.getElementById('pickerCamera').addEventListener('click', () => camInput.click());
+  document.getElementById('pickerLibrary').addEventListener('click', () => libInput.click());
+  camInput.addEventListener('change', e => { handlePickerFiles(e.target.files); camInput.value = ''; });
+  libInput.addEventListener('change', e => { handlePickerFiles(e.target.files); libInput.value = ''; });
 
   document.querySelectorAll('.modal-back').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
