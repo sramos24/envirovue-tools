@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#4a2c8a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EMC COC">
+<script src="../photo-tool/jspdf.min.js"></script>
+<title>EMC Chain of Custody — Insight Environmental</title>
+<style>
+:root {
+  --pu: #4a2c8a; --pu-lt: #f0eaf8; --pu-mid: #7a52c4;
+  --navy: #1F3864; --bg: #EDF1F7; --white: #fff;
+  --border: #c8d4e8; --text: #1a2535; --muted: #6b7e96;
+  --g100: #F1F3F5; --g200: #E2E8F0;
+  --r: 12px; --rs: 8px;
+  --sh: 0 2px 8px rgba(0,0,0,.08); --shl: 0 8px 24px rgba(0,0,0,.15);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html,body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+input,textarea,select,button { font-family: inherit; font-size: inherit; }
+
+/* header */
+.hdr {
+  background: var(--pu); color: #fff;
+  padding: 12px 14px; padding-top: calc(12px + env(safe-area-inset-top));
+  position: sticky; top: 0; z-index: 100; box-shadow: var(--sh);
+  display: flex; align-items: center; gap: 10px;
+}
+.hdr-t { flex: 1; min-width: 0; }
+.hdr-n { font-size: 14px; font-weight: 700; }
+.hdr-s { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 1px; }
+.hdr-btns { display: flex; gap: 6px; }
+.hb { background: rgba(255,255,255,.15); border: none; color: #fff;
+  padding: 7px 12px; border-radius: var(--rs); cursor: pointer;
+  font-size: 13px; font-weight: 500; white-space: nowrap; }
+.hb:active { background: rgba(255,255,255,.3); }
+.hb.pri { background: #fff; color: var(--pu); }
+
+/* main */
+.main { max-width: 860px; margin: 0 auto; padding: 14px; }
+
+/* cards */
+.card { background: #fff; border-radius: var(--r);
+  padding: 14px 16px; box-shadow: var(--sh); margin-bottom: 12px; }
+.cttl { font-size: 12px; font-weight: 700; color: var(--pu);
+  text-transform: uppercase; letter-spacing: .07em;
+  margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+
+/* form */
+.fr { margin-bottom: 10px; }
+.fr:last-child { margin-bottom: 0; }
+.fr label { display: block; font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 3px; }
+.fr input, .fr select {
+  width: 100%; padding: 9px 11px; border: 1px solid var(--border);
+  border-radius: var(--rs); background: #fff; color: var(--text); font-size: 15px; }
+.fr input:focus, .fr select:focus { outline: none; border-color: var(--pu);
+  box-shadow: 0 0 0 2px rgba(74,44,138,.12); }
+.f2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* mic wrap */
+.mw { display: flex; gap: 6px; align-items: flex-start; }
+.mw input, .mw textarea { flex: 1; }
+.mw textarea { width: 100%; padding: 9px 11px; border: 1px solid var(--border);
+  border-radius: var(--rs); font-size: 14px; resize: vertical; min-height: 50px; line-height: 1.4; }
+.mw textarea:focus { outline: none; border-color: var(--pu); box-shadow: 0 0 0 2px rgba(74,44,138,.12); }
+.mb { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+  background: var(--navy); color: #fff; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 14px; margin-top: 1px; }
+.mb.on { background: #c53030; animation: pu 1s infinite; }
+@keyframes pu { 0%,100%{box-shadow:0 0 0 0 rgba(197,48,48,.5)} 50%{box-shadow:0 0 0 8px rgba(197,48,48,0)} }
+
+/* toggles */
+.tg { display: flex; flex-wrap: wrap; gap: 6px; }
+.tb { padding: 8px 14px; border-radius: 20px;
+  border: 2px solid var(--border); background: #fff;
+  font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); transition: all .15s; }
+.tb:active { transform: scale(.96); }
+.tb.sel { border-color: var(--pu); background: var(--pu-lt); color: var(--pu); }
+.tb.solid { background: var(--pu); color: #fff !important; }
+
+/* summary bar */
+.sbar { background: var(--pu); border-radius: var(--rs); padding: 11px 16px;
+  margin-bottom: 12px; color: #fff; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.ss { text-align: center; min-width: 40px; }
+.ssv { font-size: 20px; font-weight: 700; line-height: 1; }
+.ssl { font-size: 10px; opacity: .7; margin-top: 2px; }
+
+/* HA adder */
+.ha-box { background: var(--pu-lt); border: 2px dashed var(--pu-mid); border-radius: var(--rs); padding: 14px; }
+.ha-ttl { font-size: 13px; font-weight: 700; color: var(--pu); margin-bottom: 10px; }
+.ha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.ha-f { }
+.ha-f.full { grid-column: 1 / -1; }
+.ha-f label { display: block; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 3px; }
+.ha-f input { width: 100%; padding: 8px 10px; border: 1px solid var(--border);
+  border-radius: 6px; background: #fff; font-size: 14px; }
+.ha-f input:focus { outline: none; border-color: var(--pu); }
+.ha-photo-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.phbtn { display: flex; align-items: center; gap: 5px; padding: 7px 12px;
+  border-radius: var(--rs); border: 1.5px solid var(--border); background: #fff;
+  font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.phbtn.has { border-color: var(--pu); color: var(--pu); background: var(--pu-lt); }
+.ha-thumb { width: 44px; height: 44px; border-radius: 6px; object-fit: cover;
+  border: 2px solid var(--pu); display: none; }
+.ha-clr { background: none; border: none; color: var(--muted); font-size: 18px;
+  cursor: pointer; display: none; padding: 0 4px; }
+.ha-bot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.cnt-row { display: flex; align-items: center; gap: 8px; }
+.cnt-row label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.cnb { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--border);
+  background: #fff; font-size: 18px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; color: var(--navy); }
+.cnb:active { background: var(--g100); }
+.cnv { font-size: 18px; font-weight: 700; color: var(--navy); min-width: 20px; text-align: center; }
+.ha-add { flex: 1; min-width: 130px; padding: 9px; background: var(--pu); color: #fff;
+  border: none; border-radius: var(--rs); font-size: 13px; font-weight: 600; cursor: pointer; }
+.ha-add:active { transform: scale(.98); }
+
+/* sample cards */
+.sc { border: 1px solid var(--border); border-radius: var(--rs); margin-bottom: 8px; overflow: hidden; }
+.sc-hd { background: var(--g100); padding: 9px 12px;
+  display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.sn { font-family: monospace; font-size: 11px; font-weight: 700;
+  color: #fff; background: var(--pu); padding: 2px 7px; border-radius: 10px; flex-shrink: 0; }
+.ha-chip { font-size: 11px; font-weight: 700; color: var(--pu);
+  background: var(--pu-lt); padding: 2px 7px; border-radius: 10px; flex-shrink: 0; }
+.sc-sum { flex: 1; font-size: 12px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; min-width: 0; }
+.sc-ph { width: 36px; height: 36px; border-radius: 4px; object-fit: cover;
+  border: 2px solid var(--pu); flex-shrink: 0; }
+.sc-chev { color: var(--muted); font-size: 14px; flex-shrink: 0; transition: transform .2s; }
+.sc-chev.open { transform: rotate(180deg); }
+.sc-del { background: none; border: none; color: var(--muted);
+  font-size: 18px; cursor: pointer; padding: 0 4px; flex-shrink: 0; }
+.sc-del:active { color: #c53030; }
+.sc-bd { padding: 10px 12px; display: none; }
+.sc-bd.open { display: block; }
+.sc-flds { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sc-f { }
+.sc-f.full { grid-column: 1 / -1; }
+.sc-f label { display: block; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 3px; }
+.sc-f input { width: 100%; padding: 7px 9px; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 14px; }
+.sc-f input:focus { outline: none; border-color: var(--pu); }
+.sc-f textarea { width: 100%; padding: 7px 9px; border: 1px solid var(--border);
+  border-radius: 6px; font-size: 14px; resize: vertical; min-height: 46px; line-height: 1.4; }
+.sc-f textarea:focus { outline: none; border-color: var(--pu); }
+.sc-photo-row { margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sphbtn { display: flex; align-items: center; gap: 4px; padding: 6px 11px;
+  border-radius: var(--rs); border: 1.5px solid var(--border); background: #fff;
+  font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.sphbtn.has { border-color: var(--pu); color: var(--pu); background: var(--pu-lt); }
+.sph-prev { width: 52px; height: 52px; border-radius: 6px; object-fit: cover;
+  border: 2px solid var(--pu); display: none; }
+.sph-clr { background: none; border: none; color: var(--muted);
+  font-size: 18px; cursor: pointer; display: none; padding: 0 2px; }
+
+/* add btn */
+.add-btn { width: 100%; padding: 10px; border: 2px dashed var(--border);
+  border-radius: var(--rs); background: #fff; color: var(--muted);
+  font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 4px; }
+.add-btn:active { background: var(--g100); }
+
+/* modal */
+.modal-bg { display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.5); z-index: 200;
+  align-items: center; justify-content: center; padding: 16px; }
+.modal-bg.on { display: flex; }
+.modal { background: #fff; border-radius: var(--r); max-width: 460px; width: 100%;
+  max-height: 88vh; overflow-y: auto; box-shadow: var(--shl); }
+.mhd { padding: 14px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px; }
+.mttl { flex: 1; font-size: 16px; font-weight: 700; color: var(--navy); }
+.mx { background: none; border: none; font-size: 22px; color: var(--muted); cursor: pointer; }
+.mbd { padding: 14px 16px; }
+.mft { padding: 12px 16px; border-top: 1px solid var(--border);
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.btn { padding: 9px 14px; border: 1px solid var(--border); background: #fff;
+  color: var(--text); border-radius: var(--rs); font-size: 14px; font-weight: 600; cursor: pointer; }
+.btn.pri { background: var(--pu); color: #fff; border-color: var(--pu); }
+.btn.sec { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+/* progress */
+.pgwrap { display: none; text-align: center; padding: 20px 0; }
+.pgwrap p { font-size: 14px; font-weight: 600; color: var(--navy); margin-bottom: 8px; }
+.pgbar { background: var(--border); border-radius: 8px; height: 8px; }
+.pgfill { background: var(--pu); height: 100%; border-radius: 8px; width: 0; transition: width .2s; }
+.rdywrap { display: none; text-align: center; padding: 16px 0; }
+.rdywrap .ico { font-size: 32px; margin-bottom: 8px; }
+
+/* toast */
+.toast { position: fixed; bottom: 18px; left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--navy); color: #fff; padding: 10px 18px;
+  border-radius: 22px; font-size: 13px; font-weight: 500;
+  box-shadow: var(--shl); opacity: 0; transition: all .3s;
+  z-index: 300; pointer-events: none; }
+.toast.on { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+.hi { display: none; }
+
+@media (max-width: 600px) {
+  .f2, .ha-grid, .sc-flds { grid-template-columns: 1fr; }
+  .ha-f.full, .sc-f.full { grid-column: 1; }
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-t">
+    <div class="hdr-n">📋 EMC Chain of Custody</div>
+    <div class="hdr-s">Insight Environmental — NVLAP #101926-0</div>
+  </div>
+  <div class="hdr-btns">
+    <button class="hb" id="optBtn">•••</button>
+    <button class="hb pri" id="genBtn">Generate PDF</button>
+  </div>
+</header>
+
+<!-- hidden file inputs -->
+<input class="hi" type="file" id="cam0" accept="image/*" capture="environment">
+<input class="hi" type="file" id="lib0" accept="image/*" multiple>
+<input class="hi" type="file" id="cam1" accept="image/*" capture="environment">
+<input class="hi" type="file" id="lib1" accept="image/*">
+<input class="hi" type="file" id="loadFile" accept=".json">
+
+<div class="main">
+  <div class="sbar" id="sbar" style="display:none;">
+    <div class="ss"><div class="ssv" id="ss-s">0</div><div class="ssl">Samples</div></div>
+    <div class="ss"><div class="ssv" id="ss-h">0</div><div class="ssl">HAs</div></div>
+    <div class="ss" style="flex:1;text-align:left;padding-left:8px;">
+      <div class="ssv" id="ss-a" style="font-size:13px;">—</div><div class="ssl">Analysis</div></div>
+    <div class="ss"><div class="ssv" id="ss-t">—</div><div class="ssl">TAT</div></div>
+  </div>
+
+  <!-- Job info -->
+  <div class="card">
+    <div class="cttl">📍 Job Information</div>
+    <div class="fr">
+      <label>Property Address (= Project Name)</label>
+      <div class="mw">
+        <input id="fAddr" placeholder="1916 Bay Flat Road, Bodega Bay, CA">
+        <button class="mb" data-mic="fAddr">🎤</button>
+      </div>
+    </div>
+    <div class="fr"><label>Date Sampled</label><input id="fDate" type="date"></div>
+  </div>
+
+  <!-- TAT -->
+  <div class="card">
+    <div class="cttl">⏱ Turnaround Time</div>
+    <div class="tg" id="tatGrp">
+      <button class="tb" data-tat="Same Day Rush">Same Day Rush</button>
+      <button class="tb sel solid" data-tat="1 Day">1 Day</button>
+      <button class="tb" data-tat="2 Days">2 Days</button>
+      <button class="tb" data-tat="3-5 Days">3-5 Days</button>
+      <button class="tb" data-tat="6-10 Days">6-10 Days</button>
+    </div>
+  </div>
+
+  <!-- Analysis -->
+  <div class="card">
+    <div class="cttl">🔬 Analysis Type</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">Generate a separate COC for each analysis type.</p>
+    <div class="tg" id="anGrp">
+      <button class="tb" data-an="plm">Bulk-Asbestos PLM</button>
+      <button class="tb" data-an="pcm">Air-PCM</button>
+      <button class="tb" data-an="lead">Lead</button>
+      <button class="tb" data-an="pc">Point Count</button>
+      <button class="tb" data-an="fungi">Fungi</button>
+    </div>
+  </div>
+
+  <!-- HA adder -->
+  <div class="card">
+    <div class="cttl">➕ Add Homogeneous Area</div>
+    <div class="ha-box">
+      <div class="ha-ttl" id="haTitle">HA 1 — New Homogeneous Area</div>
+      <div class="ha-grid">
+        <div class="ha-f">
+          <label>Location</label>
+          <div class="mw"><input id="haLoc" placeholder="Roof, Bathroom…"><button class="mb" data-mic="haLoc">🎤</button></div>
+        </div>
+        <div class="ha-f">
+          <label>Material</label>
+          <div class="mw"><input id="haMat" placeholder="Asphalt shingle roofing…"><button class="mb" data-mic="haMat">🎤</button></div>
+        </div>
+        <div class="ha-f">
+          <label>Color</label>
+          <div class="mw"><input id="haCol" placeholder="Black, Off-white…"><button class="mb" data-mic="haCol">🎤</button></div>
+        </div>
+        <div class="ha-f full">
+          <label>Description</label>
+          <div class="mw">
+            <textarea id="haDesc" rows="2" placeholder="Full description…"></textarea>
+            <button class="mb" data-mic="haDesc">🎤</button>
+          </div>
+        </div>
+      </div>
+      <div class="ha-photo-row">
+        <button class="phbtn" id="haCam">📸 Camera</button>
+        <button class="phbtn" id="haLib">🖼 Library</button>
+        <img id="haThumb" class="ha-thumb" alt="">
+        <button id="haClr" class="ha-clr">×</button>
+        <span style="font-size:11px;color:var(--muted);">One photo per HA (shared across samples)</span>
+      </div>
+      <div class="ha-bot">
+        <div class="cnt-row">
+          <label>Samples:</label>
+          <button class="cnb" id="haMinus">−</button>
+          <span class="cnv" id="haCnt">2</span>
+          <button class="cnb" id="haPlus">+</button>
+        </div>
+        <button class="ha-add" id="haAddBtn">Add HA →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Samples list -->
+  <div class="card" id="sampCard" style="display:none;">
+    <div class="cttl">📋 Sample List <span id="sampBadge" style="font-weight:400;color:var(--muted);font-size:11px;"></span></div>
+    <div id="sampCont"></div>
+    <button class="add-btn" id="addBlank">+ Add Individual Row</button>
+  </div>
+
+  <!-- Instructions -->
+  <div class="card">
+    <div class="cttl">📝 Special Instructions</div>
+    <div class="mw">
+      <textarea id="fInstr" rows="2" placeholder="Leave blank if none"></textarea>
+      <button class="mb" data-mic="fInstr">🎤</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF Modal -->
+<div class="modal-bg" id="pdfModal">
+  <div class="modal">
+    <div class="mhd"><div class="mttl">Generate COC</div><button class="mx" data-close="pdfModal">×</button></div>
+    <div class="mbd">
+      <div class="pgwrap" id="pgWrap">
+        <p id="pgTxt">Building PDF…</p>
+        <div class="pgbar"><div class="pgfill" id="pgFill"></div></div>
+      </div>
+      <div class="rdywrap" id="rdyWrap">
+        <div class="ico">✅</div>
+        <p id="rdyInfo" style="font-size:14px;font-weight:600;color:var(--navy);margin-bottom:4px;"></p>
+        <p id="rdySub" style="font-size:12px;color:var(--muted);"></p>
+      </div>
+    </div>
+    <div class="mft" id="pdfFoot" style="display:none;">
+      <button class="btn" id="dlCoc">⬇ Download COC</button>
+      <button class="btn sec" id="dlPhoto" style="display:none;">📷 Photo Log</button>
+      <button class="btn pri" id="shareBtn">📤 Share / Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- Options modal -->
+<div class="modal-bg" id="optModal">
+  <div class="modal">
+    <div class="mhd"><div class="mttl">Options</div><button class="mx" data-close="optModal">×</button></div>
+    <div class="mbd">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Navigate</div>
+      <a href="../home-inspector/" class="btn" style="width:100%;margin-bottom:6px;display:block;text-align:center;text-decoration:none;">🏠 Home Inspector</a>
+      <a href="../mold-inspector/" class="btn" style="width:100%;margin-bottom:6px;display:block;text-align:center;text-decoration:none;">🧫 Mold Inspector</a>
+      <a href="../" class="btn" style="width:100%;margin-bottom:12px;display:block;text-align:center;text-decoration:none;">◀ Launcher</a>
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Session</div>
+      <button class="btn" style="width:100%;margin-bottom:8px;" id="saveBtn">💾 Save Session</button>
+      <button class="btn" style="width:100%;margin-bottom:8px;" id="loadBtn">📂 Load Session</button>
+      <button class="btn" style="width:100%;margin-bottom:8px;" id="newBtn">🗒 New COC (keep settings)</button>
+      <button class="btn" style="width:100%;color:#c53030;border-color:#f2c2c2;" id="clearBtn">🗑 Clear All</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════
+//  CONSTANTS & CONFIG
+// ═══════════════════════════════════
+const SK = 'insight_coc_v2';
+const IDB_NAME = 'insight_coc_photos_v2', IDB_STORE = 'photos';
+const FIRM = {
+  name:'INSIGHT ENVIRONMENTAL', a1:'245 Kentucky St, Suite A',
+  a2:'Petaluma, CA 94952', contact:'Steve Ramos', phone:'707-775-7800', email:'steve@insightebc.com'
+};
+const LAB = {
+  name:'EMC Labs, Inc.', a1:'9830 S. 51st St., Ste B-109',
+  a2:'Phoenix, AZ 85044', phone:'(480) 940-5294', fax:'Fax (480) 893-1726'
+};
+const AN = { plm:'Bulk-Asbestos PLM', pcm:'Air-PCM', lead:'Lead', pc:'Point Count', fungi:'Fungi' };
+
+// ═══════════════════════════════════
+//  STATE
+// ═══════════════════════════════════
+let S = newState();
+let haCount = 2;
+let haPhotoId = null, haPhotoThumb = null;
+let pendingTarget = null; // {type:'ha'|'sample', idx?:n}
+let cocBlob = null, photoBlob = null;
+let micRec = null, micBtn = null;
+let idb = null;
+let uidN = 1;
+
+function newState() {
+  return { address:'', date:today(), tat:'1 Day', analysis:{}, samples:[], instructions:'' };
+}
+function today() { return new Date().toISOString().slice(0,10); }
+function uid() { return 'p'+Date.now()+'_'+(uidN++); }
+
+// ═══════════════════════════════════
+//  INDEXEDDB
+// ═══════════════════════════════════
+const idbOpen = () => new Promise((res,rej) => {
+  const r = indexedDB.open(IDB_NAME, 1);
+  r.onupgradeneeded = e => { if(!e.target.result.objectStoreNames.contains(IDB_STORE)) e.target.result.createObjectStore(IDB_STORE,{keyPath:'id'}); };
+  r.onsuccess = e => { idb=e.target.result; res(); };
+  r.onerror = e => rej(e);
+});
+const idbPut = o => new Promise((res,rej) => { const tx=idb.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).put(o); tx.oncomplete=res; tx.onerror=rej; });
+const idbGet = id => new Promise((res,rej) => { const tx=idb.transaction(IDB_STORE,'readonly'); const r=tx.objectStore(IDB_STORE).get(id); r.onsuccess=()=>res(r.result||null); r.onerror=rej; });
+const idbDel = id => new Promise((res,rej) => { const tx=idb.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).delete(id); tx.oncomplete=res; tx.onerror=rej; });
+const idbAll = () => new Promise((res,rej) => { const tx=idb.transaction(IDB_STORE,'readonly'); const r=tx.objectStore(IDB_STORE).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=rej; });
+const idbClear = () => new Promise((res,rej) => { const tx=idb.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).clear(); tx.oncomplete=res; tx.onerror=rej; });
+
+// ═══════════════════════════════════
+//  IMAGE
+// ═══════════════════════════════════
+const readF = f => new Promise((res,rej) => { const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); });
+function compress(src, maxW, q) {
+  return new Promise(resolve => {
+    const img=new Image(); img.onload=()=>{
+      let w=img.naturalWidth, h=img.naturalHeight;
+      if(w>maxW){h=Math.round(h*maxW/w);w=maxW;}
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h); resolve(c.toDataURL('image/jpeg',q));
+    }; img.onerror=()=>resolve(src); img.src=src;
+  });
+}
+
+// ═══════════════════════════════════
+//  PHOTO HANDLING
+// ═══════════════════════════════════
+async function handlePhoto(file, target) {
+  const raw = await readF(file);
+  const full  = await compress(raw, 1600, 0.78);
+  const thumb = await compress(raw, 200,  0.65);
+  const id = uid();
+  await idbPut({id, src:full, filename:file.name});
+
+  if(target.type === 'ha') {
+    if(haPhotoId) await idbDel(haPhotoId).catch(()=>{});
+    haPhotoId = id; haPhotoThumb = thumb;
+    const img = document.getElementById('haThumb');
+    img.src = thumb; img.style.display = 'block';
+    document.getElementById('haClr').style.display = 'inline';
+    ['haCam','haLib'].forEach(x => document.getElementById(x).classList.add('has'));
+    toast('HA photo attached');
+  } else {
+    const s = S.samples[target.idx]; if(!s) return;
+    if(s.photoId) await idbDel(s.photoId).catch(()=>{});
+    s.photoId = id; s.photoThumb = thumb;
+    save(); renderSamples();
+    toast('Photo attached to sample #'+(target.idx+1));
+  }
+}
+
+function clearHAPhoto() {
+  if(haPhotoId) idbDel(haPhotoId).catch(()=>{});
+  haPhotoId = null; haPhotoThumb = null;
+  document.getElementById('haThumb').style.display='none';
+  document.getElementById('haClr').style.display='none';
+  ['haCam','haLib'].forEach(x=>document.getElementById(x).classList.remove('has'));
+}
+
+// ═══════════════════════════════════
+//  PERSIST
+// ═══════════════════════════════════
+function save() { try{localStorage.setItem(SK,JSON.stringify(S));}catch(e){} }
+function load() {
+  try {
+    const r=localStorage.getItem(SK); if(!r) return;
+    const p=JSON.parse(r);
+    if(p && Array.isArray(p.samples)) S=Object.assign(newState(),p);
+  }catch(e){}
+}
+
+// ═══════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════
+function renderSamples() {
+  const card=document.getElementById('sampCard'), cont=document.getElementById('sampCont');
+  if(!S.samples.length){card.style.display='none';return;}
+  card.style.display='block';
+  document.getElementById('sampBadge').textContent=`(${S.samples.length} sample${S.samples.length!==1?'s':''})`;
+  cont.innerHTML = S.samples.map((s,i) => sCard(s,i)).join('');
+  wireSamples();
+}
+
+function sCard(s, i) {
+  const sum=[s.location,s.material,s.color].filter(Boolean).join(' · ');
+  const hp=!!s.photoThumb;
+  return `<div class="sc" data-i="${i}">
+  <div class="sc-hd" data-tog="${i}">
+    <span class="sn">#${i+1}</span><span class="ha-chip">HA ${s.ha||1}</span>
+    <span class="sc-sum">${esc(sum||'No details')}</span>
+    ${hp?`<img class="sc-ph" src="${s.photoThumb}" alt="">` : ''}
+    <span class="sc-chev" id="chev${i}">▼</span>
+    <button class="sc-del" data-del="${i}">×</button>
+  </div>
+  <div class="sc-bd" id="bd${i}">
+    <div class="sc-flds">
+      <div class="sc-f"><label>Location</label>
+        <div class="mw"><input data-i="${i}" data-f="location" value="${esc(s.location||'')}"><button class="mb" data-smic="${i}-location">🎤</button></div></div>
+      <div class="sc-f"><label>Material</label>
+        <div class="mw"><input data-i="${i}" data-f="material" value="${esc(s.material||'')}"><button class="mb" data-smic="${i}-material">🎤</button></div></div>
+      <div class="sc-f"><label>Color</label>
+        <div class="mw"><input data-i="${i}" data-f="color" value="${esc(s.color||'')}"><button class="mb" data-smic="${i}-color">🎤</button></div></div>
+      <div class="sc-f full"><label>Description</label>
+        <div class="mw"><textarea data-i="${i}" data-f="description">${esc(s.description||'')}</textarea><button class="mb" data-smic="${i}-description">🎤</button></div></div>
+    </div>
+    <div class="sc-photo-row">
+      <button class="sphbtn${hp?' has':''}" data-scam="${i}">📸 Camera</button>
+      <button class="sphbtn${hp?' has':''}" data-slib="${i}">🖼 Library</button>
+      ${hp?`<img class="sph-prev" src="${s.photoThumb}" style="display:block;" alt=""><button class="sph-clr" data-sclr="${i}" style="display:inline;">×</button>`:''}
+    </div>
+  </div></div>`;
+}
+
+function wireSamples() {
+  document.querySelectorAll('[data-tog]').forEach(el => {
+    el.addEventListener('click', e => {
+      if(e.target.closest('[data-del],[data-scam],[data-slib],[data-sclr]')) return;
+      const i=el.dataset.tog;
+      document.getElementById('bd'+i).classList.toggle('open');
+      document.getElementById('chev'+i).classList.toggle('open');
+    });
+  });
+  document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+    const i=parseInt(b.dataset.del);
+    if(!confirm(`Remove sample #${i+1}?`)) return;
+    const s=S.samples[i]; if(s && s.photoId) idbDel(s.photoId).catch(()=>{});
+    S.samples.splice(i,1); save(); renderSamples(); updateSummary();
+  }));
+  document.querySelectorAll('[data-i][data-f]').forEach(el => {
+    el.addEventListener('input', () => { S.samples[parseInt(el.dataset.i)][el.dataset.f]=el.value; save(); });
+  });
+  document.querySelectorAll('[data-smic]').forEach(b => {
+    b.addEventListener('click', () => {
+      const [idx,field] = b.dataset.smic.split('-');
+      const t = document.querySelector(`[data-i="${idx}"][data-f="${field}"]`);
+      startMic(b,t);
+    });
+  });
+  document.querySelectorAll('[data-scam]').forEach(b => b.addEventListener('click', () => {
+    pendingTarget={type:'sample',idx:parseInt(b.dataset.scam)};
+    document.getElementById('cam1').click();
+  }));
+  document.querySelectorAll('[data-slib]').forEach(b => b.addEventListener('click', () => {
+    pendingTarget={type:'sample',idx:parseInt(b.dataset.slib)};
+    document.getElementById('lib1').click();
+  }));
+  document.querySelectorAll('[data-sclr]').forEach(b => b.addEventListener('click', async () => {
+    const i=parseInt(b.dataset.sclr), s=S.samples[i];
+    if(s && s.photoId) await idbDel(s.photoId).catch(()=>{});
+    if(s){delete s.photoId; delete s.photoThumb;} save(); renderSamples();
+  }));
+}
+
+function updateSummary() {
+  const bar=document.getElementById('sbar');
+  if(!S.samples.length){bar.style.display='none';return;}
+  bar.style.display='flex';
+  document.getElementById('ss-s').textContent=S.samples.length;
+  document.getElementById('ss-h').textContent=new Set(S.samples.map(s=>s.ha)).size;
+  const ak=Object.keys(S.analysis).filter(k=>S.analysis[k]);
+  document.getElementById('ss-a').textContent=ak.map(k=>AN[k]).join(', ')||'—';
+  document.getElementById('ss-t').textContent=S.tat||'—';
+  const nextHA=(S.samples.reduce((m,s)=>Math.max(m,s.ha||0),0))+1;
+  document.getElementById('haTitle').textContent=`HA ${nextHA} — New Homogeneous Area`;
+}
+
+function addHA() {
+  const loc=document.getElementById('haLoc').value.trim();
+  const mat=document.getElementById('haMat').value.trim();
+  const col=document.getElementById('haCol').value.trim();
+  const desc=document.getElementById('haDesc').value.trim();
+  if(!loc&&!mat){toast('Enter Location or Material');return;}
+  const ha=(S.samples.reduce((m,s)=>Math.max(m,s.ha||0),0))+1;
+  for(let i=0;i<haCount;i++){
+    S.samples.push({ha,location:loc,material:mat,color:col,description:desc,
+      photoId:haPhotoId||null, photoThumb:haPhotoThumb||null});
+  }
+  save(); renderSamples(); updateSummary();
+  ['haLoc','haMat','haCol','haDesc'].forEach(id=>document.getElementById(id).value='');
+  clearHAPhoto();
+  toast(`HA ${ha} added — ${haCount} sample${haCount>1?'s':''}`);
+  document.getElementById('sampCard').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ═══════════════════════════════════
+//  PDF — COC form (faithful EMC layout)
+// ═══════════════════════════════════
+const PW=612,PH=792,ML=36,MR=36,MT=36,MB=44,UW=540;
+// Column widths must sum to 540
+const CW={no:28,ha:28,loc:90,mat:108,col:82,desc:204}; // 28+28+90+108+82+204=540
+
+function pg(p,t){document.getElementById('pgFill').style.width=p+'%'; if(t)document.getElementById('pgTxt').textContent=t;}
+
+async function generate() {
+  if(typeof window.jspdf==='undefined') throw new Error('jsPDF not loaded — check internet connection');
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
+  const addr=S.address||'(No address)';
+  const dstr=fmtDate(S.date);
+  const ak=Object.keys(S.analysis).filter(k=>S.analysis[k]);
+  const samps=S.samples;
+
+  pg(8,'Drawing header…');
+  let y=MT;
+
+  // ── LAB# BOX top-right ──
+  const bx=PW-MR-104, bh=66;
+  doc.setDrawColor(0); doc.setLineWidth(0.8); doc.rect(bx,y,104,bh);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(0,0,0);
+  doc.text('LAB #:',bx+5,y+13); doc.line(bx+5,y+16,bx+99,y+16);
+  doc.text('TAT:',bx+5,y+29); doc.line(bx+5,y+32,bx+99,y+32);
+  doc.text("Rec'd:",bx+5,y+45); doc.line(bx+5,y+48,bx+99,y+48);
+  doc.setFontSize(7); doc.setTextColor(120,120,120);
+  doc.text('EMC USE ONLY',bx+52,y+60,{align:'center'}); doc.setTextColor(0,0,0);
+
+  // ── CENTERED HEADER ──
+  doc.setFont('helvetica','bold'); doc.setFontSize(17);
+  doc.text('CHAIN OF CUSTODY',PW/2,y+14,{align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+  doc.text(LAB.name,PW/2,y+26,{align:'center'});
+  doc.text(LAB.a1,PW/2,y+37,{align:'center'});
+  doc.text(LAB.a2,PW/2,y+48,{align:'center'});
+  doc.text(LAB.phone+'   '+LAB.fax,PW/2,y+59,{align:'center'});
+  y+=bh+6;
+
+  // ── COMPANY BLOCK ──
+  doc.setLineWidth(0.4);
+  const L=62;
+  doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+  doc.text('COMPANY NAME:',ML,y+8);
+  doc.setFontSize(10); doc.text(FIRM.name,ML+L,y+8);
+  y+=12;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+  const rows=[['Address:',FIRM.a1],[' ',FIRM.a2],['Contact:',FIRM.contact],['Phone/Fax:',FIRM.phone],['Email:',FIRM.email]];
+  rows.forEach(([lbl,val])=>{
+    doc.text(lbl,ML,y+7); doc.text(val,ML+L,y+7);
+    doc.line(ML+L,y+9,ML+210,y+9); y+=11;
+  });
+  y+=8;
+
+  // ── CHECKBOX TABLES ──
+  pg(18,'Drawing checkboxes…');
+  const tats=['Same Day Rush','1 Day','2 Days','3-5 Days','6-10 Days'];
+  const ans=['Bulk-Asbestos PLM','Air-PCM','Lead','Point Count','Fungi'];
+  const selAn=ak.map(k=>AN[k]);
+
+  function cbRow(label,opts,sel) {
+    const h=22, lw=98, ow=(UW-lw)/opts.length;
+    doc.setLineWidth(0.5); doc.setDrawColor(0);
+    doc.rect(ML,y,lw,h);
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+    doc.text(label,ML+5,y+h*0.67);
+    opts.forEach((o,i)=>{
+      const ox=ML+lw+i*ow;
+      doc.rect(ox,y,ow,h);
+      doc.rect(ox+5,y+h/2-4,8,8);
+      if(sel.includes(o)){
+        doc.setFont('helvetica','bold'); doc.setFontSize(10);
+        doc.text('X',ox+6.2,y+h/2+2.5);
+      }
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+      doc.text(o,ox+16,y+h/2+2.5);
+    });
+    y+=h;
+  }
+  cbRow('Turn Around Time',tats,[S.tat||'1 Day']);
+  cbRow('Analysis',ans,selAn);
+  cbRow('Disposal',['Dispose samples at EMC'],['Dispose samples at EMC']);
+  y+=8;
+
+  // ── PROJECT / DATE BAR ──
+  doc.setLineWidth(0.6); doc.rect(ML,y,UW,26);
+  doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+  const pl='4.  Project Number or Name:';
+  doc.text(pl,ML+5,y+17);
+  const plw=doc.getTextWidth(pl);
+  doc.setFont('helvetica','normal');
+  doc.text(addr,ML+5+plw+3,y+17);
+  doc.line(ML+5+plw+3,y+19,ML+UW*0.60,y+19);
+  doc.setFont('helvetica','bold');
+  const dtl='Date Sampled:';
+  doc.text(dtl,ML+UW*0.62,y+17);
+  doc.setFont('helvetica','normal');
+  doc.text(dstr,ML+UW*0.62+doc.getTextWidth(dtl)+3,y+17);
+  y+=26;
+
+  // Property Address sub-line
+  doc.setFont('helvetica','bold'); doc.setFontSize(8);
+  doc.text('Property Address:',ML+5,y+10);
+  doc.setFont('helvetica','normal');
+  doc.text(addr,ML+5+doc.getTextWidth('Property Address:')+3,y+10);
+  y+=16;
+
+  // ── TABLE HEADER ──
+  pg(28,'Drawing sample table…');
+  y=drawTableHdr(doc,y);
+
+  // ── PAGE 1 ROWS (10 rows) ──
+  const ROWS1=10;
+  for(let i=0;i<ROWS1;i++) y=drawRow(doc,y,i+1,samps[i]||null);
+
+  // ── FOOTER ──
+  drawFooter(doc,S.instructions);
+
+  // ── CONTINUATION PAGES ──
+  const ROWSC=20;
+  let off=ROWS1;
+  while(off<samps.length){
+    pg(30+Math.round(60*(off/samps.length)),'Page '+(doc.getNumberOfPages()+1)+'…');
+    doc.addPage();
+    let cy=MT;
+    // compact header
+    doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(0,0,0);
+    doc.text('Project Name:',ML,cy+8); doc.setFont('helvetica','normal');
+    doc.text(addr,ML+doc.getTextWidth('Project Name:')+4,cy+8);
+    doc.setFont('helvetica','bold');
+    doc.text('Date Sampled:',ML+UW*0.38,cy+8); doc.setFont('helvetica','normal');
+    doc.text(dstr,ML+UW*0.38+doc.getTextWidth('Date Sampled:')+4,cy+8);
+    doc.setFont('helvetica','bold');
+    doc.text('Property Address:',ML+UW*0.63,cy+8); doc.setFont('helvetica','normal');
+    doc.text(addr,ML+UW*0.63+doc.getTextWidth('Property Address:')+4,cy+8);
+    cy+=14;
+    cy=drawTableHdr(doc,cy);
+    const batch=samps.slice(off,off+ROWSC);
+    batch.forEach((s,i)=>{cy=drawRow(doc,cy,off+i+1,s);});
+    drawFooter(doc,'');
+    off+=ROWSC;
+  }
+
+  pg(88,'Finalizing…');
+  cocBlob=doc.output('blob');
+
+  // ── PHOTO LOG (if any samples have photos) ──
+  photoBlob=null;
+  const withP=samps.filter(s=>s.photoId);
+  if(withP.length){
+    pg(90,'Building photo log…');
+    photoBlob=await buildPhotoLog(withP,addr,dstr);
+  }
+}
+
+function drawTableHdr(doc,y) {
+  const h=22;
+  const cols=[{k:'no',l:'NO.'},{k:'ha',l:'HA'},{k:'loc',l:'LOCATION'},
+    {k:'mat',l:'MATERIAL'},{k:'col',l:'COLOR'},{k:'desc',l:'DESCRIPTION'}];
+  let x=ML;
+  cols.forEach(c=>{
+    doc.setFillColor(200,200,200); doc.setDrawColor(0); doc.setLineWidth(0.5);
+    doc.rect(x,y,CW[c.k],h,'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(7.5); doc.setTextColor(0,0,0);
+    doc.text(c.l,x+CW[c.k]/2,y+h*0.67,{align:'center'});
+    x+=CW[c.k];
+  });
+  return y+h;
+}
+
+function drawRow(doc,y,no,s) {
+  const h=22;
+  const vals=s?[String(no),String(s.ha||''),s.location||'',s.material||'',s.color||'',s.description||'']
+               :[String(no),'','','','',''];
+  const keys=['no','ha','loc','mat','col','desc'];
+  let x=ML;
+  doc.setLineWidth(0.3); doc.setDrawColor(100,100,100);
+  keys.forEach((k,i)=>{
+    const cw=CW[k];
+    doc.rect(x,y,cw,h);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(0,0,0);
+    let t=vals[i], d=t;
+    while(d.length>1 && doc.getTextWidth(d)>cw-4) d=d.slice(0,-1);
+    if(d!==t) d=d.slice(0,-2)+'…';
+    doc.text(d,x+2,y+h*0.65);
+    x+=cw;
+  });
+  return y+h;
+}
+
+function drawFooter(doc,instr) {
+  let y=PH-MB-36;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(0,0,0); doc.setLineWidth(0.4);
+  const sl='Special Instructions:';
+  doc.text(sl,ML,y); const slw=doc.getTextWidth(sl);
+  if(instr) doc.text(instr,ML+slw+4,y);
+  doc.line(ML+slw+4,y+1,PW-MR,y+1);
+  y+=14;
+  const sc='Sample Collector: (Print)  ';
+  doc.text(sc,ML,y); const scw=ML+doc.getTextWidth(sc);
+  doc.setFont('helvetica','bold'); doc.text(FIRM.contact,scw,y); doc.setFont('helvetica','normal');
+  doc.line(scw,y+1,scw+120,y+1);
+  doc.text('(Signature)',scw+132,y);
+  doc.line(scw+132+doc.getTextWidth('(Signature) '),y+1,scw+240,y+1);
+  y+=14;
+  doc.text('Relinquished by:',ML,y); doc.line(ML+72,y+1,ML+175,y+1);
+  doc.text('Date/Time:',ML+180,y); doc.line(ML+220,y+1,ML+298,y+1);
+  doc.text('Received by:',ML+308,y); doc.line(ML+308+doc.getTextWidth('Received by:')+3,y+1,ML+420,y+1);
+  doc.text('Date/Time:',ML+428,y); doc.line(ML+468,y+1,ML+UW,y+1);
+}
+
+// ── PHOTO LOG ──
+async function buildPhotoLog(samples, addr, dstr) {
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'pt',format:'letter'});
+  const cw=(UW-12)/2, imgH=178;
+
+  // Cover header
+  doc.setFillColor(74,44,138); doc.rect(0,0,PW,58,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(255,255,255);
+  doc.text('SAMPLE PHOTO DOCUMENTATION',PW/2,26,{align:'center'});
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(190,190,255);
+  doc.text(addr+'  |  '+dstr,PW/2,43,{align:'center'});
+
+  let y=66;
+  for(let i=0;i<samples.length;i+=2){
+    const L=samples[i], R=samples[i+1]||null;
+    const ld=await idbGet(L.photoId).catch(()=>null);
+    const rd=R?await idbGet(R.photoId).catch(()=>null):null;
+    const cardH=imgH+56;
+    if(y+cardH>PH-MB){doc.addPage();y=MT;}
+    drawPhotoCard(doc,L,ML,y,cw,imgH,samples.indexOf(L)+1,ld);
+    if(R) drawPhotoCard(doc,R,ML+cw+12,y,cw,imgH,samples.indexOf(R)+1,rd);
+    y+=cardH+10;
+  }
+  return doc.output('blob');
+}
+
+function drawPhotoCard(doc,s,x,y,w,ih,n,pd) {
+  doc.setDrawColor(180,180,180); doc.setLineWidth(0.5); doc.rect(x,y,w,ih+56);
+  doc.setFillColor(74,44,138); doc.rect(x,y,4,ih+56,'F');
+  if(pd&&pd.src){try{doc.addImage(pd.src,'JPEG',x+4,y,w-4,ih);}catch(e){}}
+  else{doc.setFillColor(230,230,230);doc.rect(x+4,y,w-4,ih,'F');
+    doc.setTextColor(180,180,180);doc.setFontSize(9);doc.text('No photo',x+w/2,y+ih/2,{align:'center'});}
+  const ty=y+ih+13;
+  doc.setFont('courier','bold');doc.setFontSize(10);doc.setTextColor(31,56,100);
+  doc.text('#'+n+'  HA '+s.ha,x+10,ty);
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(50,50,50);
+  doc.text(s.location||'',x+10,ty+13);
+  const d=(s.description||s.material||'').slice(0,72);
+  doc.text(d,x+10,ty+25);
+  doc.setFontSize(7);doc.setTextColor(130,130,130);doc.text(s.color||'',x+10,ty+38);
+}
+
+function fmtDate(iso){
+  if(!iso) return '';
+  const [y,m,d]=iso.split('-');
+  const M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `${M[parseInt(m,10)-1]} ${parseInt(d,10)}, ${y}`;
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ═══════════════════════════════════
+//  SPEECH
+// ═══════════════════════════════════
+function startMic(btn, target) {
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Speech not supported');return;}
+  if(micRec&&micBtn===btn){try{micRec.stop();}catch(e){}return;}
+  if(micRec){try{micRec.stop();}catch(e){}}
+  const r=new SR(); r.lang='en-US'; r.continuous=false;
+  btn.classList.add('on'); micRec=r; micBtn=btn;
+  r.onresult=ev=>{
+    let s=''; for(const x of ev.results) s+=x[0].transcript;
+    target.value=(target.value.trimEnd()?(target.value.trimEnd()+' '):'')+s;
+    target.dispatchEvent(new Event('input',{bubbles:true}));
+  };
+  r.onerror=()=>toast('Microphone error');
+  r.onend=()=>{btn.classList.remove('on');micRec=null;micBtn=null;};
+  try{r.start();toast('🎤 Listening…');}catch(e){btn.classList.remove('on');}
+}
+
+// ═══════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════
+let tt;
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2300);}
+
+// ═══════════════════════════════════
+//  INIT
+// ═══════════════════════════════════
+document.addEventListener('DOMContentLoaded', async () => {
+  try{await idbOpen();}catch(e){console.warn('IDB unavailable');}
+  load();
+
+  document.getElementById('fAddr').value  = S.address;
+  document.getElementById('fDate').value  = S.date;
+  document.getElementById('fInstr').value = S.instructions;
+
+  // TAT
+  document.querySelectorAll('[data-tat]').forEach(b=>{
+    b.classList.toggle('sel',b.dataset.tat===S.tat);
+    b.classList.toggle('solid',b.dataset.tat===S.tat);
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('[data-tat]').forEach(x=>{x.classList.remove('sel','solid');});
+      b.classList.add('sel','solid'); S.tat=b.dataset.tat; save(); updateSummary();
+    });
+  });
+
+  // Analysis
+  document.querySelectorAll('[data-an]').forEach(b=>{
+    b.classList.toggle('sel',!!S.analysis[b.dataset.an]);
+    b.addEventListener('click',()=>{
+      const k=b.dataset.an; S.analysis[k]=!S.analysis[k];
+      b.classList.toggle('sel',S.analysis[k]); save(); updateSummary();
+    });
+  });
+
+  // Fields
+  document.getElementById('fAddr').addEventListener('input',e=>{S.address=e.target.value;save();updateSummary();});
+  document.getElementById('fDate').addEventListener('input',e=>{S.date=e.target.value;save();});
+  document.getElementById('fInstr').addEventListener('input',e=>{S.instructions=e.target.value;save();});
+
+  // Global mic buttons
+  document.querySelectorAll('[data-mic]').forEach(b=>{
+    b.addEventListener('click',()=>{const t=document.getElementById(b.dataset.mic);if(t)startMic(b,t);});
+  });
+
+  // HA count
+  document.getElementById('haMinus').addEventListener('click',()=>{haCount=Math.max(1,haCount-1);document.getElementById('haCnt').textContent=haCount;});
+  document.getElementById('haPlus').addEventListener('click',()=>{haCount=Math.min(6,haCount+1);document.getElementById('haCnt').textContent=haCount;});
+  document.getElementById('haAddBtn').addEventListener('click',addHA);
+
+  // HA photos
+  document.getElementById('haCam').addEventListener('click',()=>{pendingTarget={type:'ha'};document.getElementById('cam0').click();});
+  document.getElementById('haLib').addEventListener('click',()=>{pendingTarget={type:'ha'};document.getElementById('lib0').click();});
+  document.getElementById('haClr').addEventListener('click',clearHAPhoto);
+
+  // File inputs
+  ['cam0','lib0','cam1','lib1'].forEach(id=>{
+    document.getElementById(id).addEventListener('change',async e=>{
+      if(!e.target.files.length||!pendingTarget)return;
+      await handlePhoto(e.target.files[0],pendingTarget); e.target.value='';
+    });
+  });
+
+  document.getElementById('addBlank').addEventListener('click',()=>{
+    const ha=(S.samples.reduce((m,s)=>Math.max(m,s.ha||0),0))+1;
+    S.samples.push({ha,location:'',material:'',color:'',description:''});
+    save(); renderSamples(); updateSummary();
+    setTimeout(()=>{const rows=document.querySelectorAll('.sc-bd');if(rows.length){const last=rows[rows.length-1];last.classList.add('open');}},50);
+  });
+
+  // Generate PDF
+  document.getElementById('genBtn').addEventListener('click',()=>{
+    if(!S.samples.length){toast('Add at least one sample first');return;}
+    if(!S.address.trim()){toast('Enter property address');return;}
+    if(!Object.values(S.analysis).some(Boolean)){toast('Select an analysis type (PLM, Lead…)');return;}
+    document.getElementById('pdfModal').classList.add('on');
+    document.getElementById('pgWrap').style.display='block';
+    document.getElementById('rdyWrap').style.display='none';
+    document.getElementById('pdfFoot').style.display='none';
+    cocBlob=null; photoBlob=null;
+    setTimeout(()=>{
+      generate().then(()=>{
+        document.getElementById('pgWrap').style.display='none';
+        document.getElementById('rdyWrap').style.display='block';
+        document.getElementById('pdfFoot').style.display='flex';
+        const pc=S.samples.filter(s=>s.photoId).length;
+        const pages=1+Math.max(0,Math.ceil((S.samples.length-10)/20));
+        document.getElementById('rdyInfo').textContent=`COC ready · ${S.samples.length} samples · ${pages} page${pages>1?'s':''}`;
+        document.getElementById('rdySub').textContent=pc?`${pc} photos · tap "Photo Log" to download`:'No sample photos attached';
+        document.getElementById('dlPhoto').style.display=photoBlob?'':'none';
+      }).catch(err=>{toast('PDF error: '+err.message);document.getElementById('pdfModal').classList.remove('on');});
+    },150);
+  });
+
+  document.getElementById('dlCoc').addEventListener('click',()=>{
+    if(!cocBlob)return;
+    const a=document.createElement('a');
+    const fn='COC_'+(S.address||'coc').replace(/[^a-z0-9]+/gi,'_').slice(0,40).toLowerCase()+'.pdf';
+    a.href=URL.createObjectURL(cocBlob); a.download=fn; a.click(); URL.revokeObjectURL(a.href);
+    toast('COC downloaded');
+  });
+
+  document.getElementById('dlPhoto').addEventListener('click',()=>{
+    if(!photoBlob)return;
+    const a=document.createElement('a');
+    const fn='COC_'+(S.address||'coc').replace(/[^a-z0-9]+/gi,'_').slice(0,40).toLowerCase()+'_Photos.pdf';
+    a.href=URL.createObjectURL(photoBlob); a.download=fn; a.click(); URL.revokeObjectURL(a.href);
+    toast('Photo log downloaded');
+  });
+
+  document.getElementById('shareBtn').addEventListener('click',async()=>{
+    if(!cocBlob)return;
+    const base=(S.address||'coc').replace(/[^a-z0-9]+/gi,'_').slice(0,40).toLowerCase();
+    const files=[new File([cocBlob],`COC_${base}.pdf`,{type:'application/pdf'})];
+    if(photoBlob) files.push(new File([photoBlob],`COC_${base}_Photos.pdf`,{type:'application/pdf'}));
+    try{
+      if(navigator.canShare&&navigator.canShare({files})){
+        await navigator.share({files,title:'EMC Chain of Custody',text:`COC for ${S.address}`});
+      } else { document.getElementById('dlCoc').click(); }
+    }catch(e){if(e.name!=='AbortError')toast('Share error: '+e.message);}
+  });
+
+  // Options
+  document.getElementById('optBtn').addEventListener('click',()=>document.getElementById('optModal').classList.add('on'));
+  document.getElementById('saveBtn').addEventListener('click',async()=>{
+    const photos=await idbAll().catch(()=>[]);
+    const ps={}; photos.forEach(p=>{ps[p.id]={src:p.src,filename:p.filename};});
+    const b=new Blob([JSON.stringify({state:S,photos:ps})],{type:'application/json'});
+    const fn='COC_'+(S.address||'coc').replace(/[^a-z0-9]+/gi,'_').toLowerCase()+'_session.json';
+    const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=fn; a.click(); URL.revokeObjectURL(a.href);
+    toast('Session saved (with photos)');
+  });
+  document.getElementById('loadBtn').addEventListener('click',()=>document.getElementById('loadFile').click());
+  document.getElementById('loadFile').addEventListener('change',ev=>{
+    const f=ev.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=async()=>{
+      try{
+        const p=JSON.parse(r.result);
+        if(p.state&&Array.isArray(p.state.samples)){
+          S=Object.assign(newState(),p.state);
+          if(p.photos){
+            for(const[id,d]of Object.entries(p.photos)) await idbPut({id,src:d.src,filename:d.filename}).catch(()=>{});
+            toast('Session loaded · '+Object.keys(p.photos).length+' photos restored');
+          }else toast('Session loaded');
+          document.getElementById('fAddr').value=S.address;
+          document.getElementById('fDate').value=S.date;
+          document.getElementById('fInstr').value=S.instructions;
+          document.querySelectorAll('[data-tat]').forEach(b=>{b.classList.toggle('sel',b.dataset.tat===S.tat);b.classList.toggle('solid',b.dataset.tat===S.tat);});
+          document.querySelectorAll('[data-an]').forEach(b=>b.classList.toggle('sel',!!S.analysis[b.dataset.an]));
+          save(); renderSamples(); updateSummary();
+          document.getElementById('optModal').classList.remove('on');
+        }else toast('Invalid session file');
+      }catch(e){toast('Could not read file');}
+    }; r.readAsText(f); ev.target.value='';
+  });
+  document.getElementById('newBtn').addEventListener('click',()=>{
+    if(!confirm('Clear all samples? Settings will be kept.'))return;
+    S.samples=[]; save(); renderSamples(); updateSummary();
+    document.getElementById('optModal').classList.remove('on'); toast('Samples cleared');
+  });
+  document.getElementById('clearBtn').addEventListener('click',async()=>{
+    if(!confirm('Clear everything?'))return;
+    S=newState(); await idbClear().catch(()=>{});
+    document.getElementById('fAddr').value=''; document.getElementById('fDate').value=S.date; document.getElementById('fInstr').value='';
+    document.querySelectorAll('[data-an]').forEach(b=>b.classList.remove('sel'));
+    document.querySelectorAll('[data-tat]').forEach(b=>{b.classList.toggle('sel',b.dataset.tat==='1 Day');b.classList.toggle('solid',b.dataset.tat==='1 Day');});
+    save(); renderSamples(); updateSummary();
+    document.getElementById('optModal').classList.remove('on'); toast('Cleared');
+  });
+
+  document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('on');}));
+  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.close).classList.remove('on')));
+
+  renderSamples(); updateSummary();
+});
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('../sw.js',{scope:'../'}).catch(()=>{}));
+}
+</script>
+</body>
+</html>
