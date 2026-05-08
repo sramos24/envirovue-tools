@@ -127,23 +127,28 @@ header{background:var(--navy);padding:0 20px;padding-top:max(0px,env(safe-area-i
 .pdf-section{max-width:680px;margin:0 auto 28px}
 .pdf-sec-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1a3a5c;border-bottom:2px solid #1a3a5c;padding-bottom:6px;margin-bottom:14px}
 .pdf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.pdf-card{border:1px solid #dde3ee;border-radius:6px;overflow:hidden;page-break-inside:avoid}
+.pdf-card{border:1px solid #dde3ee;border-left:4px solid #b0bcd0;border-radius:6px;overflow:hidden;page-break-inside:avoid;break-inside:avoid}
 .pdf-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
 .pdf-card-body{padding:8px 10px}
-.pdf-card-num{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:#1a3a5c}
-.pdf-card-cat{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;background:#d9e2f3;color:#1a3a5c;margin:3px 0;text-transform:uppercase;letter-spacing:.04em}
-.pdf-card-caption{font-size:12px;color:#4a5568;line-height:1.45;margin-top:3px}
+.pdf-card-num{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:3px}
+.pdf-card-cat{display:block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.pdf-card-caption{font-size:11px;color:#4a5568;line-height:1.4;margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+@page{margin:0.6in 0.5in}
 @media print{
   body > *:not(#printDiv){display:none!important}
-  #printDiv{display:block!important;padding:20px;font-family:'IBM Plex Sans',sans-serif}
-  .pdf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .pdf-card{border:1px solid #dde3ee;border-radius:6px;overflow:hidden;page-break-inside:avoid}
+  #printDiv{display:block!important;font-family:'IBM Plex Sans',sans-serif}
+  /* two-column grid using columns — more reliable page-break than CSS grid */
+  .pdf-grid{column-count:2;column-gap:14px;orphans:1;widows:1}
+  .pdf-card{display:inline-block;width:100%;margin-bottom:14px;break-inside:avoid;page-break-inside:avoid;border:1px solid #dde3ee;border-radius:6px;overflow:hidden;vertical-align:top}
   .pdf-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
   .pdf-card-body{padding:8px 10px}
+  .pdf-card-caption{-webkit-line-clamp:4;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical}
+  .pdf-section{break-inside:auto;page-break-inside:auto}
+  .pdf-cover{page-break-after:always}
   .pdf-cover table{width:100%;border-collapse:collapse;border:1px solid #dde3ee}
   .pdf-cover td{padding:9px 14px;font-size:13px;border-bottom:1px solid #eef1f6}
   .pdf-cover td:first-child{background:#1a3a5c;color:#fff;font-weight:600;width:150px}
-  .pdf-cover-hdr{background:#1a3a5c;color:#fff;padding:24px 28px;border-radius:8px 8px 0 0;margin-bottom:0}
+  .pdf-cover-hdr{background:#1a3a5c;color:#fff;padding:24px 28px;margin-bottom:0}
   .pdf-sec-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1a3a5c;border-bottom:2px solid #1a3a5c;padding-bottom:6px;margin-bottom:14px}
 }
 /* LOG */
@@ -630,15 +635,22 @@ function exportPDF() {
   document.getElementById('pdfPreview').innerHTML=html;
   document.getElementById('pdfModal').classList.add('open');
 }
+const CAT_BORDER={
+  'Repair':'#a07830','Due Diligence':'#4a8ba8','Rec. Maintenance':'#b85a5a',
+  'Information':'#1a6fa0','Monitor':'#3c9a3c','Limitation':'#c0a030',
+  'System Description':'#7a7a7a'
+};
 function pCard(p,seq){
-  return `<div class="pdf-card">
+  const bdr = CAT_BORDER[p.category]||'#b0bcd0';
+  const caption = (p.caption||'').trim().slice(0,200);
+  return `<div class="pdf-card" style="border-left:4px solid ${bdr}">
     <img src="${p.src}" alt="">
     <div class="pdf-card-body">
       <div class="pdf-card-num"><strong>Photo ${seq}</strong></div>
-      ${p.section&&p.section!=='—'?`<div class="pdf-card-cat">${esc(p.section)}</div>`:''}
-      ${p.category&&p.category!=='—'?`<div style="font-size:11px;color:#7a8ca0;margin-bottom:3px">${esc(p.category)}</div>`:''}
-      ${p.caption?`<div class="pdf-card-caption">${esc(p.caption)}</div>`:''}
-    </div></div>`;
+      ${p.category&&p.category!=='—'?`<div class="pdf-card-cat" style="color:${bdr}">${esc(p.category.toUpperCase())}</div>`:''}
+      ${caption?`<div class="pdf-card-caption">${esc(caption)}</div>`:''}
+    </div>
+  </div>`;
 }
 function exportLog(){
   const addr=document.getElementById('propAddress').value||'—';
