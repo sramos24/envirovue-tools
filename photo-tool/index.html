@@ -109,7 +109,8 @@
   .btn-outline:hover { background: var(--ice); }
   .btn-accent    { background: #7a3da8; color: #fff; }
   .btn-accent:hover { background: #642e8d; }
-
+  .btn-teal      { background: #1a7a6e; color: #fff; }
+  .btn-teal:hover { background: #156058; }
   /* ── MAIN LAYOUT ── */
   main {
     max-width: 1200px;
@@ -528,6 +529,8 @@
   <div class="brand">Insight <span>Environmental</span> — Photo Documentation</div>
   <div class="actions">
     <button class="btn btn-accent btn-sm" id="linkBtn">🔗 Link Field Notes</button>
+    <button class="btn btn-teal btn-sm" id="hiImportBtn">📋 Load HI Session</button>
+    <input type="file" id="hiImportInput" accept=".json" style="display:none">
     <input type="file" id="mapInput" accept=".json" style="display:none">
     <button class="btn btn-amber btn-sm" id="saveBtn" title="Save session as backup">💾 Save</button>
     <button class="btn btn-ghost btn-sm" id="restoreBtn" title="Restore saved session">↩ Restore</button>
@@ -812,6 +815,70 @@ function wireEvents() {
   // Link Field Notes
   const mi = document.getElementById('mapInput');
   document.getElementById('linkBtn').addEventListener('click', () => mi.click());
+  // Home Inspector Session import
+  const hii = document.getElementById('hiImportInput');
+  document.getElementById('hiImportBtn').addEventListener('click', () => hii.click());
+  hii.addEventListener('change', async (ev) => {
+    const file = ev.target.files[0];
+    if (!file) return;
+    toast('Reading session file...');
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const bundle = JSON.parse(e.target.result);
+        if (bundle.version !== 3 || !bundle.state || !bundle.photoStore) {
+          toast('Not a valid Home Inspector session (need v3 with photos)');
+          return;
+        }
+        const { state: hi, photoStore } = bundle;
+        const SECTION_MAP = {
+          'GENERAL':'General','ROOFING':'Roofing','EXTERIORS':'Exteriors',
+          'ELECTRICAL':'Electrical','HVAC':'HVAC','PLUMBING':'Plumbing',
+          'INTERIORS':'Interiors','STRUCTURAL':'Structural'
+        };
+        const CODE_CAT = {
+          'SD':'System Description','R':'Repair','DD':'Due Diligence',
+          'RM':'Rec. Maintenance','I':'Information','M':'Monitor','LM':'Limitation'
+        };
+        if (hi.general) {
+          if (hi.general.address && !document.getElementById('propAddress').value)
+            document.getElementById('propAddress').value = hi.general.address;
+          if (hi.general.date && !document.getElementById('propDate').value) {
+            const d = new Date(hi.general.date + 'T12:00:00');
+            document.getElementById('propDate').value = d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+          }
+        }
+        let imported = 0;
+        for (const [sec, secData] of Object.entries(hi.sections || {})) {
+          const section = SECTION_MAP[sec] || sec;
+          const findings = [...(secData.descriptions||[]),...(secData.observations||[]),...(secData.limitations||[])];
+          for (const f of findings) {
+            for (const ap of (f.attachedPhotos || [])) {
+              const stored = photoStore[ap.id];
+              if (!stored?.src) continue;
+              photos.push({
+                id: nextId++, src: stored.src,
+                filename: ap.filename || ap.id,
+                section, category: CODE_CAT[f.code] || '—',
+                caption: (f.text || '').trim(),
+                order: photos.length,
+                photoId: null, linked: false, findingText: (f.text||'').trim()
+              });
+              imported++;
+            }
+          }
+        }
+        if (!imported) { toast('No attached photos found in this session'); return; }
+        renderPhotos(); updateBadges(); showToolbar(); updateStats();
+        document.getElementById('compressPanel').classList.add('visible');
+        autosave();
+        toast(`Imported ${imported} photo${imported!==1?'s':''} from Home Inspector`);
+      } catch(err) { console.error(err); toast('Could not read session file'); }
+    };
+    reader.readAsText(file);
+    ev.target.value = '';
+  });
+  
   mi.addEventListener('change', e => handleMapFile(e.target.files[0]));
   document.getElementById('rematchBtn').addEventListener('click', rematchAll);
   document.getElementById('unlinkBtn').addEventListener('click', unlinkMap);
