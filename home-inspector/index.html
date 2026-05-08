@@ -828,6 +828,19 @@ function startDictation(btn, findingId) {
 function buildExportText() {
   const lines = [];
   const g = state.general;
+
+  // Build global sequential photo number map — same traversal order as Photo Tool import
+  // so "Photo 3" in the report matches "Photo 3" in the Photo Tool PDF
+  const photoSeqMap = {};
+  let photoSeq = 1;
+  INSPECT_SECTIONS.forEach(sec => {
+    const s = state.sections[sec];
+    const sortedObs = [...s.observations].sort((a,b) => CAT_ORDER.indexOf(a.code) - CAT_ORDER.indexOf(b.code));
+    [...s.descriptions, ...sortedObs, ...s.limitations].forEach(f => {
+      (f.attachedPhotos || []).forEach(ap => { photoSeqMap[ap.id] = photoSeq++; });
+    });
+  });
+
   lines.push('## GENERAL');
   if (g.address)    lines.push('Property address: ' + g.address);
   if (g.date)       lines.push('Inspection date: '  + formatDate(g.date));
@@ -840,7 +853,6 @@ function buildExportText() {
 
   INSPECT_SECTIONS.forEach(sec => {
     const s = state.sections[sec];
-    // Sort observations by category order: R, DD, RM, I, M
     const sortedObs = [...s.observations].sort((a,b) => CAT_ORDER.indexOf(a.code) - CAT_ORDER.indexOf(b.code));
     const all = [...s.descriptions, ...sortedObs, ...s.limitations];
     if (all.length === 0) return;
@@ -849,7 +861,8 @@ function buildExportText() {
       const text = (f.text||'').trim();
       if (!text) return;
       lines.push(f.code + ': ' + text);
-      if (f.photos && f.photos.trim()) lines.push('photos: ' + f.photos.trim());
+      const refs = (f.attachedPhotos || []).map(ap => photoSeqMap[ap.id] ? 'Photo ' + photoSeqMap[ap.id] : null).filter(Boolean);
+      if (refs.length) lines.push('photos: ' + refs.join(', '));
     });
   });
   return lines.join('\n');
