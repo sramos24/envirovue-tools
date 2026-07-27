@@ -417,6 +417,7 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
   background: rgba(0,0,0,0.88); z-index: 500; flex-direction: column;
 }
 .photo-overlay.active { display: flex; }
+.photo-overlay.drag-over { outline: 3px dashed #4a9eff; outline-offset: -8px; background: rgba(74,158,255,0.12); }
 .photo-overlay-head {
   background: var(--teal); padding: 12px 16px;
   padding-top: calc(12px + env(safe-area-inset-top));
@@ -1343,6 +1344,7 @@ function renderPickerGrid() {
     grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#aaa;">
       <div style="font-size:40px;margin-bottom:12px;">📷</div>
       <p style="font-size:14px;">Tap <strong>Camera</strong> to take a photo or <strong>Library</strong> to choose existing photos</p>
+      <p style="font-size:13px;margin-top:14px;color:#9ab;">On desktop, you can also <strong>drag &amp; drop photos here</strong></p>
     </div>`;
     return;
   }
@@ -1721,6 +1723,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('pickerLibrary').addEventListener('click', () => libInput.click());
   camInput.addEventListener('change', e => { handlePickerFiles(e.target.files); camInput.value = ''; });
   libInput.addEventListener('change', e => { handlePickerFiles(e.target.files); libInput.value = ''; });
+
+  // Drag & drop onto photo picker overlay (desktop)
+  const mOverlay = document.getElementById('photoOverlay');
+  ['dragenter','dragover'].forEach(evt => {
+    mOverlay.addEventListener(evt, e => {
+      e.preventDefault(); e.stopPropagation();
+      if (e.dataTransfer && Array.from(e.dataTransfer.types||[]).includes('Files')) mOverlay.classList.add('drag-over');
+    });
+  });
+  ['dragleave','dragend'].forEach(evt => {
+    mOverlay.addEventListener(evt, e => {
+      e.preventDefault(); e.stopPropagation();
+      if (e.target === mOverlay || !mOverlay.contains(e.relatedTarget)) mOverlay.classList.remove('drag-over');
+    });
+  });
+  mOverlay.addEventListener('drop', async e => {
+    e.preventDefault(); e.stopPropagation();
+    mOverlay.classList.remove('drag-over');
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) await handlePickerFiles(e.dataTransfer.files);
+  });
 
   document.querySelectorAll('.modal-back').forEach(m => {
     m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });

@@ -135,6 +135,8 @@ input,textarea,select,button { font-family:inherit; font-size:inherit; }
 /* PHOTO PICKER OVERLAY */
 .photo-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:300; flex-direction:column; }
 .photo-overlay.active { display:flex; }
+.photo-overlay.drag-over { outline:3px dashed #4a9eff; outline-offset:-8px; background:rgba(74,158,255,0.12); }
+.picker-grid.drag-over { background:rgba(74,158,255,0.08); }
 .picker-header { padding:14px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.1); }
 .picker-title { color:#fff; font-size:16px; font-weight:700; flex:1; }
 .picker-count-label { color:rgba(255,255,255,0.6); font-size:13px; }
@@ -507,6 +509,7 @@ function renderPickerGrid() {
     grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#aaa;">
       <div style="font-size:40px;margin-bottom:12px;">&#128247;</div>
       <p style="font-size:14px;">Tap <strong>Camera</strong> to take a photo<br>or <strong>Add More</strong> to pick from your library</p>
+      <p style="font-size:13px;margin-top:14px;color:#7a8ca0;">On desktop, you can also <strong>drag &amp; drop photos here</strong></p>
     </div>`;
     return;
   }
@@ -1053,6 +1056,32 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('pickerLibrary').addEventListener('change', async (ev) => {
     await handlePickerFiles(ev.target.files); ev.target.value='';
+  });
+
+  // Drag & drop onto the photo picker overlay (desktop)
+  const overlay = document.getElementById('photoOverlay');
+  const pickerGrid = document.getElementById('pickerGrid');
+  ['dragenter','dragover'].forEach(evt => {
+    overlay.addEventListener(evt, e => {
+      e.preventDefault(); e.stopPropagation();
+      if (e.dataTransfer && Array.from(e.dataTransfer.types||[]).includes('Files')) {
+        overlay.classList.add('drag-over');
+      }
+    });
+  });
+  ['dragleave','dragend'].forEach(evt => {
+    overlay.addEventListener(evt, e => {
+      e.preventDefault(); e.stopPropagation();
+      // only clear if leaving the overlay itself, not a child
+      if (e.target === overlay || !overlay.contains(e.relatedTarget)) overlay.classList.remove('drag-over');
+    });
+  });
+  overlay.addEventListener('drop', async e => {
+    e.preventDefault(); e.stopPropagation();
+    overlay.classList.remove('drag-over');
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+      await handlePickerFiles(e.dataTransfer.files);
+    }
   });
 
   // Modal backdrop close
