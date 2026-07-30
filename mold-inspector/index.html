@@ -615,6 +615,7 @@ input, textarea, select, button { font-family: inherit; font-size: inherit; }
       <button class="btn" style="width:100%;margin-bottom:8px;" id="saveBtn">💾 Save Session</button>
       <button class="btn" style="width:100%;margin-bottom:8px;" id="loadBtn">📂 Load Session</button>
       <input type="file" id="loadFile" accept=".json" style="display:none">
+      <button class="btn" style="width:100%;margin-bottom:14px;background:var(--teal);color:#fff;" id="exportPhotosBtn">📸 Export Photos to Photo Tool</button>
       <button class="btn danger" style="width:100%;" id="clearBtn">🗑 Clear All Data</button>
     </div>
   </div>
@@ -1677,6 +1678,64 @@ document.addEventListener('DOMContentLoaded', async () => {
     a.href = URL.createObjectURL(blob); a.download = `${addr}_mold_session.json`; a.click();
     URL.revokeObjectURL(a.href);
     toast('Session saved');
+  });
+
+  // Export photos in Photo Tool v3 format (rooms → sections, conditions → categories)
+  document.getElementById('exportPhotosBtn').addEventListener('click', async () => {
+    toast('Bundling photos...');
+    const allPhotos = await idbGetAll().catch(() => []);
+    const byId = {};
+    allPhotos.forEach(p => { byId[p.id] = p; });
+
+    const COND_CAT = { '1':'Condition 1 - Normal', '2':'Condition 2 - Settled Spores', '3':'Condition 3 - Actual Growth' };
+    // Build a synthetic HI-style state: one "section" holding all rooms as findings
+    const sections = { MOLD: { descriptions: [], observations: [], limitations: [] } };
+    const photoStore = {};
+    let photoCount = 0;
+
+    (state.rooms || []).forEach(room => {
+      const aps = room.attachedPhotos || [];
+      if (!aps.length) return;
+      aps.forEach(ap => {
+        const stored = byId[ap.id];
+        if (stored && stored.src) { photoStore[ap.id] = { src: stored.src, filename: stored.filename || ap.filename }; photoCount++; }
+      });
+      // Each room becomes a finding; caption = room name + remediation
+      let text = room.name || 'Room';
+      if (room.condition) text += ` — ${COND_CAT[room.condition] || ''}`.trimEnd();
+      if (room.remediation && room.remediation.trim()) text += `. ${room.remediation.trim()}`;
+      sections.MOLD.observations.push({
+        id: 'mroom_' + Math.random().toString(36).slice(2),
+        code: room.condition === '3' ? 'R' : room.condition === '2' ? 'DD' : 'I',
+        text,
+        attachedPhotos: aps,
+        // custom fields the Photo Tool import will read directly
+        _moldSection: room.name || 'Mold',
+        _moldCategory: COND_CAT[room.condition] || 'Observation'
+      });
+    });
+
+    if (!photoCount) { toast('No photos attached to any room'); return; }
+
+    const bundle = {
+      version: 3,
+      source: 'mold-inspector',
+      state: {
+        general: {
+          address: state.general.address || '',
+          date: state.general.inspectionDate || ''
+        },
+        sections
+      },
+      photoStore
+    };
+    const blob = new Blob([JSON.stringify(bundle)], { type: 'application/json' });
+    const addr = (state.general.address || 'mold').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = `${addr}_mold_photos.json`; a.click();
+    URL.revokeObjectURL(a.href);
+    toast(`Exported ${photoCount} photo${photoCount!==1?'s':''} — load in Photo Tool`);
+    document.getElementById('moreModal').classList.remove('active');
   });
 
   const loadFile = document.getElementById('loadFile');

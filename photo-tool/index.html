@@ -280,7 +280,7 @@ let photos = [], nextId = 1, photoMap = {}, linkedFile = '';
 let viewMode = 'grid', activeFilter = 'All';
 
 const SECTIONS   = ['General','Roofing','Exteriors','Electrical','HVAC','Plumbing','Interiors','Structural','—'];
-const CATEGORIES = ['System Description','Repair','Due Diligence','Rec. Maintenance','Information','Monitor','Limitation','—'];
+const CATEGORIES = ['System Description','Repair','Due Diligence','Rec. Maintenance','Information','Monitor','Limitation','Condition 1 - Normal','Condition 2 - Settled Spores','Condition 3 - Actual Growth','—'];
 
 // ─── COMPRESS ─────────────────────────────────────────────
 function getCompress() {
@@ -582,15 +582,19 @@ function importHISession(file) {
         }
       }
       let imported=0;
+      const isMold = bundle.source === 'mold-inspector';
       for(const [sec,sd] of Object.entries(hi.sections||{})){
         const section=SM[sec]||sec;
         const sortedObs=[...(sd.observations||[])].sort((a,b)=>ORD.indexOf(a.code)-ORD.indexOf(b.code));
         const findings=[...(sd.descriptions||[]),...sortedObs,...(sd.limitations||[])];
         for(const f of findings){
+          // Mold exports carry their own section/category on each finding
+          const useSection  = f._moldSection  || section;
+          const useCategory = f._moldCategory || CM[f.code] || '—';
           for(const ap of (f.attachedPhotos||[])){
             const stored=photoStore[ap.id];
             if(!stored?.src) continue;
-            photos.push({id:nextId++,src:stored.src,filename:ap.filename||ap.id,section,category:CM[f.code]||'—',caption:(f.text||'').trim(),linked:false,order:photos.length});
+            photos.push({id:nextId++,src:stored.src,filename:ap.filename||ap.id,section:useSection,category:useCategory,caption:(f.text||'').trim(),linked:false,order:photos.length});
             imported++;
           }
         }
@@ -599,7 +603,7 @@ function importHISession(file) {
       showToolbar(); renderPhotos(); updateBadges();
       document.getElementById('compressPanel').classList.add('visible');
       autosave();
-      toast('Imported '+imported+' photo'+(imported!==1?'s':'')+' from Home Inspector');
+      toast('Imported '+imported+' photo'+(imported!==1?'s':'')+' from '+(isMold?'Mold Inspector':'Home Inspector'));
     } catch(err){ console.error(err); toast('Could not read session file'); }
   };
   reader.readAsText(file);
@@ -638,7 +642,8 @@ function exportPDF() {
 const CAT_BORDER={
   'Repair':'#a07830','Due Diligence':'#4a8ba8','Rec. Maintenance':'#b85a5a',
   'Information':'#1a6fa0','Monitor':'#3c9a3c','Limitation':'#c0a030',
-  'System Description':'#7a7a7a'
+  'System Description':'#7a7a7a',
+  'Condition 1 - Normal':'#3c9a3c','Condition 2 - Settled Spores':'#c0a030','Condition 3 - Actual Growth':'#b83030'
 };
 function pCard(p,seq){
   const bdr = CAT_BORDER[p.category]||'#b0bcd0';
