@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#5c3a1a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<title>Asbestos & Lead Survey — Insight Environmental</title>
+<style>
+:root {
+  --brown:#5c3a1a; --brown-light:#8a5a2a; --brown-dim:#d4b896;
+  --amber:#9a6800; --red:#b83030; --green:#2a7a4a;
+  --g50:#faf8f5; --g100:#f1ede8; --g200:#e2ddd5; --g300:#cbc3b8;
+  --g400:#a89a88; --g500:#7a6d5c; --g600:#4a4238; --g700:#2d2820;
+  --radius:12px; --radius-sm:8px;
+  --shadow:0 2px 8px rgba(0,0,0,0.08); --shadow-lg:0 8px 24px rgba(0,0,0,0.15);
+}
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#efe9e2; color:var(--g700); min-height:100vh; -webkit-font-smoothing:antialiased; }
+body { padding-bottom:max(80px,calc(80px + env(safe-area-inset-bottom))); }
+input,textarea,select,button { font-family:inherit; font-size:inherit; }
+
+/* HEADER */
+.app-header { background:var(--brown); color:#fff; padding:12px 14px; padding-top:max(12px,env(safe-area-inset-top)); padding-left:max(14px,env(safe-area-inset-left)); padding-right:max(14px,env(safe-area-inset-right)); position:sticky; top:0; z-index:100; box-shadow:var(--shadow); display:flex; align-items:center; gap:10px; }
+.menu-btn { background:none; border:none; color:#fff; font-size:22px; padding:4px 8px; cursor:pointer; border-radius:4px; }
+.menu-btn:active { background:rgba(255,255,255,0.15); }
+.hdr-title { flex:1; min-width:0; }
+.hdr-co { font-size:14px; font-weight:700; letter-spacing:0.02em; }
+.hdr-sec { font-size:12px; color:var(--brown-dim); margin-top:2px; }
+.hdr-btns { display:flex; gap:6px; }
+.hdr-btn { background:rgba(255,255,255,0.15); border:none; color:#fff; padding:7px 12px; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; font-weight:500; }
+.hdr-btn:active { background:rgba(255,255,255,0.3); }
+.hdr-btn.primary { background:#fff; color:var(--brown); }
+
+/* LAYOUT */
+.layout { display:flex; min-height:calc(100vh - 60px); }
+.sidebar { width:240px; background:#fff; border-right:1px solid var(--g200); padding:12px 0; flex-shrink:0; }
+.sb-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--g500); padding:8px 16px 4px; }
+.sb-item { display:flex; align-items:center; gap:10px; padding:11px 16px; cursor:pointer; font-size:14px; color:var(--g600); border-left:3px solid transparent; user-select:none; }
+.sb-item:active { background:var(--g100); }
+.sb-item.active { background:#f5ede3; border-left-color:var(--brown); color:var(--brown); font-weight:600; }
+.sb-item.disabled { opacity:0.4; }
+.sb-count { margin-left:auto; background:var(--g200); color:var(--g600); font-size:11px; font-weight:600; padding:1px 7px; border-radius:10px; min-width:20px; text-align:center; }
+.sb-item.active .sb-count { background:var(--brown); color:#fff; }
+.sb-item.has-items .sb-count { background:#f0d9a8; color:#8a5a14; }
+.sb-item.active.has-items .sb-count { background:var(--brown); color:#fff; }
+.sb-toggle { padding:10px 16px; border-top:1px solid var(--g200); margin-top:8px; }
+.sb-toggle-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:13px; color:var(--g600); }
+.sb-toggle-row input { width:auto; }
+.sidebar-overlay { display:none; position:fixed; inset:0; top:0; background:rgba(0,0,0,0.4); z-index:50; }
+
+/* MAIN */
+.main { flex:1; padding:16px; min-width:0; max-width:900px; }
+.page-title { font-size:20px; font-weight:700; color:var(--brown); margin-bottom:4px; }
+.page-sub { font-size:13px; color:var(--g500); margin-bottom:16px; }
+
+/* FORM */
+.form-card { background:#fff; border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); margin-bottom:14px; }
+.form-card-title { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--brown); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--g200); }
+.form-row { margin-bottom:12px; }
+.form-row:last-child { margin-bottom:0; }
+.form-row label { display:block; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--g500); margin-bottom:4px; }
+.form-row input,.form-row textarea,.form-row select { width:100%; padding:9px 11px; border:1px solid var(--g300); border-radius:var(--radius-sm); background:#fff; color:var(--g700); font-size:15px; }
+.form-row input:focus,.form-row textarea:focus,.form-row select:focus { outline:none; border-color:var(--brown); box-shadow:0 0 0 2px rgba(92,58,26,0.15); }
+.form-row textarea { resize:vertical; min-height:70px; line-height:1.45; }
+.form-2col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media(max-width:560px){ .form-2col { grid-template-columns:1fr; } }
+
+/* SCOPE CHECKBOXES */
+.scope-check { display:flex; align-items:flex-start; gap:10px; padding:9px 0; border-bottom:1px solid var(--g100); }
+.scope-check:last-child { border-bottom:none; }
+.scope-check input { width:20px; height:20px; margin-top:1px; flex-shrink:0; accent-color:var(--brown); }
+.scope-check-body { flex:1; }
+.scope-check-title { font-size:14px; font-weight:600; color:var(--g700); }
+.scope-check-desc { font-size:12px; color:var(--g500); margin-top:2px; }
+
+/* ENTRY CARDS (HA / XRF) */
+.add-btn-row { margin-bottom:14px; }
+.add-btn { width:100%; padding:12px; border:1.5px dashed var(--brown); border-radius:var(--radius-sm); background:#f5ede3; font-size:14px; font-weight:600; cursor:pointer; color:var(--brown); text-align:center; }
+.add-btn:active { transform:scale(0.98); }
+.entry-card { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:12px; overflow:hidden; border-left:4px solid var(--g300); }
+.entry-card.cond-good { border-left-color:var(--green); }
+.entry-card.cond-fair { border-left-color:var(--amber); }
+.entry-card.cond-poor { border-left-color:var(--red); }
+.entry-card.haz-yes { border-left-color:var(--red); }
+.entry-head { display:flex; align-items:center; gap:8px; padding:10px 14px; background:var(--g50); border-bottom:1px solid var(--g200); }
+.entry-num { background:var(--brown); color:#fff; font-size:12px; font-weight:700; padding:3px 10px; border-radius:12px; }
+.entry-label { font-size:13px; font-weight:600; color:var(--g600); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.entry-del { background:none; border:none; color:var(--g400); font-size:18px; padding:0 4px; cursor:pointer; line-height:1; }
+.entry-del:active { color:var(--red); }
+.entry-body { padding:12px 14px; }
+.field-mini { margin-bottom:10px; }
+.field-mini:last-child { margin-bottom:0; }
+.field-mini label { display:block; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.03em; color:var(--g500); margin-bottom:3px; }
+.field-mini input,.field-mini select,.field-mini textarea { width:100%; padding:8px 10px; border:1px solid var(--g300); border-radius:6px; font-size:14px; color:var(--g700); background:#fff; }
+.field-mini input:focus,.field-mini select:focus,.field-mini textarea:focus { outline:none; border-color:var(--brown); box-shadow:0 0 0 2px rgba(92,58,26,0.12); }
+.field-mini textarea { resize:vertical; min-height:48px; }
+.field-with-mic { display:flex; gap:6px; align-items:flex-start; }
+.field-with-mic > *:first-child { flex:1; }
+.mic-btn { background:var(--brown); color:#fff; border:none; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:15px; flex-shrink:0; }
+.mic-btn:active { transform:scale(0.92); }
+.mic-btn.listening { background:var(--red); animation:pulse 1s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(184,48,48,0.5)} 50%{box-shadow:0 0 0 8px rgba(184,48,48,0)} }
+
+/* HAZARD RANK (optional, collapsible) */
+.haz-toggle-row { display:flex; align-items:center; gap:8px; margin:10px 0 4px; padding-top:10px; border-top:1px dashed var(--g200); }
+.haz-toggle-row input { width:auto; accent-color:var(--brown); }
+.haz-toggle-row label { font-size:12px; font-weight:600; color:var(--g600); text-transform:none; letter-spacing:0; }
+.haz-fields { display:none; }
+.haz-fields.visible { display:block; }
+
+/* PHOTO STRIP */
+.photo-strip { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.photo-thumb-wrap { position:relative; width:56px; height:56px; flex-shrink:0; }
+.photo-thumb-wrap img { width:56px; height:56px; object-fit:cover; border-radius:4px; display:block; }
+.photo-thumb-del { position:absolute; top:-6px; right:-6px; background:var(--red); color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:11px; line-height:18px; text-align:center; cursor:pointer; padding:0; }
+.photo-add-btn { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:var(--brown); background:rgba(92,58,26,0.08); border:1.5px dashed var(--brown); border-radius:6px; padding:5px 10px; cursor:pointer; margin-top:8px; }
+.photo-add-btn:active { background:rgba(92,58,26,0.15); }
+
+.empty { padding:24px 16px; text-align:center; color:var(--g400); font-size:13px; font-style:italic; }
+
+/* PHOTO PICKER OVERLAY */
+.photo-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:300; flex-direction:column; }
+.photo-overlay.active { display:flex; }
+.photo-overlay.drag-over { outline:3px dashed #d4b896; outline-offset:-8px; background:rgba(212,184,150,0.12); }
+.picker-header { padding:14px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.1); }
+.picker-title { color:#fff; font-size:16px; font-weight:700; flex:1; }
+.picker-count-label { color:rgba(255,255,255,0.6); font-size:13px; }
+.picker-close { background:none; border:none; color:#fff; font-size:24px; cursor:pointer; padding:0 4px; }
+.picker-grid { flex:1; overflow-y:auto; padding:12px; display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.picker-item { position:relative; aspect-ratio:1; border-radius:6px; overflow:hidden; cursor:pointer; border:2px solid transparent; }
+.picker-item.selected { border-color:#c88a3a; }
+.picker-item img { width:100%; height:100%; object-fit:cover; display:block; }
+.picker-check { position:absolute; top:4px; right:4px; width:22px; height:22px; background:rgba(0,0,0,0.4); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:700; }
+.picker-item.selected .picker-check { background:#c88a3a; }
+.picker-footer { padding:12px 16px; border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:10px; }
+.picker-source-btn { flex:1; padding:12px; border:none; border-radius:var(--radius-sm); font-size:14px; font-weight:600; cursor:pointer; }
+.picker-source-btn.camera { background:var(--brown); color:#fff; }
+.picker-source-btn.library { background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.3); }
+.picker-attach-btn { padding:12px 18px; background:#3a9c6a; color:#fff; border:none; border-radius:var(--radius-sm); font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.picker-attach-btn:disabled { opacity:0.4; }
+
+/* MODALS */
+.modal-back { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; padding:16px; }
+.modal-back.active { display:flex; }
+.modal { background:#fff; border-radius:var(--radius); max-width:700px; width:100%; max-height:90vh; display:flex; flex-direction:column; box-shadow:var(--shadow-lg); }
+.modal-head { padding:14px 16px; border-bottom:1px solid var(--g200); display:flex; align-items:center; gap:10px; }
+.modal-title { flex:1; font-size:16px; font-weight:700; color:var(--brown); }
+.modal-close { background:none; border:none; font-size:22px; color:var(--g500); cursor:pointer; padding:0 4px; }
+.modal-body { padding:14px 16px; overflow-y:auto; flex:1; }
+.modal-body textarea { width:100%; min-height:340px; border:1px solid var(--g300); border-radius:var(--radius-sm); padding:10px; font-family:'SF Mono',Menlo,Consolas,monospace; font-size:12px; line-height:1.55; color:var(--g700); resize:vertical; }
+.modal-foot { padding:12px 16px; border-top:1px solid var(--g200); display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.btn { padding:9px 14px; border:1px solid var(--g300); background:#fff; color:var(--g700); border-radius:var(--radius-sm); font-size:14px; font-weight:600; cursor:pointer; }
+.btn:active { transform:scale(0.97); }
+.btn.primary { background:var(--brown); color:#fff; border-color:var(--brown); }
+.btn.danger { background:#fff; color:var(--red); border-color:#f2c2c2; }
+
+/* TOAST */
+.toast { position:fixed; bottom:max(20px,calc(20px + env(safe-area-inset-bottom))); left:50%; transform:translateX(-50%) translateY(60px); background:var(--g700); color:#fff; padding:10px 18px; border-radius:22px; font-size:13px; font-weight:500; box-shadow:var(--shadow-lg); opacity:0; transition:all 0.3s; z-index:400; pointer-events:none; }
+.toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+/* RESPONSIVE */
+@media (max-width:768px) {
+  .sidebar { position:fixed; inset:60px 0 0 0; transform:translateX(-100%); transition:transform 0.25s; z-index:60; width:260px; right:auto; overflow-y:auto; box-shadow:var(--shadow-lg); }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar-overlay.open { display:block; }
+  .main { padding:12px; }
+}
+@media (min-width:769px) {
+  .menu-btn { display:none; }
+  .sidebar-overlay { display:none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <button class="menu-btn" id="menuBtn" aria-label="Menu">&#9776;</button>
+  <div class="hdr-title">
+    <div class="hdr-co">Insight Environmental</div>
+    <div class="hdr-sec" id="hdrSec">Asbestos &amp; Lead Survey</div>
+  </div>
+  <div class="hdr-btns">
+    <button class="hdr-btn" id="menuMore">&#8226;&#8226;&#8226;</button>
+    <button class="hdr-btn primary" id="exportBtn">Export</button>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sbOverlay"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-label">Survey</div>
+    <div class="sb-item" data-sec="GENERAL"><span>&#127970;</span><span>General / Building</span><span class="sb-count" id="count-GENERAL">&#8212;</span></div>
+    <div class="sb-item" data-sec="SCOPE"><span>&#128203;</span><span>Scope of Work</span><span class="sb-count" id="count-SCOPE">&#8212;</span></div>
+    <div class="sb-item" data-sec="ASBESTOS"><span>&#9888;&#65039;</span><span>Asbestos (HA)</span><span class="sb-count" id="count-ASBESTOS">0</span></div>
+    <div class="sb-item" data-sec="LEAD"><span>&#128738;</span><span>Lead Paint (XRF)</span><span class="sb-count" id="count-LEAD">0</span></div>
+    <div class="sb-toggle">
+      <div class="sb-label" style="padding:0 0 6px;">Include in Survey</div>
+      <div class="sb-toggle-row"><input type="checkbox" id="toggleAsbestos" checked><label for="toggleAsbestos">Asbestos survey</label></div>
+      <div class="sb-toggle-row"><input type="checkbox" id="toggleLead" checked><label for="toggleLead">Lead paint (XRF)</label></div>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<!-- Photo Picker Overlay -->
+<div class="photo-overlay" id="photoOverlay">
+  <div class="picker-header">
+    <div class="picker-title">Attach Photos</div>
+    <span class="picker-count-label" id="pickerCount">0 selected</span>
+    <button class="picker-close" id="pickerClose">&#215;</button>
+  </div>
+  <div class="picker-grid" id="pickerGrid"></div>
+  <div class="picker-footer">
+    <label class="picker-source-btn camera">&#128248; Camera
+      <input type="file" id="pickerCamera" accept="image/*" capture="environment" style="display:none"></label>
+    <label class="picker-source-btn library">&#128444;&#65039; Add More
+      <input type="file" id="pickerLibrary" accept="image/*" multiple style="display:none"></label>
+    <button class="picker-attach-btn" id="pickerSave" disabled>Attach (0)</button>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-back" id="exportModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Field Notes Export</div>
+      <button class="modal-close" id="exportClose">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--g500);margin-bottom:10px;">Copy and paste into your Asbestos/Lead Claude Project to generate the report.</p>
+      <textarea id="exportText" readonly></textarea>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="downloadBtn">Download .txt</button>
+      <button class="btn primary" id="copyBtn">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- More Menu Modal -->
+<div class="modal-back" id="moreModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head">
+      <div class="modal-title">Options</div>
+      <button class="modal-close" id="moreClose">&#215;</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Navigate</div>
+      <a href="../" class="btn" style="width:100%;margin-bottom:14px;display:block;text-align:center;text-decoration:none;">&#9664; Back to Envirovue</a>
+      <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Session</div>
+      <button class="btn" style="width:100%;margin-bottom:8px;" id="saveJsonBtn">&#128190; Save Session (JSON backup)</button>
+      <button class="btn" style="width:100%;margin-bottom:8px;" id="loadJsonBtn">&#128194; Load Session</button>
+      <input type="file" id="loadFile" accept=".json" style="display:none;">
+      <button class="btn" style="width:100%;margin-bottom:14px;background:#1a7a6e;color:#fff;" id="exportPhotosBtn">&#128248; Export Photos to Photo Tool</button>
+      <button class="btn danger" style="width:100%;" id="clearBtn">&#128465; Clear All Data</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════════════════
+const STORAGE_KEY = 'insight_asbestos_lead_v1';
+const IDB_NAME  = 'insight_asblead_photos';
+const IDB_STORE = 'photos';
+const MAX_PHOTO_W = 1920;
+const PHOTO_QUALITY = 0.75;
+
+const ASB_CATEGORIES = ['Surfacing','TSI (Thermal System Insulation)','Miscellaneous'];
+const CONDITIONS = ['Good','Fair','Poor'];
+const ASB_HAZARD = ['Undetermined','No','Low','Medium','High'];
+const HAZARD_RANK = ['1 - Low','2 - Low/Moderate','3 - Moderate','4 - Moderate/High','5 - High','6 - Severe','7 - Damaged Significant'];
+const LEAD_RESULTS = ['PA1% (≥1.0 mg/cm² — LBP)','PB1% (below threshold)','0.00 / Not Detected'];
+const LEAD_HAZARD = ['YES','No','No* (good condition)','—'];
+const SIDES = ['—','A','B','C','D','A,B','A,B,C,D','abcd'];
+
+// ═══════════════════════════════════════════════════════
+//  INDEXEDDB
+// ═══════════════════════════════════════════════════════
+let idb = null;
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE, { keyPath:'id' });
+    };
+    req.onsuccess = e => { idb = e.target.result; resolve(idb); };
+    req.onerror   = e => reject(e);
+  });
+}
+async function idbPut(obj) { if(!idb) await openIDB(); return new Promise((res,rej)=>{ const tx=idb.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).put(obj); tx.oncomplete=()=>res(); tx.onerror=e=>rej(e); }); }
+async function idbGet(id) { if(!idb) await openIDB(); return new Promise((res,rej)=>{ const tx=idb.transaction(IDB_STORE,'readonly'); const r=tx.objectStore(IDB_STORE).get(id); r.onsuccess=()=>res(r.result||null); r.onerror=e=>rej(e); }); }
+async function idbGetAll() { if(!idb) await openIDB(); return new Promise((res,rej)=>{ const tx=idb.transaction(IDB_STORE,'readonly'); const r=tx.objectStore(IDB_STORE).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=e=>rej(e); }); }
+async function idbDelete(id) { if(!idb) await openIDB(); return new Promise((res,rej)=>{ const tx=idb.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).delete(id); tx.oncomplete=()=>res(); tx.onerror=e=>rej(e); }); }
+async function idbClear() { if(!idb) await openIDB(); return new Promise((res,rej)=>{ const tx=idb.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).clear(); tx.oncomplete=()=>res(); tx.onerror=e=>rej(e); }); }
+
+// ═══════════════════════════════════════════════════════
+//  IMAGE UTILITIES
+// ═══════════════════════════════════════════════════════
+function compressImage(dataUrl) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let w=img.naturalWidth, h=img.naturalHeight;
+      if (w>MAX_PHOTO_W) { h=Math.round(h*MAX_PHOTO_W/w); w=MAX_PHOTO_W; }
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      resolve(c.toDataURL('image/jpeg',PHOTO_QUALITY));
+    };
+    img.onerror=()=>resolve(dataUrl); img.src=dataUrl;
+  });
+}
+function makeThumbnail(dataUrl, size) {
+  return new Promise(resolve => {
+    const img=new Image();
+    img.onload=()=>{ let w=img.naturalWidth,h=img.naturalHeight; const sc=Math.min(size/w,size/h,1); w=Math.round(w*sc); h=Math.round(h*sc); const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); resolve(c.toDataURL('image/jpeg',0.6)); };
+    img.onerror=()=>resolve(dataUrl); img.src=dataUrl;
+  });
+}
+function readFileAsDataURL(file) { return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(new Error('Read failed')); r.readAsDataURL(file); }); }
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let state = createEmptyState();
+let currentSection = 'GENERAL';
+let uidCounter = 1;
+
+function createEmptyState() {
+  return {
+    general: {
+      address:'', client:'', date:new Date().toISOString().slice(0,10), reportDate:'', inspector:'Steve Ramos, CAC-17-6062',
+      surveyType:'', leadMethod:'XRF Analysis — Heurisis XRF Analyzer',
+      foundation:'', structure:'', roofing:'', cladding:'', chimney:'', windows:'', flooring:'', ceilings:'', walls:'', otherBuilding:''
+    },
+    scope: { asbestosVisual:true, asbestosBulk:false, leadXRF:true, notes:'' },
+    includeAsbestos:true, includeLead:true,
+    asbestos: [],  // { id, ha, material, color, pattern, category, condition, hazard, hazardRankOn, hazardRank, notes, attachedPhotos }
+    lead: []       // { id, side, location, component, substrate, color, condition, result, hazard, notes, attachedPhotos }
+  };
+}
+function newUid() { return 'e_' + Date.now() + '_' + (uidCounter++); }
+
+// ═══════════════════════════════════════════════════════
+//  PERSISTENCE
+// ═══════════════════════════════════════════════════════
+function save() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY); if(!raw) return;
+    const p = JSON.parse(raw);
+    if (p && p.general) {
+      p.asbestos = (p.asbestos||[]).map(a => ({ ...a, attachedPhotos:a.attachedPhotos||[] }));
+      p.lead     = (p.lead||[]).map(l => ({ ...l, attachedPhotos:l.attachedPhotos||[] }));
+      p.scope    = p.scope || { asbestosVisual:true, asbestosBulk:false, leadXRF:true, notes:'' };
+      if (typeof p.includeAsbestos === 'undefined') p.includeAsbestos = true;
+      if (typeof p.includeLead === 'undefined') p.includeLead = true;
+      state = p;
+    }
+  } catch(e){}
+}
+
+// ═══════════════════════════════════════════════════════
+//  PHOTO PICKER
+// ═══════════════════════════════════════════════════════
+let pickerTarget = null;   // { list:'asbestos'|'lead', id }
+let pickerPool = [];
+let pickerNextPoolId = 1;
+
+function findEntry(list, id) { return (state[list]||[]).find(e => e.id === id); }
+
+function openPhotoPicker(list, id) {
+  pickerTarget = { list, id };
+  pickerPool = [];
+  const e = findEntry(list, id);
+  if (e && e.attachedPhotos) {
+    e.attachedPhotos.forEach(p => pickerPool.push({ id:p.id, src:p.thumb||'', filename:p.filename, selected:true, existing:true, order:pickerPool.length+1 }));
+    pickerPool.forEach(async p => { const st = await idbGet(p.id).catch(()=>null); if(st&&st.src){ p.src=st.src; renderPickerGrid(); } });
+  }
+  renderPickerGrid(); updatePickerCount();
+  document.getElementById('photoOverlay').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function closePhotoPicker() {
+  document.getElementById('photoOverlay').classList.remove('active');
+  document.body.style.overflow=''; pickerTarget=null; pickerPool=[];
+}
+function renderPickerGrid() {
+  const grid = document.getElementById('pickerGrid');
+  if (!pickerPool.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#aaa;">
+      <div style="font-size:40px;margin-bottom:12px;">&#128247;</div>
+      <p style="font-size:14px;">Tap <strong>Camera</strong> to take a photo<br>or <strong>Add More</strong> to pick from your library</p>
+      <p style="font-size:13px;margin-top:14px;color:#9a8a72;">On desktop, you can also <strong>drag &amp; drop photos here</strong></p>
+    </div>`;
+    return;
+  }
+  const selected = pickerPool.filter(x=>x.selected).sort((a,b)=>a.order-b.order);
+  grid.innerHTML = pickerPool.map((p,i)=>{
+    return `<div class="picker-item ${p.selected?'selected':''}" data-idx="${i}">
+      <img src="${p.src}" alt="">
+      <div class="picker-check">${p.selected?'&#10003;':''}</div>
+    </div>`;
+  }).join('');
+  grid.querySelectorAll('.picker-item').forEach(el => el.addEventListener('click', ()=>togglePickerItem(parseInt(el.dataset.idx))));
+}
+function togglePickerItem(idx) {
+  const p=pickerPool[idx]; if(!p) return;
+  if(p.selected){ p.selected=false; p.order=0; } else { p.selected=true; p.order=Math.max(0,...pickerPool.filter(x=>x.selected).map(x=>x.order))+1; }
+  renderPickerGrid(); updatePickerCount();
+}
+function updatePickerCount() {
+  const c = pickerPool.filter(p=>p.selected).length;
+  document.getElementById('pickerCount').textContent = c+' selected';
+  const btn = document.getElementById('pickerSave');
+  btn.disabled = c===0; btn.textContent = c?`Attach (${c})`:'Attach (0)';
+}
+async function handlePickerFiles(files) {
+  const arr = Array.from(files).filter(f=>f.type.startsWith('image/'));
+  if(!arr.length) return;
+  toast('Processing '+arr.length+' photo'+(arr.length>1?'s':'')+'...');
+  for (const file of arr) {
+    const dataUrl = await readFileAsDataURL(file);
+    const compressed = await compressImage(dataUrl);
+    const thumb = await makeThumbnail(compressed, 160);
+    const id = 'ph_'+Date.now()+'_'+(pickerNextPoolId++);
+    pickerPool.push({ id, src:compressed, thumb, filename:file.name, selected:true, existing:false, order:Math.max(0,...pickerPool.filter(x=>x.selected).map(x=>x.order))+1 });
+  }
+  renderPickerGrid(); updatePickerCount();
+}
+async function savePickerSelection() {
+  if(!pickerTarget) return;
+  const selected = pickerPool.filter(p=>p.selected).sort((a,b)=>a.order-b.order);
+  const attachedPhotos = [];
+  for (const p of selected) {
+    const thumb = p.thumb || await makeThumbnail(p.src,160);
+    await idbPut({ id:p.id, src:p.src, filename:p.filename });
+    attachedPhotos.push({ id:p.id, filename:p.filename, thumb });
+  }
+  const e = findEntry(pickerTarget.list, pickerTarget.id);
+  if (e && e.attachedPhotos) {
+    for (const old of e.attachedPhotos) { if(!selected.find(s=>s.id===old.id)) await idbDelete(old.id).catch(()=>{}); }
+  }
+  if (e) { e.attachedPhotos = attachedPhotos; save(); }
+  closePhotoPicker(); renderMain();
+  toast(attachedPhotos.length+' photo'+(attachedPhotos.length!==1?'s':'')+' attached');
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════
+function renderSidebar() {
+  document.getElementById('count-ASBESTOS').textContent = state.asbestos.length;
+  document.getElementById('count-LEAD').textContent = state.lead.length;
+  document.querySelector('.sb-item[data-sec="ASBESTOS"]').classList.toggle('has-items', state.asbestos.length>0);
+  document.querySelector('.sb-item[data-sec="LEAD"]').classList.toggle('has-items', state.lead.length>0);
+  document.getElementById('count-GENERAL').innerHTML = state.general.address ? '&#10003;' : '&#8212;';
+  document.getElementById('count-SCOPE').innerHTML = (state.scope.notes || state.scope.asbestosVisual || state.scope.leadXRF) ? '&#10003;' : '&#8212;';
+  // toggle disabled sections
+  document.querySelector('.sb-item[data-sec="ASBESTOS"]').classList.toggle('disabled', !state.includeAsbestos);
+  document.querySelector('.sb-item[data-sec="LEAD"]').classList.toggle('disabled', !state.includeLead);
+  document.getElementById('toggleAsbestos').checked = state.includeAsbestos;
+  document.getElementById('toggleLead').checked = state.includeLead;
+}
+function renderActive() {
+  document.querySelectorAll('.sb-item').forEach(el => el.classList.toggle('active', el.dataset.sec===currentSection));
+  const labels = { GENERAL:'General / Building', SCOPE:'Scope of Work', ASBESTOS:'Asbestos Survey', LEAD:'Lead Paint (XRF)' };
+  document.getElementById('hdrSec').textContent = labels[currentSection] || currentSection;
+}
+function renderMain() {
+  const main = document.getElementById('main');
+  if (currentSection==='GENERAL') { main.innerHTML = renderGeneral(); wireGeneral(); }
+  else if (currentSection==='SCOPE') { main.innerHTML = renderScope(); wireScope(); }
+  else if (currentSection==='ASBESTOS') { main.innerHTML = renderAsbestos(); wireAsbestos(); }
+  else if (currentSection==='LEAD') { main.innerHTML = renderLead(); wireLead(); }
+  renderActive(); renderSidebar();
+}
+
+// ── GENERAL ──
+function renderGeneral() {
+  const g = state.general;
+  const inp = (id,val,ph) => `<input id="${id}" type="text" value="${esc(val)}" placeholder="${esc(ph||'')}">`;
+  return `
+    <h2 class="page-title">General / Building Information</h2>
+    <p class="page-sub">Background data for the report title page and building description.</p>
+    <div class="form-card">
+      <div class="form-card-title">Project</div>
+      <div class="form-row"><label>Property Address *</label>${inp('g-address',g.address,'7991 Covert Ln, Sebastopol, CA')}</div>
+      <div class="form-2col">
+        <div class="form-row"><label>Client</label>${inp('g-client',g.client,'Sonoma County CDC')}</div>
+        <div class="form-row"><label>Inspector</label>${inp('g-inspector',g.inspector,'')}</div>
+      </div>
+      <div class="form-2col">
+        <div class="form-row"><label>Inspection Date</label><input id="g-date" type="date" value="${esc(g.date)}"></div>
+        <div class="form-row"><label>Report Date</label><input id="g-reportDate" type="date" value="${esc(g.reportDate)}"></div>
+      </div>
+      <div class="form-row"><label>Survey Type</label>${inp('g-surveyType',g.surveyType,'Visual Asbestos Survey | XRF Lead Paint Inspection')}</div>
+      <div class="form-row"><label>Lead Paint Method</label>${inp('g-leadMethod',g.leadMethod,'')}</div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">Building Description — Exterior</div>
+      <div class="form-2col">
+        <div class="form-row"><label>Foundation</label>${inp('g-foundation',g.foundation,'Concrete perimeter w/ crawlspace')}</div>
+        <div class="form-row"><label>Structure</label>${inp('g-structure',g.structure,'Wood-framed')}</div>
+      </div>
+      <div class="form-2col">
+        <div class="form-row"><label>Roofing</label>${inp('g-roofing',g.roofing,'Asphalt shingles')}</div>
+        <div class="form-row"><label>Chimney</label>${inp('g-chimney',g.chimney,'Brick and mortar')}</div>
+      </div>
+      <div class="form-row"><label>Exterior Cladding</label>${inp('g-cladding',g.cladding,'Lap wood siding; TG siding; stucco skirt')}</div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">Building Description — Interior</div>
+      <div class="form-2col">
+        <div class="form-row"><label>Windows</label>${inp('g-windows',g.windows,'Single-pane metal-frame')}</div>
+        <div class="form-row"><label>Ceilings</label>${inp('g-ceilings',g.ceilings,'Pine tongue-and-groove')}</div>
+      </div>
+      <div class="form-row"><label>Flooring</label>${inp('g-flooring',g.flooring,'Carpet; tile; hardwood; 12x12 stick-on tiles')}</div>
+      <div class="form-row"><label>Walls</label>${inp('g-walls',g.walls,'Drywall w/ texture; TG paneling')}</div>
+      <div class="form-row"><label>Other Building Notes</label><textarea id="g-otherBuilding" placeholder="Additions, wall furnaces, water heater, etc.">${esc(g.otherBuilding)}</textarea></div>
+    </div>`;
+}
+function wireGeneral() {
+  const map = { 'g-address':'address','g-client':'client','g-inspector':'inspector','g-date':'date','g-reportDate':'reportDate','g-surveyType':'surveyType','g-leadMethod':'leadMethod','g-foundation':'foundation','g-structure':'structure','g-roofing':'roofing','g-chimney':'chimney','g-cladding':'cladding','g-windows':'windows','g-ceilings':'ceilings','g-flooring':'flooring','g-walls':'walls','g-otherBuilding':'otherBuilding' };
+  Object.keys(map).forEach(id => {
+    const el = document.getElementById(id); if(!el) return;
+    el.addEventListener('input', ()=>{ state.general[map[id]]=el.value; save(); renderSidebar(); });
+  });
+}
+
+// ── SCOPE ──
+function renderScope() {
+  const s = state.scope;
+  const chk = (id,on,title,desc) => `
+    <div class="scope-check">
+      <input type="checkbox" id="${id}" ${on?'checked':''}>
+      <div class="scope-check-body"><div class="scope-check-title">${esc(title)}</div><div class="scope-check-desc">${esc(desc)}</div></div>
+    </div>`;
+  return `
+    <h2 class="page-title">Scope of Work</h2>
+    <p class="page-sub">Define what this survey covers.</p>
+    <div class="form-card">
+      <div class="form-card-title">Survey Components</div>
+      ${chk('sc-asbVisual',s.asbestosVisual,'Visual Asbestos Survey','Visual identification of suspect ACM — no bulk sampling')}
+      ${chk('sc-asbBulk',s.asbestosBulk,'Bulk Asbestos Sampling','Samples collected & submitted for PLM lab analysis')}
+      ${chk('sc-leadXRF',s.leadXRF,'XRF Lead Paint Inspection','Representative XRF testing of painted components')}
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">Scope Notes</div>
+      <div class="form-row"><textarea id="sc-notes" placeholder="Additional scope details, limitations, targeting notes...">${esc(s.notes)}</textarea></div>
+    </div>`;
+}
+function wireScope() {
+  const bind = (id,field) => { const el=document.getElementById(id); if(el) el.addEventListener('change',()=>{ state.scope[field]=el.checked; save(); renderSidebar(); }); };
+  bind('sc-asbVisual','asbestosVisual'); bind('sc-asbBulk','asbestosBulk'); bind('sc-leadXRF','leadXRF');
+  const notes = document.getElementById('sc-notes');
+  if (notes) notes.addEventListener('input', ()=>{ state.scope.notes=notes.value; save(); renderSidebar(); });
+}
+
+// ── ASBESTOS ──
+function renderAsbestos() {
+  if (!state.includeAsbestos) return `<div class="empty">Asbestos survey is turned off. Enable it in the sidebar under "Include in Survey".</div>`;
+  const items = state.asbestos;
+  const cards = items.length ? items.map((a,i)=>renderAsbestosCard(a,i+1)).join('') : `<div class="empty">No suspect materials yet. Tap "Add Suspect Material" to begin.</div>`;
+  return `
+    <h2 class="page-title">Asbestos — Suspect Materials (HA)</h2>
+    <p class="page-sub">Each homogeneous area (HA). Tap &#127908; to dictate. Tap &#128247; to attach photos.</p>
+    <div class="add-btn-row"><button class="add-btn" id="addAsbestos">+ Add Suspect Material</button></div>
+    ${cards}`;
+}
+function renderAsbestosCard(a, num) {
+  const condCls = a.condition==='Good'?'cond-good':a.condition==='Fair'?'cond-fair':a.condition==='Poor'?'cond-poor':'';
+  const photos = a.attachedPhotos || [];
+  const sel = (id,field,opts,cur) => `<select data-af="${field}" data-id="${id}">${opts.map(o=>`<option ${o===cur?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  return `
+    <div class="entry-card ${condCls}" data-id="${a.id}">
+      <div class="entry-head">
+        <span class="entry-num">HA ${a.ha||num}</span>
+        <span class="entry-label">${esc(a.material||'(material)')}</span>
+        <button class="entry-del" data-del-asb="${a.id}">&#215;</button>
+      </div>
+      <div class="entry-body">
+        <div class="form-2col">
+          <div class="field-mini"><label>HA #</label><input data-af="ha" data-id="${a.id}" type="text" value="${esc(a.ha||String(num))}"></div>
+          <div class="field-mini"><label>Category</label>${sel(a.id,'category',['—',...ASB_CATEGORIES],a.category||'—')}</div>
+        </div>
+        <div class="field-mini"><label>Material</label>
+          <div class="field-with-mic">
+            <input data-af="material" data-id="${a.id}" type="text" value="${esc(a.material||'')}" placeholder="e.g. Vinyl floor tile, 12x12 stick-on">
+            <button class="mic-btn" data-mic="material" data-id="${a.id}">&#127908;</button>
+          </div>
+        </div>
+        <div class="form-2col">
+          <div class="field-mini"><label>Color</label><input data-af="color" data-id="${a.id}" type="text" value="${esc(a.color||'')}" placeholder="Off-white"></div>
+          <div class="field-mini"><label>Condition</label>${sel(a.id,'condition',['—',...CONDITIONS],a.condition||'—')}</div>
+        </div>
+        <div class="field-mini"><label>Pattern / Description</label>
+          <div class="field-with-mic">
+            <input data-af="pattern" data-id="${a.id}" type="text" value="${esc(a.pattern||'')}" placeholder="2-inch square">
+            <button class="mic-btn" data-mic="pattern" data-id="${a.id}">&#127908;</button>
+          </div>
+        </div>
+        <div class="field-mini"><label>Hazard Classification</label>${sel(a.id,'hazard',ASB_HAZARD,a.hazard||'Undetermined')}</div>
+        <div class="field-mini"><label>Notes</label>
+          <div class="field-with-mic">
+            <textarea data-af="notes" data-id="${a.id}" placeholder="Location, priority for testing, era notes...">${esc(a.notes||'')}</textarea>
+            <button class="mic-btn" data-mic="notes" data-id="${a.id}">&#127908;</button>
+          </div>
+        </div>
+        <div class="haz-toggle-row">
+          <input type="checkbox" id="hazrank-${a.id}" data-hazrank-toggle="${a.id}" ${a.hazardRankOn?'checked':''}>
+          <label for="hazrank-${a.id}">Add hazard rank score (optional)</label>
+        </div>
+        <div class="haz-fields ${a.hazardRankOn?'visible':''}" id="hazfields-${a.id}">
+          <div class="field-mini"><label>Hazard Rank</label>${sel(a.id,'hazardRank',['—',...HAZARD_RANK],a.hazardRank||'—')}</div>
+        </div>
+        <button class="photo-add-btn" data-photo-asb="${a.id}">&#128247; ${photos.length?photos.length+' photo'+(photos.length!==1?'s':''):'Add photos'}</button>
+        ${photos.length?`<div class="photo-strip">${photos.map(p=>`<div class="photo-thumb-wrap"><img src="${p.thumb||''}" alt=""><button class="photo-thumb-del" data-delphoto-asb="${a.id}" data-photo-id="${p.id}">&#215;</button></div>`).join('')}</div>`:''}
+      </div>
+    </div>`;
+}
+function wireAsbestos() {
+  const add = document.getElementById('addAsbestos');
+  if (add) add.addEventListener('click', ()=>{
+    const num = state.asbestos.length+1;
+    state.asbestos.push({ id:newUid(), ha:String(num), material:'', color:'', pattern:'', category:'—', condition:'—', hazard:'Undetermined', hazardRankOn:false, hazardRank:'—', notes:'', attachedPhotos:[] });
+    save(); renderMain();
+    setTimeout(()=>{ const cards=document.querySelectorAll('.entry-card'); if(cards.length) cards[cards.length-1].scrollIntoView({behavior:'smooth',block:'center'}); },50);
+  });
+  document.querySelectorAll('[data-af]').forEach(el => {
+    const handler = ()=>{ updateEntry('asbestos', el.dataset.id, el.dataset.af, el.value); if(['condition','material','ha'].includes(el.dataset.af)) renderMain(); };
+    el.addEventListener('input', handler); el.addEventListener('change', handler);
+  });
+  document.querySelectorAll('[data-del-asb]').forEach(b => b.addEventListener('click', ()=>{ if(confirm('Delete this material?')) deleteEntry('asbestos', b.dataset.delAsb); }));
+  document.querySelectorAll('[data-hazrank-toggle]').forEach(cb => cb.addEventListener('change', ()=>{
+    updateEntry('asbestos', cb.dataset.hazrankToggle, 'hazardRankOn', cb.checked);
+    document.getElementById('hazfields-'+cb.dataset.hazrankToggle).classList.toggle('visible', cb.checked);
+  }));
+  document.querySelectorAll('[data-photo-asb]').forEach(b => b.addEventListener('click', ()=>openPhotoPicker('asbestos', b.dataset.photoAsb)));
+  document.querySelectorAll('[data-delphoto-asb]').forEach(b => b.addEventListener('click', ()=>removePhoto('asbestos', b.dataset.delphotoAsb, b.dataset.photoId)));
+  wireMics();
+}
+
+// ── LEAD ──
+function renderLead() {
+  if (!state.includeLead) return `<div class="empty">Lead paint survey is turned off. Enable it in the sidebar under "Include in Survey".</div>`;
+  const items = state.lead;
+  const cards = items.length ? items.map((l,i)=>renderLeadCard(l,i+1)).join('') : `<div class="empty">No XRF readings yet. Tap "Add XRF Reading" to begin.</div>`;
+  return `
+    <h2 class="page-title">Lead Paint — XRF Results</h2>
+    <p class="page-sub">Each tested component. Tap &#127908; to dictate. Tap &#128247; to attach photos.</p>
+    <div class="add-btn-row"><button class="add-btn" id="addLead">+ Add XRF Reading</button></div>
+    ${cards}`;
+}
+function renderLeadCard(l, num) {
+  const condCls = l.condition==='Good'?'cond-good':l.condition==='Fair'?'cond-fair':l.condition==='Deteriorated'?'cond-poor':'';
+  const hazCls = l.hazard==='YES'?'haz-yes':'';
+  const photos = l.attachedPhotos || [];
+  const sel = (id,field,opts,cur) => `<select data-lf="${field}" data-id="${id}">${opts.map(o=>`<option ${o===cur?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+  return `
+    <div class="entry-card ${hazCls||condCls}" data-id="${l.id}">
+      <div class="entry-head">
+        <span class="entry-num">#${num}</span>
+        <span class="entry-label">${esc(l.component||'(component)')}${l.location?' — '+esc(l.location):''}</span>
+        <button class="entry-del" data-del-lead="${l.id}">&#215;</button>
+      </div>
+      <div class="entry-body">
+        <div class="form-2col">
+          <div class="field-mini"><label>Side</label>${sel(l.id,'side',SIDES,l.side||'—')}</div>
+          <div class="field-mini"><label>Location / Room</label><input data-lf="location" data-id="${l.id}" type="text" value="${esc(l.location||'')}" placeholder="Exterior / Kitchen / Bedroom 1"></div>
+        </div>
+        <div class="field-mini"><label>Component</label>
+          <div class="field-with-mic">
+            <input data-lf="component" data-id="${l.id}" type="text" value="${esc(l.component||'')}" placeholder="Ext wall – lap siding">
+            <button class="mic-btn" data-mic="component" data-id="${l.id}">&#127908;</button>
+          </div>
+        </div>
+        <div class="form-2col">
+          <div class="field-mini"><label>Substrate</label><input data-lf="substrate" data-id="${l.id}" type="text" value="${esc(l.substrate||'')}" placeholder="Wood / Drywall / Stucco"></div>
+          <div class="field-mini"><label>Color</label><input data-lf="color" data-id="${l.id}" type="text" value="${esc(l.color||'')}" placeholder="White"></div>
+        </div>
+        <div class="form-2col">
+          <div class="field-mini"><label>Condition</label>${sel(l.id,'condition',['—','Good','Fair','Deteriorated'],l.condition||'—')}</div>
+          <div class="field-mini"><label>Result</label>${sel(l.id,'result',['—',...LEAD_RESULTS],l.result||'—')}</div>
+        </div>
+        <div class="field-mini"><label>Lead Hazard</label>${sel(l.id,'hazard',LEAD_HAZARD,l.hazard||'—')}</div>
+        <div class="field-mini"><label>Notes</label>
+          <div class="field-with-mic">
+            <textarea data-lf="notes" data-id="${l.id}" placeholder="Additional detail...">${esc(l.notes||'')}</textarea>
+            <button class="mic-btn" data-mic="notes" data-id="${l.id}">&#127908;</button>
+          </div>
+        </div>
+        <button class="photo-add-btn" data-photo-lead="${l.id}">&#128247; ${photos.length?photos.length+' photo'+(photos.length!==1?'s':''):'Add photos'}</button>
+        ${photos.length?`<div class="photo-strip">${photos.map(p=>`<div class="photo-thumb-wrap"><img src="${p.thumb||''}" alt=""><button class="photo-thumb-del" data-delphoto-lead="${l.id}" data-photo-id="${p.id}">&#215;</button></div>`).join('')}</div>`:''}
+      </div>
+    </div>`;
+}
+function wireLead() {
+  const add = document.getElementById('addLead');
+  if (add) add.addEventListener('click', ()=>{
+    state.lead.push({ id:newUid(), side:'—', location:'', component:'', substrate:'', color:'', condition:'—', result:'—', hazard:'—', notes:'', attachedPhotos:[] });
+    save(); renderMain();
+    setTimeout(()=>{ const cards=document.querySelectorAll('.entry-card'); if(cards.length) cards[cards.length-1].scrollIntoView({behavior:'smooth',block:'center'}); },50);
+  });
+  document.querySelectorAll('[data-lf]').forEach(el => {
+    const handler = ()=>{ updateEntry('lead', el.dataset.id, el.dataset.lf, el.value); if(['condition','result','hazard','component','location'].includes(el.dataset.lf)) renderMain(); };
+    el.addEventListener('input', handler); el.addEventListener('change', handler);
+  });
+  document.querySelectorAll('[data-del-lead]').forEach(b => b.addEventListener('click', ()=>{ if(confirm('Delete this reading?')) deleteEntry('lead', b.dataset.delLead); }));
+  document.querySelectorAll('[data-photo-lead]').forEach(b => b.addEventListener('click', ()=>openPhotoPicker('lead', b.dataset.photoLead)));
+  document.querySelectorAll('[data-delphoto-lead]').forEach(b => b.addEventListener('click', ()=>removePhoto('lead', b.dataset.delphotoLead, b.dataset.photoId)));
+  wireMics();
+}
+
+// ── SHARED ENTRY OPS ──
+function updateEntry(list, id, field, value) {
+  const e = findEntry(list, id); if(e){ e[field]=value; save(); }
+}
+function deleteEntry(list, id) {
+  const e = findEntry(list, id);
+  if (e && e.attachedPhotos) e.attachedPhotos.forEach(p=>idbDelete(p.id).catch(()=>{}));
+  state[list] = state[list].filter(x=>x.id!==id);
+  save(); renderMain();
+}
+async function removePhoto(list, id, photoId) {
+  const e = findEntry(list, id);
+  if (e) e.attachedPhotos = (e.attachedPhotos||[]).filter(p=>p.id!==photoId);
+  await idbDelete(photoId).catch(()=>{});
+  save(); renderMain();
+}
+
+// ── MIC / DICTATION ──
+let currentRec=null, currentRecBtn=null;
+function wireMics() {
+  document.querySelectorAll('[data-mic]').forEach(b => b.addEventListener('click', ()=>startDictation(b)));
+}
+function startDictation(btn) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ toast('Speech not supported in this browser'); return; }
+  if(currentRec && currentRecBtn===btn){ try{currentRec.stop();}catch(e){} return; }
+  if(currentRec){ try{currentRec.stop();}catch(e){} }
+  const field = btn.dataset.mic, id = btn.dataset.id;
+  const target = document.querySelector(`[data-af="${field}"][data-id="${id}"], [data-lf="${field}"][data-id="${id}"]`);
+  if(!target) return;
+  const rec = new SR(); rec.lang='en-US'; rec.continuous=false; rec.interimResults=false; rec.maxAlternatives=1;
+  btn.classList.add('listening'); currentRec=rec; currentRecBtn=btn;
+  rec.onresult = ev => {
+    let said=''; for(const r of ev.results) said+=r[0].transcript;
+    const cur=(target.value||'').trimEnd();
+    target.value = cur ? cur+' '+said : said;
+    target.dispatchEvent(new Event('input',{bubbles:true}));
+  };
+  rec.onerror = e => toast('Mic: '+(e.error||'error'));
+  rec.onend = () => { btn.classList.remove('listening'); currentRec=null; currentRecBtn=null; };
+  try { rec.start(); toast('&#127908; Listening...'); } catch(e){ btn.classList.remove('listening'); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  EXPORT — FIELD NOTES
+// ═══════════════════════════════════════════════════════
+function formatDate(ymd) {
+  if(!ymd) return '';
+  const [y,m,d]=ymd.split('-'); if(!y||!m||!d) return ymd;
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return `${months[parseInt(m,10)-1]} ${parseInt(d,10)}, ${y}`;
+}
+function buildExportText() {
+  const g = state.general, lines = [];
+  lines.push('## GENERAL / PROJECT');
+  if(g.address)    lines.push('Property address: '+g.address);
+  if(g.client)     lines.push('Client: '+g.client);
+  if(g.date)       lines.push('Inspection date: '+formatDate(g.date));
+  if(g.reportDate) lines.push('Report date: '+formatDate(g.reportDate));
+  if(g.inspector)  lines.push('Inspector: '+g.inspector);
+  if(g.surveyType) lines.push('Survey type: '+g.surveyType);
+  if(g.leadMethod && state.includeLead) lines.push('Lead method: '+g.leadMethod);
+
+  lines.push(''); lines.push('## BUILDING DESCRIPTION');
+  const bd = [['Foundation',g.foundation],['Structure',g.structure],['Roofing',g.roofing],['Chimney',g.chimney],['Exterior cladding',g.cladding],['Windows',g.windows],['Ceilings',g.ceilings],['Flooring',g.flooring],['Walls',g.walls]];
+  bd.forEach(([k,v])=>{ if(v) lines.push(k+': '+v); });
+  if(g.otherBuilding) lines.push('Other: '+g.otherBuilding);
+
+  lines.push(''); lines.push('## SCOPE OF WORK');
+  const sc = state.scope;
+  if(sc.asbestosVisual) lines.push('- Visual asbestos survey (no bulk sampling)');
+  if(sc.asbestosBulk)   lines.push('- Bulk asbestos sampling & PLM lab analysis');
+  if(sc.leadXRF)        lines.push('- XRF lead paint inspection');
+  if(sc.notes)          lines.push('Scope notes: '+sc.notes);
+
+  if (state.includeAsbestos) {
+    lines.push(''); lines.push('## ASBESTOS — SUSPECT MATERIALS (VISUAL SURVEY)');
+    if (!state.asbestos.length) lines.push('(none recorded)');
+    state.asbestos.forEach((a,i)=>{
+      const ha = a.ha || (i+1);
+      let l = `HA ${ha}: `;
+      const parts = [];
+      if(a.material) parts.push(a.material);
+      if(a.color) parts.push('color '+a.color);
+      if(a.pattern) parts.push(a.pattern);
+      l += parts.join(', ');
+      lines.push(l);
+      const meta = [];
+      if(a.category && a.category!=='—') meta.push('Category: '+a.category);
+      if(a.condition && a.condition!=='—') meta.push('Condition: '+a.condition);
+      if(a.hazard) meta.push('Hazard: '+a.hazard);
+      if(a.hazardRankOn && a.hazardRank && a.hazardRank!=='—') meta.push('Hazard rank: '+a.hazardRank);
+      if(meta.length) lines.push('  '+meta.join(' | '));
+      if(a.notes) lines.push('  Notes: '+a.notes);
+      const ph = photoRefs(a);
+      if(ph) lines.push('  photos: '+ph);
+    });
+  }
+
+  if (state.includeLead) {
+    lines.push(''); lines.push('## LEAD PAINT — XRF RESULTS');
+    if (!state.lead.length) lines.push('(none recorded)');
+    state.lead.forEach((l,i)=>{
+      let line = `#${i+1} `;
+      const head = [];
+      if(l.side && l.side!=='—') head.push('Side '+l.side);
+      if(l.location) head.push(l.location);
+      if(l.component) head.push(l.component);
+      line += head.join(' / ');
+      lines.push(line);
+      const meta = [];
+      if(l.substrate) meta.push('Substrate: '+l.substrate);
+      if(l.color) meta.push('Color: '+l.color);
+      if(l.condition && l.condition!=='—') meta.push('Condition: '+l.condition);
+      if(l.result && l.result!=='—') meta.push('Result: '+l.result);
+      if(l.hazard && l.hazard!=='—') meta.push('Hazard: '+l.hazard);
+      if(meta.length) lines.push('  '+meta.join(' | '));
+      if(l.notes) lines.push('  Notes: '+l.notes);
+      const ph = photoRefs(l);
+      if(ph) lines.push('  photos: '+ph);
+    });
+  }
+  return lines.join('\n');
+}
+// global sequential photo numbering across asbestos then lead (matches Photo Tool export order)
+function buildPhotoSeqMap() {
+  const map = {}; let seq = 1;
+  if (state.includeAsbestos) state.asbestos.forEach(a => (a.attachedPhotos||[]).forEach(p => map[p.id]=seq++));
+  if (state.includeLead)     state.lead.forEach(l => (l.attachedPhotos||[]).forEach(p => map[p.id]=seq++));
+  return map;
+}
+let _photoSeqMap = {};
+function photoRefs(entry) {
+  const refs = (entry.attachedPhotos||[]).map(p => _photoSeqMap[p.id] ? 'Photo '+_photoSeqMap[p.id] : null).filter(Boolean);
+  return refs.join(', ');
+}
+
+// ═══════════════════════════════════════════════════════
+//  EXPORT PHOTOS → PHOTO TOOL (v3 bundle)
+// ═══════════════════════════════════════════════════════
+async function exportPhotosToPhotoTool() {
+  toast('Bundling photos...');
+  const all = await idbGetAll().catch(()=>[]);
+  const byId = {}; all.forEach(p=>byId[p.id]=p);
+  const photoStore = {}; let count=0;
+  const sections = { ASBESTOS:{descriptions:[],observations:[],limitations:[]}, LEAD:{descriptions:[],observations:[],limitations:[]} };
+
+  if (state.includeAsbestos) state.asbestos.forEach((a,i)=>{
+    const aps=a.attachedPhotos||[]; if(!aps.length) return;
+    aps.forEach(ap=>{ const st=byId[ap.id]; if(st&&st.src){ photoStore[ap.id]={src:st.src,filename:st.filename||ap.filename}; count++; } });
+    let text = `HA ${a.ha||(i+1)}: ${a.material||''}`;
+    if(a.condition&&a.condition!=='—') text += ` (${a.condition})`;
+    if(a.notes) text += `. ${a.notes}`;
+    sections.ASBESTOS.observations.push({ id:'asb_'+a.id, code:a.condition==='Poor'?'R':'I', text, attachedPhotos:aps, _moldSection:'Asbestos — HA '+(a.ha||(i+1)), _moldCategory:a.category&&a.category!=='—'?a.category:'Suspect Material' });
+  });
+  if (state.includeLead) state.lead.forEach((l,i)=>{
+    const aps=l.attachedPhotos||[]; if(!aps.length) return;
+    aps.forEach(ap=>{ const st=byId[ap.id]; if(st&&st.src){ photoStore[ap.id]={src:st.src,filename:st.filename||ap.filename}; count++; } });
+    let text = `#${i+1} ${l.component||''}`;
+    if(l.location) text += ` (${l.location})`;
+    if(l.result&&l.result!=='—') text += ` — ${l.result}`;
+    if(l.notes) text += `. ${l.notes}`;
+    sections.LEAD.observations.push({ id:'lead_'+l.id, code:l.hazard==='YES'?'R':'I', text, attachedPhotos:aps, _moldSection:'Lead — '+(l.location||'XRF'), _moldCategory:l.result&&l.result!=='—'?l.result:'XRF Reading' });
+  });
+
+  if(!count){ toast('No photos attached to any entry'); return; }
+  const bundle = { version:3, source:'asbestos-lead', state:{ general:{ address:state.general.address||'', date:state.general.date||'' }, sections }, photoStore };
+  const blob = new Blob([JSON.stringify(bundle)],{type:'application/json'});
+  const addr = (state.general.address||'asbestos_lead').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${addr}_ashlead_photos.json`; a.click(); URL.revokeObjectURL(a.href);
+  toast(`Exported ${count} photo${count!==1?'s':''} — load in Photo Tool`);
+  document.getElementById('moreModal').classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════════
+//  UTIL
+// ═══════════════════════════════════════════════════════
+function toast(msg){ const t=document.getElementById('toast'); t.innerHTML=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2400); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  load();
+
+  document.querySelectorAll('.sb-item').forEach(el => {
+    el.addEventListener('click', () => {
+      if (el.classList.contains('disabled')) { toast('Enable this survey type first'); return; }
+      currentSection = el.dataset.sec; renderMain();
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sbOverlay').classList.remove('open');
+      window.scrollTo(0,0);
+    });
+  });
+  document.getElementById('menuBtn').addEventListener('click', ()=>{ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sbOverlay').classList.toggle('open'); });
+  document.getElementById('sbOverlay').addEventListener('click', ()=>{ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sbOverlay').classList.remove('open'); });
+
+  // survey type toggles
+  document.getElementById('toggleAsbestos').addEventListener('change', e=>{ state.includeAsbestos=e.target.checked; save(); if(!state.includeAsbestos && currentSection==='ASBESTOS') currentSection='GENERAL'; renderMain(); });
+  document.getElementById('toggleLead').addEventListener('change', e=>{ state.includeLead=e.target.checked; save(); if(!state.includeLead && currentSection==='LEAD') currentSection='GENERAL'; renderMain(); });
+
+  // Export
+  document.getElementById('exportBtn').addEventListener('click', ()=>{ _photoSeqMap = buildPhotoSeqMap(); document.getElementById('exportText').value = buildExportText(); document.getElementById('exportModal').classList.add('active'); });
+  document.getElementById('exportClose').addEventListener('click', ()=>document.getElementById('exportModal').classList.remove('active'));
+  document.getElementById('copyBtn').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(document.getElementById('exportText').value); toast('Copied to clipboard'); }catch(e){ const ta=document.getElementById('exportText'); ta.select(); document.execCommand('copy'); toast('Copied'); } });
+  document.getElementById('downloadBtn').addEventListener('click', ()=>{ const text=document.getElementById('exportText').value; const addr=(state.general.address||'survey').replace(/[^a-z0-9]+/gi,'_').toLowerCase(); const blob=new Blob([text],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${addr}_asblead_notes.txt`; a.click(); });
+
+  // More menu
+  document.getElementById('menuMore').addEventListener('click', ()=>document.getElementById('moreModal').classList.add('active'));
+  document.getElementById('moreClose').addEventListener('click', ()=>document.getElementById('moreModal').classList.remove('active'));
+
+  // Save session (v3-style with photos)
+  document.getElementById('saveJsonBtn').addEventListener('click', async ()=>{
+    toast('Preparing session (including photos)...');
+    const all = await idbGetAll().catch(()=>[]);
+    const photoStore={}; all.forEach(p=>photoStore[p.id]={src:p.src,filename:p.filename});
+    const bundle = { version:1, state, photoStore };
+    const blob = new Blob([JSON.stringify(bundle)],{type:'application/json'});
+    const addr = (state.general.address||'survey').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${addr}_asblead_session.json`; a.click(); URL.revokeObjectURL(a.href);
+    toast('Session saved (with photos)');
+  });
+  document.getElementById('loadJsonBtn').addEventListener('click', ()=>document.getElementById('loadFile').click());
+  document.getElementById('loadFile').addEventListener('change', async ev=>{
+    const file=ev.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=async ()=>{
+      try {
+        const parsed=JSON.parse(reader.result);
+        const st = parsed.state || parsed;
+        if(st && st.general){
+          st.asbestos=(st.asbestos||[]).map(a=>({...a,attachedPhotos:a.attachedPhotos||[]}));
+          st.lead=(st.lead||[]).map(l=>({...l,attachedPhotos:l.attachedPhotos||[]}));
+          st.scope=st.scope||{asbestosVisual:true,asbestosBulk:false,leadXRF:true,notes:''};
+          if(typeof st.includeAsbestos==='undefined') st.includeAsbestos=true;
+          if(typeof st.includeLead==='undefined') st.includeLead=true;
+          state=st;
+          if(parsed.photoStore){ for(const [id,d] of Object.entries(parsed.photoStore)) await idbPut({id,src:d.src,filename:d.filename}).catch(()=>{}); toast(`Session loaded · ${Object.keys(parsed.photoStore).length} photos restored`); }
+          else toast('Session loaded');
+          save(); currentSection='GENERAL'; renderMain();
+          document.getElementById('moreModal').classList.remove('active');
+        } else toast('Invalid session file');
+      } catch(e){ toast('Could not read file'); }
+    };
+    reader.readAsText(file); ev.target.value='';
+  });
+  document.getElementById('exportPhotosBtn').addEventListener('click', exportPhotosToPhotoTool);
+  document.getElementById('clearBtn').addEventListener('click', async ()=>{
+    if(!confirm('Clear ALL data? This cannot be undone.')) return;
+    state=createEmptyState(); await idbClear().catch(()=>{}); save(); currentSection='GENERAL'; renderMain();
+    document.getElementById('moreModal').classList.remove('active'); toast('All data cleared');
+  });
+
+  // Photo picker
+  document.getElementById('pickerClose').addEventListener('click', closePhotoPicker);
+  document.getElementById('pickerSave').addEventListener('click', savePickerSelection);
+  document.getElementById('pickerCamera').addEventListener('change', async ev=>{ await handlePickerFiles(ev.target.files); ev.target.value=''; });
+  document.getElementById('pickerLibrary').addEventListener('change', async ev=>{ await handlePickerFiles(ev.target.files); ev.target.value=''; });
+
+  // Drag & drop onto picker
+  const overlay = document.getElementById('photoOverlay');
+  ['dragenter','dragover'].forEach(evt=>overlay.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); if(e.dataTransfer && Array.from(e.dataTransfer.types||[]).includes('Files')) overlay.classList.add('drag-over'); }));
+  ['dragleave','dragend'].forEach(evt=>overlay.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); if(e.target===overlay || !overlay.contains(e.relatedTarget)) overlay.classList.remove('drag-over'); }));
+  overlay.addEventListener('drop', async e=>{ e.preventDefault(); e.stopPropagation(); overlay.classList.remove('drag-over'); if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length) await handlePickerFiles(e.dataTransfer.files); });
+
+  // Modal backdrop close
+  document.querySelectorAll('.modal-back').forEach(bg => bg.addEventListener('click', e=>{ if(e.target===bg) bg.classList.remove('active'); }));
+
+  renderMain();
+});
+</script>
+</body>
+</html>
