@@ -1067,10 +1067,13 @@ async function exportPhotosToPhotoTool(){
       if((c.photoIds||[]).length) sections[KEY].descriptions.push({ id:'chk_'+pid_key(c), code:'SD', text:c.phrase+(c.text?': '+c.text:''), attachedPhotos:(c.photoIds||[]).map(id=>({id,filename:id})), _moldSection:sec, _moldCategory:'System Description' });
     });
     ['Description','Observation','Limitation'].forEach(t=>{
-      state.photos.filter(p=>p.section===sec&&p.type===t).forEach(p=>{
-        const st=byId[p.id]; if(st&&st.src){ photoStore[p.id]={src:st.src,filename:st.filename||p.id}; count++; }
+      state.photos.filter(p=>!p.parentId&&p.section===sec&&p.type===t).forEach(p=>{
+        // primary + all attached extras
+        const allIds=[p.id,...(p.extras||[])];
+        const attachedPhotos=[];
+        allIds.forEach(pid=>{ const st=byId[pid]; if(st&&st.src){ photoStore[pid]={src:st.src,filename:st.filename||pid}; count++; attachedPhotos.push({id:pid,filename:st.filename||pid}); } });
         const bucket=t==='Description'?'descriptions':t==='Observation'?'observations':'limitations';
-        sections[KEY][bucket].push({ id:'ph_'+p.id, code:p.cat!=='—'?p.cat:'I', text:p.text||'', attachedPhotos:[{id:p.id,filename:p.id}], _moldSection:sec, _moldCategory:CAT_LABEL[p.cat]||t });
+        sections[KEY][bucket].push({ id:'ph_'+p.id, code:p.cat!=='—'?p.cat:'I', text:p.text||'', attachedPhotos, _moldSection:sec, _moldCategory:CAT_LABEL[p.cat]||t });
       });
     });
   });
