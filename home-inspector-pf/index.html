@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1F3864">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="../icons/icon-180.png">
+<title>Home Inspector (Photo-First) — Insight Environmental</title>
+<style>
+:root {
+  --navy:#1F3864; --navy-light:#2E5FA3; --navy-dim:#9cb8e0;
+  --g50:#F8F9FA; --g100:#F1F3F5; --g200:#E2E8F0; --g300:#CBD5E0;
+  --g400:#94A3B8; --g500:#64748B; --g600:#475569; --g700:#334155; --g800:#1E293B;
+  --sd:#7a7a7a; --r:#a07830; --dd:#4a8ba8; --rm:#b85a5a; --i:#1a6fa0; --m:#3c9a3c; --lm:#c0a030;
+  --sd-bg:#F4F4F4; --r-bg:#FAEBCD; --dd-bg:#DCEDF6; --rm-bg:#F9DDDD; --i-bg:#CDE6F5; --m-bg:#DCF3DC; --lm-bg:#FBEEC6;
+  --radius:12px; --radius-sm:8px; --shadow:0 2px 8px rgba(0,0,0,0.08); --shadow-lg:0 8px 24px rgba(0,0,0,0.15);
+}
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#EDF1F7; color:var(--g800); min-height:100vh; -webkit-font-smoothing:antialiased; }
+body { padding-bottom:max(40px,calc(40px + env(safe-area-inset-bottom))); }
+input,textarea,select,button { font-family:inherit; font-size:inherit; }
+
+/* HEADER */
+.app-header { background:var(--navy); color:#fff; padding:12px 14px; padding-top:max(12px,env(safe-area-inset-top)); padding-left:max(14px,env(safe-area-inset-left)); padding-right:max(14px,env(safe-area-inset-right)); position:sticky; top:0; z-index:100; box-shadow:var(--shadow); display:flex; align-items:center; gap:10px; }
+.menu-btn { background:none; border:none; color:#fff; font-size:22px; padding:4px 8px; cursor:pointer; border-radius:4px; }
+.menu-btn:active { background:rgba(255,255,255,0.15); }
+.hdr-title { flex:1; min-width:0; }
+.hdr-co { font-size:14px; font-weight:700; }
+.hdr-sec { font-size:12px; color:var(--navy-dim); margin-top:2px; }
+.hdr-btns { display:flex; gap:6px; }
+.hdr-btn { background:rgba(255,255,255,0.15); border:none; color:#fff; padding:7px 12px; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; font-weight:500; }
+.hdr-btn:active { background:rgba(255,255,255,0.3); }
+.hdr-btn.primary { background:#fff; color:var(--navy); }
+
+/* LAYOUT */
+.layout { display:flex; min-height:calc(100vh - 60px); }
+.sidebar { width:220px; background:#fff; border-right:1px solid var(--g200); padding:10px 0; flex-shrink:0; }
+.sb-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--g500); padding:10px 16px 4px; }
+.sb-item { display:flex; align-items:center; gap:9px; padding:11px 16px; cursor:pointer; font-size:14px; color:var(--g600); border-left:3px solid transparent; user-select:none; }
+.sb-item:active { background:var(--g100); }
+.sb-item.active { background:#EEF3FB; border-left-color:var(--navy); color:var(--navy); font-weight:600; }
+.sb-icon { width:20px; text-align:center; }
+.sb-count { margin-left:auto; background:var(--g200); color:var(--g600); font-size:11px; font-weight:600; padding:1px 7px; border-radius:10px; min-width:20px; text-align:center; }
+.sb-item.active .sb-count { background:var(--navy); color:#fff; }
+.sb-item.has .sb-count { background:#FEE9B8; color:#8a5a14; }
+.sb-item.active.has .sb-count { background:var(--navy); color:#fff; }
+.sidebar-ov { display:none; position:fixed; inset:0; top:0; background:rgba(0,0,0,0.4); z-index:60; }
+
+/* MAIN */
+.main { flex:1; padding:16px; min-width:0; max-width:940px; }
+.page { display:none; }
+.page.active { display:block; }
+.page-title { font-size:20px; font-weight:700; color:var(--navy); margin-bottom:4px; }
+.page-sub { font-size:13px; color:var(--g500); margin-bottom:14px; }
+.hint-callout { background:#EEF3FB; border-left:3px solid var(--navy); border-radius:6px; padding:10px 12px; font-size:13px; color:var(--g600); margin-bottom:14px; line-height:1.5; }
+
+/* PHOTO LIBRARY */
+.lib-toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+.btn { padding:9px 14px; border:1px solid var(--g300); background:#fff; color:var(--g700); border-radius:var(--radius-sm); font-size:14px; font-weight:600; cursor:pointer; }
+.btn:active { transform:scale(0.97); }
+.btn.primary { background:var(--navy); color:#fff; border-color:var(--navy); }
+.btn.danger { background:#fff; color:#c53030; border-color:#f2c2c2; }
+.btn.sm { padding:6px 10px; font-size:12px; }
+.filter-note { font-size:12px; color:var(--g500); margin-left:auto; }
+.filter-tabs { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:12px; }
+.ftab { padding:5px 11px; border-radius:20px; border:1.5px solid var(--g300); background:#fff; font-size:12px; font-weight:600; color:var(--g500); cursor:pointer; }
+.ftab.active { background:var(--navy); color:#fff; border-color:var(--navy); }
+
+.upload-zone { border:2px dashed var(--g300); border-radius:12px; padding:36px 24px; text-align:center; cursor:pointer; transition:all 0.2s; background:#fff; margin-bottom:14px; }
+.upload-zone:hover,.upload-zone.drag-over { border-color:var(--navy-light); background:rgba(46,95,163,0.04); }
+.upload-zone .uz-icon { font-size:36px; margin-bottom:10px; opacity:0.5; }
+.upload-zone h3 { font-size:15px; font-weight:600; color:var(--g600); margin-bottom:5px; }
+.upload-zone p { font-size:13px; color:var(--g400); }
+
+.photo-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:14px; }
+@media(max-width:520px){ .photo-grid { grid-template-columns:repeat(2,1fr); gap:8px; } }
+.pcard { background:#fff; border-radius:10px; overflow:hidden; box-shadow:var(--shadow); border-left:4px solid var(--g300); }
+.pcard.sd{border-left-color:var(--sd)} .pcard.r{border-left-color:var(--r)} .pcard.dd{border-left-color:var(--dd)}
+.pcard.rm{border-left-color:var(--rm)} .pcard.i{border-left-color:var(--i)} .pcard.m{border-left-color:var(--m)} .pcard.lm{border-left-color:var(--lm)}
+.pthumb { width:100%; aspect-ratio:4/3; object-fit:cover; display:block; background:var(--g200); cursor:pointer; }
+.pbody { padding:10px; }
+.pfields { display:flex; flex-direction:column; gap:6px; }
+.pfields select, .pfields textarea { width:100%; padding:6px 8px; border:1px solid var(--g300); border-radius:6px; font-size:13px; font-family:inherit; color:var(--g700); background:#fff; }
+.pfields textarea { resize:vertical; min-height:44px; }
+.prow2 { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+.field-mic { display:flex; gap:6px; align-items:flex-start; }
+.field-mic > *:first-child { flex:1; }
+.ptag-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; flex-wrap:wrap; }
+.unassigned-tag { display:inline-block; font-size:10px; font-weight:700; color:var(--g500); background:var(--g100); padding:2px 8px; border-radius:9px; text-transform:uppercase; }
+.assigned-tag { display:inline-block; font-size:10px; font-weight:700; color:#fff; padding:2px 8px; border-radius:9px; text-transform:uppercase; }
+.assigned-tag.sd{background:var(--sd)} .assigned-tag.r{background:var(--r)} .assigned-tag.dd{background:var(--dd)} .assigned-tag.rm{background:var(--rm)} .assigned-tag.i{background:var(--i)} .assigned-tag.m{background:var(--m)} .assigned-tag.lm{background:var(--lm)}
+.pdel { margin-left:auto; background:none; border:none; color:var(--g400); font-size:15px; cursor:pointer; padding:0 4px; }
+.pdel:active { color:#c53030; }
+
+/* MIC */
+.mic-btn { background:var(--navy); color:#fff; border:none; border-radius:50%; width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; flex-shrink:0; }
+.mic-btn:active { transform:scale(0.92); }
+.mic-btn.listening { background:#c53030; animation:micpulse 1s infinite; }
+@keyframes micpulse { 0%,100%{box-shadow:0 0 0 0 rgba(197,48,48,0.5)} 50%{box-shadow:0 0 0 7px rgba(197,48,48,0)} }
+
+/* SECTION PAGE */
+.sec-head-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; flex-wrap:wrap; }
+.sec-head-row .page-title { margin:0; }
+.info-btn { background:var(--navy-light); color:#fff; border:none; border-radius:20px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; }
+.info-btn:active { background:var(--navy); }
+.block { background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:14px; overflow:hidden; }
+.block-head { padding:12px 14px; border-bottom:1px solid var(--g200); display:flex; align-items:center; gap:8px; }
+.block-title { font-size:15px; font-weight:700; color:var(--navy); flex:1; }
+.block-tag { font-size:11px; color:var(--g500); }
+.block-body { padding:12px 14px; }
+
+/* CHECKLIST */
+.check-row { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--g100); }
+.check-row:last-child { border-bottom:none; }
+.check-row input[type=checkbox] { width:20px; height:20px; margin-top:1px; accent-color:var(--navy); flex-shrink:0; cursor:pointer; }
+.check-body { flex:1; min-width:0; }
+.check-phrase-row { display:flex; align-items:center; gap:8px; }
+.check-phrase { font-size:14px; font-weight:600; color:var(--g700); flex:1; }
+.check-row.checked .check-phrase { color:var(--navy); }
+.saved-badge { font-size:9px; font-weight:700; color:#8a5a14; background:#FEE9B8; padding:1px 6px; border-radius:8px; text-transform:uppercase; }
+.mini-edit,.mini-del { background:none; border:none; color:var(--g400); font-size:13px; cursor:pointer; padding:2px 4px; }
+.mini-edit:hover { color:var(--navy); } .mini-del:hover { color:#c53030; }
+.check-expand { margin-top:6px; display:none; }
+.check-row.checked .check-expand { display:block; }
+.check-expand textarea { width:100%; padding:7px 9px; border:1px solid var(--g300); border-radius:6px; font-size:13px; font-family:inherit; resize:vertical; min-height:38px; }
+.check-expand .hint { font-size:11px; color:var(--g400); margin-top:3px; }
+.check-photos { font-size:11px; color:var(--navy-light); font-weight:600; cursor:pointer; margin-top:4px; display:inline-block; }
+.check-thumbs { display:flex; gap:5px; margin-top:6px; flex-wrap:wrap; }
+.check-thumbs img { width:44px; height:44px; object-fit:cover; border-radius:4px; }
+.add-phrase-box { margin-top:12px; padding-top:12px; border-top:1px dashed var(--g200); }
+.add-phrase-row { display:flex; gap:8px; }
+.add-phrase-row input { flex:1; padding:8px 10px; border:1px solid var(--g300); border-radius:6px; font-size:13px; font-family:inherit; }
+.save-next-row { display:flex; align-items:center; gap:7px; margin-top:8px; font-size:13px; color:var(--g600); }
+.save-next-row input { width:17px; height:17px; accent-color:var(--navy); }
+
+/* FINDINGS */
+.finding { border-left:4px solid var(--g300); background:var(--g50); border-radius:6px; padding:10px 12px; margin-bottom:8px; }
+.finding.r{border-left-color:var(--r);background:var(--r-bg)} .finding.dd{border-left-color:var(--dd);background:var(--dd-bg)}
+.finding.rm{border-left-color:var(--rm);background:var(--rm-bg)} .finding.i{border-left-color:var(--i);background:var(--i-bg)}
+.finding.m{border-left-color:var(--m);background:var(--m-bg)} .finding.sd{border-left-color:var(--sd);background:var(--sd-bg)} .finding.lm{border-left-color:var(--lm);background:var(--lm-bg)}
+.finding-head { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.finding-tag { font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; color:#fff; text-transform:uppercase; }
+.finding-tag.sd{background:var(--sd)} .finding-tag.r{background:var(--r)} .finding-tag.dd{background:var(--dd)} .finding-tag.rm{background:var(--rm)} .finding-tag.i{background:var(--i)} .finding-tag.m{background:var(--m)} .finding-tag.lm{background:var(--lm)}
+.finding-src { font-size:10px; color:var(--g400); margin-left:auto; }
+.finding-text { font-size:14px; color:var(--g700); line-height:1.4; }
+.finding-thumbs { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.finding-thumbs img { width:50px; height:50px; object-fit:cover; border-radius:4px; }
+.empty-note { padding:14px; text-align:center; color:var(--g400); font-size:13px; font-style:italic; }
+
+/* GENERAL FORM */
+.form-card { background:#fff; border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); margin-bottom:14px; }
+.form-card-title { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--navy); margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--g200); }
+.form-row { margin-bottom:12px; }
+.form-row:last-child { margin-bottom:0; }
+.form-row label { display:block; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--g500); margin-bottom:4px; }
+.form-row input, .form-row select, .form-row textarea { width:100%; padding:9px 11px; border:1px solid var(--g300); border-radius:var(--radius-sm); font-size:15px; font-family:inherit; color:var(--g700); background:#fff; }
+.form-row textarea { resize:vertical; min-height:60px; }
+.form-2col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media(max-width:560px){ .form-2col { grid-template-columns:1fr; } }
+
+/* MODALS */
+.modal-back { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; padding:16px; }
+.modal-back.active { display:flex; }
+.modal { background:#fff; border-radius:var(--radius); max-width:560px; width:100%; max-height:88vh; display:flex; flex-direction:column; box-shadow:var(--shadow-lg); }
+.modal-head { padding:14px 16px; border-bottom:1px solid var(--g200); display:flex; align-items:center; gap:10px; }
+.modal-title { flex:1; font-size:16px; font-weight:700; color:var(--navy); }
+.modal-close { background:none; border:none; font-size:22px; color:var(--g500); cursor:pointer; }
+.modal-body { padding:16px; overflow-y:auto; }
+.modal-body textarea { width:100%; min-height:320px; border:1px solid var(--g300); border-radius:var(--radius-sm); padding:10px; font-family:'SF Mono',Menlo,Consolas,monospace; font-size:12px; line-height:1.55; resize:vertical; }
+.modal-foot { padding:12px 16px; border-top:1px solid var(--g200); display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+.modal-actions { padding:12px 16px; border-top:1px solid var(--g200); display:flex; gap:8px; justify-content:flex-end; }
+.look-item { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--g100); font-size:14px; color:var(--g700); }
+.look-item:last-child { border-bottom:none; }
+.look-bullet { color:var(--navy-light); font-weight:700; }
+.look-del { margin-left:auto; background:none; border:none; color:var(--g400); font-size:14px; cursor:pointer; }
+.look-del:hover { color:#c53030; }
+.look-edit-row { display:flex; gap:8px; margin-top:12px; }
+.look-edit-row input { flex:1; padding:8px 10px; border:1px solid var(--g300); border-radius:6px; font-size:13px; font-family:inherit; }
+.modal-foot-note { padding:12px 16px; border-top:1px solid var(--g200); font-size:12px; color:var(--g500); }
+.prompt-q { font-size:14px; color:var(--g700); margin-bottom:14px; line-height:1.5; }
+.prompt-phrase { font-weight:700; color:var(--navy); }
+
+/* PHOTO PICKER OVERLAY (for attaching to checklist descriptions) */
+.photo-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:300; flex-direction:column; }
+.photo-overlay.active { display:flex; }
+.photo-overlay.drag-over { outline:3px dashed #4a9eff; outline-offset:-8px; background:rgba(74,158,255,0.12); }
+.picker-header { padding:14px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.1); }
+.picker-title { color:#fff; font-size:16px; font-weight:700; flex:1; }
+.picker-count-label { color:rgba(255,255,255,0.6); font-size:13px; }
+.picker-close { background:none; border:none; color:#fff; font-size:24px; cursor:pointer; }
+.picker-grid { flex:1; overflow-y:auto; padding:12px; display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.picker-item { position:relative; aspect-ratio:1; border-radius:6px; overflow:hidden; cursor:pointer; border:2px solid transparent; }
+.picker-item.selected { border-color:#3a9c6a; }
+.picker-item img { width:100%; height:100%; object-fit:cover; display:block; }
+.picker-check { position:absolute; top:4px; right:4px; width:22px; height:22px; background:rgba(0,0,0,0.4); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:13px; font-weight:700; }
+.picker-item.selected .picker-check { background:#3a9c6a; }
+.picker-footer { padding:12px 16px; border-top:1px solid rgba(255,255,255,0.1); display:flex; gap:10px; }
+.picker-source-btn { flex:1; padding:12px; border:none; border-radius:var(--radius-sm); font-size:14px; font-weight:600; cursor:pointer; }
+.picker-source-btn.camera { background:var(--navy); color:#fff; }
+.picker-source-btn.library { background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.3); }
+.picker-attach-btn { padding:12px 18px; background:#3a9c6a; color:#fff; border:none; border-radius:var(--radius-sm); font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.picker-attach-btn:disabled { opacity:0.4; }
+
+/* LIGHTBOX */
+.lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:350; align-items:center; justify-content:center; padding:20px; }
+.lightbox.active { display:flex; }
+.lightbox img { max-width:100%; max-height:100%; object-fit:contain; border-radius:6px; }
+.lightbox-close { position:absolute; top:16px; right:16px; background:rgba(255,255,255,0.2); color:#fff; border:none; width:40px; height:40px; border-radius:50%; font-size:22px; cursor:pointer; }
+
+/* TOAST */
+.toast { position:fixed; bottom:max(20px,calc(20px + env(safe-area-inset-bottom))); left:50%; transform:translateX(-50%) translateY(60px); background:var(--g800); color:#fff; padding:10px 18px; border-radius:22px; font-size:13px; font-weight:500; box-shadow:var(--shadow-lg); opacity:0; transition:all 0.3s; z-index:400; pointer-events:none; }
+.toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+@media (max-width:768px) {
+  .sidebar { position:fixed; inset:60px 0 0 0; transform:translateX(-100%); transition:transform 0.25s; z-index:70; width:250px; overflow-y:auto; box-shadow:var(--shadow-lg); }
+  .sidebar.open { transform:translateX(0); }
+  .sidebar-ov.open { display:block; }
+  .main { padding:12px; }
+}
+@media (min-width:769px) {
+  .menu-btn { display:none; }
+  .sidebar-ov { display:none !important; }
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <button class="menu-btn" id="menuBtn">&#9776;</button>
+  <div class="hdr-title">
+    <div class="hdr-co">Insight Environmental</div>
+    <div class="hdr-sec">Home Inspector · Photo-First</div>
+  </div>
+  <div class="hdr-btns">
+    <button class="hdr-btn" id="menuMore">&#8226;&#8226;&#8226;</button>
+    <button class="hdr-btn primary" id="exportBtn">Export</button>
+  </div>
+</header>
+
+<div class="sidebar-ov" id="sbOv"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-label">Capture</div>
+    <div class="sb-item active" data-page="library"><span class="sb-icon">&#128247;</span><span>Photos</span><span class="sb-count" id="c-library">0</span></div>
+    <div class="sb-item" data-page="general"><span class="sb-icon">&#127968;</span><span>General</span><span class="sb-count" id="c-general">&#8212;</span></div>
+    <div class="sb-label">Sections</div>
+    <div id="sectionNav"></div>
+  </aside>
+
+  <main class="main" id="main"></main>
+</div>
+
+<!-- Photo Picker Overlay -->
+<div class="photo-overlay" id="photoOverlay">
+  <div class="picker-header">
+    <div class="picker-title" id="pickerTitle">Attach Photos</div>
+    <span class="picker-count-label" id="pickerCount">0 selected</span>
+    <button class="picker-close" id="pickerClose">&#215;</button>
+  </div>
+  <div class="picker-grid" id="pickerGrid"></div>
+  <div class="picker-footer">
+    <label class="picker-source-btn camera">&#128248; Camera
+      <input type="file" id="pickerCamera" accept="image/*" capture="environment" style="display:none"></label>
+    <label class="picker-source-btn library">&#128444;&#65039; Add More
+      <input type="file" id="pickerLibrary" accept="image/*" multiple style="display:none"></label>
+    <button class="picker-attach-btn" id="pickerSave" disabled>Attach (0)</button>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox"><button class="lightbox-close" id="lightboxClose">&#215;</button><img id="lightboxImg" src="" alt=""></div>
+
+<!-- Look-for Modal -->
+<div class="modal-back" id="lookModal">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title" id="lookTitle">What to look for</div><button class="modal-close" data-close="lookModal">&#215;</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--g500);margin-bottom:12px;">Your reminder list for this section. Add items — tick "save" to keep them for next inspection. Stays in sync with the Descriptions checklist.</p>
+      <div id="lookItems"></div>
+      <div class="look-edit-row">
+        <input type="text" id="lookNew" placeholder="Add a reminder...">
+        <button class="mic-btn" data-mic="lookNew">&#127908;</button>
+        <button class="btn sm primary" id="lookAddBtn">Add</button>
+      </div>
+      <div class="save-next-row"><input type="checkbox" id="lookSaveNext" checked><label for="lookSaveNext">Save for next inspection</label></div>
+    </div>
+    <div class="modal-foot-note">Reminders and the Descriptions checklist share one list per section.</div>
+  </div>
+</div>
+
+<!-- Edit-phrase Prompt -->
+<div class="modal-back" id="editPrompt">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-head"><div class="modal-title">Edit saved phrase</div><button class="modal-close" data-close="editPrompt">&#215;</button></div>
+    <div class="modal-body">
+      <div class="prompt-q">You're editing <span class="prompt-phrase" id="editPhraseName"></span>, which is in your <strong>saved template</strong>. Apply this change to:</div>
+      <input type="text" id="editPhraseInput" style="width:100%;padding:9px 11px;border:1px solid var(--g300);border-radius:8px;font-size:14px;font-family:inherit;">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="editLocalBtn">Just this inspection</button>
+      <button class="btn primary" id="editOverwriteBtn">Overwrite saved template</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal-back" id="exportModal">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Field Notes Export</div><button class="modal-close" data-close="exportModal">&#215;</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--g500);margin-bottom:10px;">Copy into your Home Inspection Claude Project to generate the report. Phrases seed the narrative; the Project expands them.</p>
+      <textarea id="exportText" readonly></textarea>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="downloadTxtBtn">Download .txt</button>
+      <button class="btn" id="exportPhotosBtn2">Export Photos to Photo Tool</button>
+      <button class="btn primary" id="copyBtn">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- More Menu -->
+<div class="modal-back" id="moreModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head"><div class="modal-title">Options</div><button class="modal-close" data-close="moreModal">&#215;</button></div>
+    <div class="modal-body">
+      <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Navigate</div>
+      <a href="../" class="btn" style="width:100%;margin-bottom:14px;display:block;text-align:center;text-decoration:none;">&#9664; Back to Envirovue</a>
+      <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Session</div>
+      <button class="btn" style="width:100%;margin-bottom:8px;" id="saveJsonBtn">&#128190; Save Session (with photos)</button>
+      <button class="btn" style="width:100%;margin-bottom:8px;" id="loadJsonBtn">&#128194; Load Session</button>
+      <input type="file" id="loadFile" accept=".json" style="display:none;">
+      <button class="btn" style="width:100%;margin-bottom:14px;background:#1a7a6e;color:#fff;" id="exportPhotosBtn">&#128248; Export Photos to Photo Tool</button>
+      <div style="font-size:10px;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Templates</div>
+      <button class="btn" style="width:100%;margin-bottom:14px;" id="resetTemplateBtn">&#8635; Reset saved checklists to defaults</button>
+      <button class="btn danger" style="width:100%;" id="clearBtn">&#128465; Clear This Inspection</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════════════════
+const STORAGE_KEY  = 'insight_hi_photofirst_v1';
+const TEMPLATE_KEY = 'insight_hi_templates_v1';   // persists saved checklist phrases + look-for lists
+const IDB_NAME  = 'insight_hi_pf_photos';
+const IDB_STORE = 'photos';
+const MAX_PHOTO_W = 1920;
+const PHOTO_QUALITY = 0.75;
+
+const SECTIONS = ['Roofing','Exteriors','Electrical','HVAC','Plumbing','Interiors','Structural'];
+const SECTION_ICONS = { Roofing:'🏠', Exteriors:'🧱', Electrical:'⚡', HVAC:'🌡️', Plumbing:'🚰', Interiors:'🛋️', Structural:'🏗️' };
+const TYPES = ['—','Description','Observation','Limitation'];
+const CATS = ['—','SD','R','DD','RM','I','M','LM'];
+const CAT_CLS = { SD:'sd', R:'r', DD:'dd', RM:'rm', I:'i', M:'m', LM:'lm' };
+const CAT_LABEL = { SD:'System Description', R:'Repair', DD:'Due Diligence', RM:'Rec. Maintenance', I:'Information', M:'Monitor', LM:'Limitation' };
+
+// Default templates — starter phrases & reminders per section (user edits/extends; persisted)
+const DEFAULT_TEMPLATES = {
+  Roofing: {
+    phrases: ['Roof covering material','Gutter & downspout material','Chimney present / type','Roof drainage / slope','Method of inspection'],
+    lookFor: ['Roof covering type & approximate age','Gutter & downspout material + termination','Chimney: present? masonry or metal? crown/cap','Flashing at penetrations, valleys, walls','How was the roof viewed? (walked / ladder / ground)']
+  },
+  Exteriors: {
+    phrases: ['Exterior cladding material','Trim & fascia material','Grading & drainage','Walkways & driveway','Exterior doors'],
+    lookFor: ['Cladding type & condition','Grading slopes away from foundation?','Vegetation contact with siding','Trim, fascia, soffit condition','Exterior GFCI, hose bibs']
+  },
+  Electrical: {
+    phrases: ['Main panel amperage','Panel manufacturer','Branch wiring type','GFCI / AFCI protection','Service entrance'],
+    lookFor: ['Main service amperage & voltage','Panel manufacturer (note recalled brands)','Branch wiring (copper / aluminum)','GFCI in wet areas, AFCI where required','Grounding / bonding','Double-taps, open knockouts']
+  },
+  HVAC: {
+    phrases: ['Heating system type','Cooling system type','Approximate age / data plate','Thermostat','Distribution / ductwork'],
+    lookFor: ['Heating type, fuel, approx age','AC / heat pump present, age','Filter condition & location','Combustion air / venting','Condensate handling']
+  },
+  Plumbing: {
+    phrases: ['Supply piping material','Drain/waste/vent material','Water heater type & capacity','Water heater age','Fixtures'],
+    lookFor: ['Supply pipe material (copper/PEX/galv)','DWV material','Water heater: type, capacity, age, TPR','Functional flow & drainage','Visible leaks or corrosion']
+  },
+  Interiors: {
+    phrases: ['Wall & ceiling finishes','Flooring materials','Windows','Interior doors','Smoke / CO alarms'],
+    lookFor: ['Wall/ceiling finish & condition','Flooring types','Window operation & glazing','Stairs, railings, guards','Smoke & CO alarm presence']
+  },
+  Structural: {
+    phrases: ['Foundation type','Framing observed','Crawlspace / basement access','Attic framing','Signs of movement'],
+    lookFor: ['Foundation type & material','Visible framing & condition','Crawlspace: moisture, vapor barrier','Attic: framing, ventilation','Cracks, settlement, deflection']
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+//  INDEXEDDB (reused pattern from Home Inspector)
+// ═══════════════════════════════════════════════════════
+let idb = null;
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => { const db=e.target.result; if(!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE,{keyPath:'id'}); };
+    req.onsuccess = e => { idb=e.target.result; resolve(idb); };
+    req.onerror = e => reject(e);
+  });
+}
+async function idbPut(o){ if(!idb) await openIDB(); return new Promise((res,rej)=>{ const tx=idb.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).put(o); tx.oncomplete=()=>res(); tx.onerror=e=>rej(e); }); }
+async function idbGet(id){ if(!idb) await openIDB(); return new Promise((res,rej)=>{ const tx=idb.transaction(IDB_STORE,'readonly'); const r=tx.objectStore(IDB_STORE).get(id); r.onsuccess=()=>res(r.result||null); r.onerror=e=>rej(e); }); }
+async function idbGetAll(){ if(!idb) await openIDB(); return new Promise((res,rej)=>{ const tx=idb.transaction(IDB_STORE,'readonly'); const r=tx.objectStore(IDB_STORE).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=e=>rej(e); }); }
+async function idbDelete(id){ if(!idb) await openIDB(); return new Promise((res,rej)=>{ const tx=idb.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).delete(id); tx.oncomplete=()=>res(); tx.onerror=e=>rej(e); }); }
+async function idbClear(){ if(!idb) await openIDB(); return new Promise((res,rej)=>{ const tx=idb.transaction(IDB_STORE,'readwrite'); tx.objectStore(IDB_STORE).clear(); tx.oncomplete=()=>res(); tx.onerror=e=>rej(e); }); }
+
+// ═══════════════════════════════════════════════════════
+//  IMAGE UTILITIES
+// ═══════════════════════════════════════════════════════
+function compressImage(dataUrl){ return new Promise(res=>{ const img=new Image(); img.onload=()=>{ let w=img.naturalWidth,h=img.naturalHeight; if(w>MAX_PHOTO_W){h=Math.round(h*MAX_PHOTO_W/w);w=MAX_PHOTO_W;} const c=document.createElement('canvas'); c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); res(c.toDataURL('image/jpeg',PHOTO_QUALITY)); }; img.onerror=()=>res(dataUrl); img.src=dataUrl; }); }
+function makeThumbnail(dataUrl,size){ return new Promise(res=>{ const img=new Image(); img.onload=()=>{ let w=img.naturalWidth,h=img.naturalHeight; const sc=Math.min(size/w,size/h,1); w=Math.round(w*sc);h=Math.round(h*sc); const c=document.createElement('canvas'); c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); res(c.toDataURL('image/jpeg',0.6)); }; img.onerror=()=>res(dataUrl); img.src=dataUrl; }); }
+function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(new Error('read fail')); r.readAsDataURL(file); }); }
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+let state = createEmptyState();
+let templates = {};       // { [section]: { phrases:[{phrase,saved}], lookFor:[...] } }  — the SAVED reusable master
+let currentPage = 'library';
+let libFilter = 'All';
+let uidCounter = 1;
+
+function createEmptyState() {
+  const s = {
+    general: { address:'', date:new Date().toISOString().slice(0,10), client:'', era:'', foundation:'', exterior:'', occupancy:'', weather:'', notes:'' },
+    photos: [],       // { id, section, type, cat, text }   (thumb/full in IDB, id key)
+    checklists: {}    // { [section]: [ { phrase, checked, text, saved, photoIds:[] } ] }
+  };
+  SECTIONS.forEach(sec => s.checklists[sec] = []);
+  return s;
+}
+function newPhotoId(){ return 'p_'+Date.now()+'_'+(uidCounter++); }
+
+// ═══════════════════════════════════════════════════════
+//  PERSISTENCE
+// ═══════════════════════════════════════════════════════
+function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+function loadState(){
+  try{ const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return;
+    const p=JSON.parse(raw);
+    if(p && p.general && p.photos){ p.checklists=p.checklists||{}; SECTIONS.forEach(sec=>{ p.checklists[sec]=(p.checklists[sec]||[]).map(c=>({...c,photoIds:c.photoIds||[]})); }); state=p; }
+  }catch(e){}
+}
+function saveTemplates(){ try{ localStorage.setItem(TEMPLATE_KEY, JSON.stringify(templates)); }catch(e){} }
+function loadTemplates(){
+  try{ const raw=localStorage.getItem(TEMPLATE_KEY);
+    if(raw){ templates=JSON.parse(raw); }
+    else { templates={}; SECTIONS.forEach(sec=>{ templates[sec]={ phrases:DEFAULT_TEMPLATES[sec].phrases.map(p=>({phrase:p,saved:true})), lookFor:[...DEFAULT_TEMPLATES[sec].lookFor] }; }); saveTemplates(); }
+    SECTIONS.forEach(sec=>{ if(!templates[sec]) templates[sec]={phrases:[],lookFor:[]}; });
+  }catch(e){ templates={}; SECTIONS.forEach(sec=>templates[sec]={phrases:[],lookFor:[]}); }
+}
+// Seed a fresh inspection's checklists from saved templates (only saved phrases, unchecked)
+function seedChecklistsFromTemplates(){
+  SECTIONS.forEach(sec=>{
+    if(state.checklists[sec].length===0){
+      state.checklists[sec] = templates[sec].phrases.map(t=>({ phrase:t.phrase, checked:false, text:'', saved:t.saved, photoIds:[] }));
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER — NAV + ROUTING
+// ═══════════════════════════════════════════════════════
+function renderNav(){
+  const nav=document.getElementById('sectionNav');
+  nav.innerHTML = SECTIONS.map(sec=>{
+    const n = state.photos.filter(p=>p.section===sec).length + state.checklists[sec].filter(c=>c.checked).length;
+    return `<div class="sb-item ${currentPage===sec?'active':''} ${n>0?'has':''}" data-page="${sec}">
+      <span class="sb-icon">${SECTION_ICONS[sec]||'📄'}</span><span>${sec}</span><span class="sb-count">${n}</span></div>`;
+  }).join('');
+  document.querySelectorAll('#sectionNav .sb-item').forEach(el=>el.addEventListener('click',()=>go(el.dataset.page)));
+  // library + general counts
+  document.getElementById('c-library').textContent = state.photos.length;
+  document.getElementById('c-general').innerHTML = state.general.address ? '&#10003;' : '&#8212;';
+}
+function go(page){
+  currentPage=page;
+  document.querySelectorAll('.sb-item').forEach(el=>el.classList.toggle('active', el.dataset.page===page));
+  renderMain();
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sbOv').classList.remove('open');
+  window.scrollTo(0,0);
+}
+function renderMain(){
+  const main=document.getElementById('main');
+  if(currentPage==='library'){ main.innerHTML=renderLibrary(); wireLibrary(); }
+  else if(currentPage==='general'){ main.innerHTML=renderGeneral(); wireGeneral(); }
+  else { main.innerHTML=renderSection(currentPage); wireSection(currentPage); }
+  renderNav();
+}
+
+// ═══════════════════════════════════════════════════════
+//  PHOTO LIBRARY
+// ═══════════════════════════════════════════════════════
+function renderLibrary(){
+  const assigned = state.photos.filter(p=>p.section && p.section!=='—').length;
+  const filters = ['All','Unassigned',...SECTIONS];
+  return `
+    <div class="page-title">Photo Library</div>
+    <div class="page-sub">Tag each photo: Section, Type, Category, text. It flows into that section as a finding.</div>
+    <div class="hint-callout"><strong>All three types flow from here.</strong> Tag a photo Roofing → Description and it lands in Roofing's Descriptions. Same for Observations and Limitations. Unassigned photos are simply excluded — no need to delete.</div>
+    <label class="upload-zone" id="uploadZone">
+      <div class="uz-icon">&#128247;</div>
+      <h3>Add Photos</h3>
+      <p>Tap to pick from library · or drag &amp; drop here on desktop</p>
+      <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+    </label>
+    <div class="lib-toolbar">
+      <label class="btn primary" style="cursor:pointer;">&#128248; Camera<input type="file" id="camInput" accept="image/*" capture="environment" style="display:none"></label>
+      <span class="filter-note">${state.photos.length} photos · ${assigned} assigned · ${state.photos.length-assigned} unassigned</span>
+    </div>
+    <div class="filter-tabs" id="libFilters">
+      ${filters.map(f=>`<button class="ftab ${f===libFilter?'active':''}" data-f="${f}">${f}</button>`).join('')}
+    </div>
+    <div class="photo-grid" id="libGrid"></div>`;
+}
+function visibleLibPhotos(){
+  if(libFilter==='All') return state.photos;
+  if(libFilter==='Unassigned') return state.photos.filter(p=>!p.section||p.section==='—');
+  return state.photos.filter(p=>p.section===libFilter);
+}
+function renderLibGrid(){
+  const grid=document.getElementById('libGrid'); if(!grid) return;
+  const vis=visibleLibPhotos();
+  if(!vis.length){ grid.innerHTML=`<div class="empty-note" style="grid-column:1/-1;">${state.photos.length? 'No photos in this filter.' : 'No photos yet — add some above.'}</div>`; return; }
+  grid.innerHTML = vis.map(p=>{
+    const assigned=p.section&&p.section!=='—';
+    const cls=assigned&&p.cat!=='—'?CAT_CLS[p.cat]:'';
+    const tag=assigned?`<span class="assigned-tag ${cls}">${p.section}${p.type!=='—'?' · '+p.type:''}${p.cat!=='—'?' · '+p.cat:''}</span>`:`<span class="unassigned-tag">Unassigned</span>`;
+    return `<div class="pcard ${cls}">
+      <img class="pthumb" src="${p._thumb||''}" data-full="${p.id}" alt="">
+      <div class="pbody">
+        <div class="ptag-row">${tag}<button class="pdel" data-del="${p.id}" title="Delete">&#128465;</button></div>
+        <div class="pfields">
+          <select data-pf="section" data-id="${p.id}">${['—',...SECTIONS].map(s=>`<option ${s===p.section?'selected':''}>${s}</option>`).join('')}</select>
+          <div class="prow2">
+            <select data-pf="type" data-id="${p.id}">${TYPES.map(t=>`<option ${t===p.type?'selected':''}>${t}</option>`).join('')}</select>
+            <select data-pf="cat" data-id="${p.id}">${CATS.map(c=>`<option ${c===p.cat?'selected':''}>${c}</option>`).join('')}</select>
+          </div>
+          <div class="field-mic">
+            <textarea data-pf="text" data-id="${p.id}" placeholder="Description / finding text...">${esc(p.text)}</textarea>
+            <button class="mic-btn" data-mic-target="pt-${p.id}">&#127908;</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  // attach thumbnails from IDB
+  vis.forEach(async p=>{ if(!p._thumb){ const st=await idbGet(p.id).catch(()=>null); if(st){ p._thumb=st.thumb||st.src; const img=grid.querySelector(`img[data-full="${p.id}"]`); if(img) img.src=p._thumb; } } });
+  // wire
+  grid.querySelectorAll('[data-pf]').forEach(el=>{
+    const headerField=['section','type','cat'].includes(el.dataset.pf);
+    el.addEventListener('input', ()=>{ setPhoto(el.dataset.id, el.dataset.pf, el.value, false); });
+    el.addEventListener('change', ()=>{ setPhoto(el.dataset.id, el.dataset.pf, el.value, headerField); });
+    if(el.tagName==='TEXTAREA') el.id='pt-'+el.dataset.id;
+  });
+  grid.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ if(confirm('Delete this photo?')) deletePhoto(b.dataset.del); }));
+  grid.querySelectorAll('[data-mic-target]').forEach(b=>b.addEventListener('click',(e)=>dictate(b.dataset.micTarget, e)));
+  grid.querySelectorAll('.pthumb').forEach(img=>img.addEventListener('click',()=>openLightbox(img.dataset.full)));
+}
+function setPhoto(id, field, val, rerender){
+  const p=state.photos.find(x=>x.id===id); if(!p) return;
+  p[field]=val; save();
+  if(rerender){ renderLibGrid(); renderNav(); if(field==='section'){ /* moved sections */ } }
+}
+async function deletePhoto(id){
+  state.photos = state.photos.filter(p=>p.id!==id);
+  // remove from any checklist attachments
+  SECTIONS.forEach(sec=>state.checklists[sec].forEach(c=>{ c.photoIds=(c.photoIds||[]).filter(pid=>pid!==id); }));
+  await idbDelete(id).catch(()=>{});
+  save(); renderLibGrid(); renderNav();
+}
+function wireLibrary(){
+  const fi=document.getElementById('fileInput');
+  const uz=document.getElementById('uploadZone');
+  const cam=document.getElementById('camInput');
+  if(fi) fi.addEventListener('change', async e=>{ await handleLibFiles(e.target.files); e.target.value=''; });
+  if(cam) cam.addEventListener('change', async e=>{ await handleLibFiles(e.target.files); e.target.value=''; });
+  if(uz){
+    uz.addEventListener('dragover', e=>{ e.preventDefault(); uz.classList.add('drag-over'); });
+    uz.addEventListener('dragleave', ()=>uz.classList.remove('drag-over'));
+    uz.addEventListener('drop', async e=>{ e.preventDefault(); uz.classList.remove('drag-over'); await handleLibFiles(e.dataTransfer.files); });
+  }
+  document.querySelectorAll('#libFilters .ftab').forEach(b=>b.addEventListener('click',()=>{ libFilter=b.dataset.f; renderMain(); }));
+  renderLibGrid();
+}
+async function handleLibFiles(files){
+  const arr=Array.from(files).filter(f=>f.type.startsWith('image/'));
+  if(!arr.length) return;
+  toast('Processing '+arr.length+' photo'+(arr.length>1?'s':'')+'...');
+  for(const file of arr){
+    const raw=await readFileAsDataURL(file);
+    const src=await compressImage(raw);
+    const thumb=await makeThumbnail(src,200);
+    const id=newPhotoId();
+    await idbPut({ id, src, thumb, filename:file.name });
+    state.photos.push({ id, section:'—', type:'—', cat:'—', text:'', _thumb:thumb });
+  }
+  save(); renderLibGrid(); renderNav();
+  toast(arr.length+' photo'+(arr.length>1?'s':'')+' added');
+}
+
+// ═══════════════════════════════════════════════════════
+//  GENERAL
+// ═══════════════════════════════════════════════════════
+function renderGeneral(){
+  const g=state.general;
+  const inp=(id,val,ph)=>`<input id="${id}" type="text" value="${esc(val)}" placeholder="${esc(ph||'')}">`;
+  return `
+    <div class="page-title">General / Building Information</div>
+    <div class="page-sub">Property metadata for the report.</div>
+    <div class="form-card">
+      <div class="form-card-title">Project</div>
+      <div class="form-row"><label>Property Address</label>${inp('g-address',g.address,'1642 Lauren Dr., Petaluma, CA')}</div>
+      <div class="form-2col">
+        <div class="form-row"><label>Inspection Date</label><input id="g-date" type="date" value="${esc(g.date)}"></div>
+        <div class="form-row"><label>Client Name</label>${inp('g-client',g.client,'Optional')}</div>
+      </div>
+      <div class="form-2col">
+        <div class="form-row"><label>Construction Era</label><select id="g-era">${['','Pre-1940','1940-1959','1960-1979','1980-1999','2000-present'].map(v=>`<option ${g.era===v?'selected':''}>${v||'— select —'}</option>`).join('')}</select></div>
+        <div class="form-row"><label>Foundation</label><select id="g-foundation">${['','Concrete perimeter','Concrete slab on grade','Pier and post','Raised w/ crawlspace','Mixed / Other'].map(v=>`<option ${g.foundation===v?'selected':''}>${v||'— select —'}</option>`).join('')}</select></div>
+      </div>
+      <div class="form-2col">
+        <div class="form-row"><label>Exterior Cladding</label>${inp('g-exterior',g.exterior,'Stucco, wood siding...')}</div>
+        <div class="form-row"><label>Occupancy</label><select id="g-occupancy">${['','Occupied - furnished','Vacant - unfurnished','Vacant - furnished'].map(v=>`<option ${g.occupancy===v?'selected':''}>${v||'— select —'}</option>`).join('')}</select></div>
+      </div>
+      <div class="form-row"><label>Weather at Inspection</label>${inp('g-weather',g.weather,'Sunny, 62°F, recent rain')}</div>
+    </div>
+    <div class="form-card">
+      <div class="form-card-title">General Notes</div>
+      <div class="form-row">
+        <div class="field-mic">
+          <textarea id="g-notes" placeholder="Misc information for the report...">${esc(g.notes)}</textarea>
+          <button class="mic-btn" data-mic-target="g-notes">&#127908;</button>
+        </div>
+      </div>
+    </div>`;
+}
+function wireGeneral(){
+  const map={ 'g-address':'address','g-date':'date','g-client':'client','g-era':'era','g-foundation':'foundation','g-exterior':'exterior','g-occupancy':'occupancy','g-weather':'weather','g-notes':'notes' };
+  Object.keys(map).forEach(id=>{ const el=document.getElementById(id); if(!el) return; const h=()=>{ state.general[map[id]]=el.value; save(); renderNav(); }; el.addEventListener('input',h); el.addEventListener('change',h); });
+  document.querySelectorAll('[data-mic-target]').forEach(b=>b.addEventListener('click',(e)=>dictate(b.dataset.micTarget, e)));
+}
+
+// ═══════════════════════════════════════════════════════
+//  SECTION PAGE
+// ═══════════════════════════════════════════════════════
+function renderSection(sec){
+  return `
+    <div class="sec-head-row">
+      <div class="page-title">${sec}</div>
+      <button class="info-btn" data-look="${sec}">&#128161; What to look for</button>
+    </div>
+    <div class="page-sub">Descriptions from checklist phrases &amp; photos. Observations &amp; limitations from photos.</div>
+    <div class="block">
+      <div class="block-head"><div class="block-title">Descriptions</div><span class="block-tag">checklist + photos</span></div>
+      <div class="block-body">
+        <p style="font-size:12px;color:var(--g500);margin-bottom:8px;">Check a phrase to include it — it seeds the report narrative. Photos tagged Description also appear here.</p>
+        <div id="checklist-${sec}"></div>
+        <div class="add-phrase-box">
+          <div class="add-phrase-row">
+            <input type="text" id="newphrase-${sec}" placeholder="Add a phrase (e.g. 'ridge vent present')">
+            <button class="mic-btn" data-mic-target="newphrase-${sec}">&#127908;</button>
+            <button class="btn sm primary" data-addphrase="${sec}">Add</button>
+          </div>
+          <div class="save-next-row"><input type="checkbox" id="savenext-${sec}"><label for="savenext-${sec}">Save this phrase for next inspection</label></div>
+        </div>
+        <div id="descphotos-${sec}"></div>
+      </div>
+    </div>
+    <div class="block">
+      <div class="block-head"><div class="block-title">Observations</div><span class="block-tag">from photos</span></div>
+      <div class="block-body" id="obs-${sec}"></div>
+    </div>
+    <div class="block">
+      <div class="block-head"><div class="block-title">Limitations</div><span class="block-tag">from photos</span></div>
+      <div class="block-body" id="lim-${sec}"></div>
+    </div>`;
+}
+function wireSection(sec){
+  document.querySelector(`[data-look="${sec}"]`).addEventListener('click',()=>openLook(sec));
+  document.querySelector(`[data-addphrase="${sec}"]`).addEventListener('click',()=>addPhrase(sec));
+  document.querySelectorAll('[data-mic-target]').forEach(b=>b.addEventListener('click',(e)=>dictate(b.dataset.micTarget, e)));
+  renderChecklist(sec);
+  renderSectionPhotos(sec);
+}
+function renderChecklist(sec){
+  const el=document.getElementById('checklist-'+sec); if(!el) return;
+  const list=state.checklists[sec];
+  el.innerHTML = list.length ? list.map((c,idx)=>`
+    <div class="check-row ${c.checked?'checked':''}">
+      <input type="checkbox" ${c.checked?'checked':''} data-check="${idx}">
+      <div class="check-body">
+        <div class="check-phrase-row">
+          <span class="check-phrase">${esc(c.phrase)}</span>
+          ${c.saved?'<span class="saved-badge">saved</span>':''}
+          <button class="mini-edit" data-editphrase="${idx}" title="Edit">&#9998;</button>
+          <button class="mini-del" data-delphrase="${idx}" title="Remove">&#215;</button>
+        </div>
+        <div class="check-expand">
+          <div class="field-mic">
+            <textarea data-ctext="${idx}" placeholder="Optional detail (or leave to Claude Project)">${esc(c.text)}</textarea>
+            <button class="mic-btn" data-mic-target="ctext-${sec}-${idx}">&#127908;</button>
+          </div>
+          <div class="hint">Phrase seeds the narrative. Add specifics if you want.</div>
+          <span class="check-photos" data-checkphoto="${idx}">&#128247; Attach photos (${(c.photoIds||[]).length})</span>
+          <div class="check-thumbs" id="cthumbs-${sec}-${idx}"></div>
+        </div>
+      </div>
+    </div>`).join('') : '<div class="empty-note">No checklist phrases. Add some below, or reset templates in the ••• menu.</div>';
+  // wire
+  el.querySelectorAll('[data-check]').forEach(cb=>cb.addEventListener('change',()=>{ state.checklists[sec][cb.dataset.check].checked=cb.checked; save(); renderChecklist(sec); renderNav(); }));
+  el.querySelectorAll('[data-ctext]').forEach(ta=>{ ta.id='ctext-'+sec+'-'+ta.dataset.ctext; ta.addEventListener('input',()=>{ state.checklists[sec][ta.dataset.ctext].text=ta.value; save(); }); });
+  el.querySelectorAll('[data-editphrase]').forEach(b=>b.addEventListener('click',()=>editPhrase(sec,parseInt(b.dataset.editphrase))));
+  el.querySelectorAll('[data-delphrase]').forEach(b=>b.addEventListener('click',()=>{ if(confirm('Remove this phrase from this inspection?')){ state.checklists[sec].splice(parseInt(b.dataset.delphrase),1); save(); renderChecklist(sec); renderNav(); } }));
+  el.querySelectorAll('[data-checkphoto]').forEach(b=>b.addEventListener('click',()=>openChecklistPicker(sec,parseInt(b.dataset.checkphoto))));
+  el.querySelectorAll('[data-mic-target]').forEach(b=>b.addEventListener('click',(e)=>dictate(b.dataset.micTarget, e)));
+  // render attached thumbs
+  list.forEach((c,idx)=>{ const t=document.getElementById(`cthumbs-${sec}-${idx}`); if(t&&(c.photoIds||[]).length){ t.innerHTML=c.photoIds.map(pid=>`<img data-full="${pid}" src="">`).join(''); c.photoIds.forEach(async pid=>{ const st=await idbGet(pid).catch(()=>null); if(st){ const img=t.querySelector(`img[data-full="${pid}"]`); if(img){ img.src=st.thumb||st.src; img.addEventListener('click',()=>openLightbox(pid)); } } }); } });
+}
+function renderSectionPhotos(sec){
+  const descPhotos=state.photos.filter(p=>p.section===sec&&p.type==='Description');
+  const obs=state.photos.filter(p=>p.section===sec&&p.type==='Observation');
+  const lim=state.photos.filter(p=>p.section===sec&&p.type==='Limitation');
+  const dp=document.getElementById('descphotos-'+sec);
+  if(dp) dp.innerHTML = descPhotos.length ? `<div style="margin-top:12px;border-top:1px dashed var(--g200);padding-top:10px;"><div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:8px;">From photos</div>${descPhotos.map(findingHTML).join('')}</div>` : '';
+  const o=document.getElementById('obs-'+sec); if(o) o.innerHTML = obs.length?obs.map(findingHTML).join(''):`<div class="empty-note">Tag a photo as ${sec} → Observation to populate.</div>`;
+  const l=document.getElementById('lim-'+sec); if(l) l.innerHTML = lim.length?lim.map(findingHTML).join(''):`<div class="empty-note">e.g. "Viewed from hatch only" — tag a photo as ${sec} → Limitation.</div>`;
+  // wire finding thumbs lightbox
+  document.querySelectorAll('#page-'+sec+' .finding-thumbs img, .finding-thumbs img').forEach(img=>{ if(img.dataset.full) img.addEventListener('click',()=>openLightbox(img.dataset.full)); });
+  // load finding thumbs
+  [...descPhotos,...obs,...lim].forEach(async p=>{ const st=await idbGet(p.id).catch(()=>null); if(st){ const imgs=document.querySelectorAll(`.finding-thumbs img[data-full="${p.id}"]`); imgs.forEach(img=>{ img.src=st.thumb||st.src; }); } });
+}
+function findingHTML(p){
+  const cls=p.cat!=='—'?CAT_CLS[p.cat]:'';
+  return `<div class="finding ${cls}">
+    <div class="finding-head"><span class="finding-tag ${cls}">${p.cat!=='—'?p.cat:'—'}</span><span class="finding-src">photo</span></div>
+    <div class="finding-text">${p.text?esc(p.text):'<em style="color:#94A3B8">(no text yet)</em>'}</div>
+    <div class="finding-thumbs"><img data-full="${p.id}" src="" alt=""></div>
+  </div>`;
+}
+
+// ── ADD / EDIT PHRASE ──
+function addPhrase(sec){
+  const inp=document.getElementById('newphrase-'+sec);
+  const save2=document.getElementById('savenext-'+sec).checked;
+  const v=inp.value.trim(); if(!v) return;
+  state.checklists[sec].push({ phrase:v, checked:true, text:'', saved:save2, photoIds:[] });
+  if(save2){
+    if(!templates[sec].phrases.some(t=>t.phrase===v)) templates[sec].phrases.push({phrase:v,saved:true});
+    if(!templates[sec].lookFor.includes(v)) templates[sec].lookFor.push(v);
+    saveTemplates();
+  }
+  inp.value=''; document.getElementById('savenext-'+sec).checked=false;
+  save(); renderChecklist(sec); renderNav();
+}
+let editCtx=null;
+function editPhrase(sec,idx){
+  const c=state.checklists[sec][idx];
+  if(c.saved){
+    editCtx={sec,idx,oldPhrase:c.phrase};
+    document.getElementById('editPhraseName').textContent='"'+c.phrase+'"';
+    document.getElementById('editPhraseInput').value=c.phrase;
+    document.getElementById('editPrompt').classList.add('active');
+  } else {
+    const v=prompt('Edit phrase:',c.phrase);
+    if(v!==null&&v.trim()){ c.phrase=v.trim(); save(); renderChecklist(sec); }
+  }
+}
+function resolveEdit(mode){
+  if(!editCtx) return;
+  const {sec,idx,oldPhrase}=editCtx;
+  const newVal=document.getElementById('editPhraseInput').value.trim();
+  if(newVal){
+    state.checklists[sec][idx].phrase=newVal;
+    if(mode==='overwrite'){
+      state.checklists[sec][idx].saved=true;
+      const tp=templates[sec].phrases.find(t=>t.phrase===oldPhrase); if(tp) tp.phrase=newVal; else templates[sec].phrases.push({phrase:newVal,saved:true});
+      const li=templates[sec].lookFor.indexOf(oldPhrase); if(li>-1) templates[sec].lookFor[li]=newVal;
+      saveTemplates();
+    } else {
+      state.checklists[sec][idx].saved=false; // detach from template
+    }
+  }
+  closeModal('editPrompt'); editCtx=null; save(); renderChecklist(sec); renderNav();
+}
+
+// ═══════════════════════════════════════════════════════
+//  LOOK-FOR MODAL
+// ═══════════════════════════════════════════════════════
+let currentLook=null;
+function openLook(sec){
+  currentLook=sec;
+  document.getElementById('lookTitle').textContent=sec+' — what to look for';
+  renderLookItems();
+  document.getElementById('lookModal').classList.add('active');
+}
+function renderLookItems(){
+  const list=templates[currentLook].lookFor;
+  document.getElementById('lookItems').innerHTML = list.length ? list.map((item,i)=>`<div class="look-item"><span class="look-bullet">○</span><span>${esc(item)}</span><button class="look-del" data-lookdel="${i}">&#215;</button></div>`).join('') : '<div class="empty-note">No reminders yet — add some below.</div>';
+  document.querySelectorAll('[data-lookdel]').forEach(b=>b.addEventListener('click',()=>{ templates[currentLook].lookFor.splice(parseInt(b.dataset.lookdel),1); saveTemplates(); renderLookItems(); }));
+}
+function addLook(){
+  const inp=document.getElementById('lookNew');
+  const saveNext=document.getElementById('lookSaveNext').checked;
+  const v=inp.value.trim(); if(!v) return;
+  templates[currentLook].lookFor.push(v);
+  // sync to current checklist (unchecked) and, if saved, to template phrases
+  if(!state.checklists[currentLook].some(c=>c.phrase===v)) state.checklists[currentLook].push({phrase:v,checked:false,text:'',saved:saveNext,photoIds:[]});
+  if(saveNext && !templates[currentLook].phrases.some(t=>t.phrase===v)) templates[currentLook].phrases.push({phrase:v,saved:true});
+  saveTemplates(); save();
+  inp.value='';
+  renderLookItems(); renderChecklist(currentLook); renderNav();
+}
+
+// ═══════════════════════════════════════════════════════
+//  CHECKLIST PHOTO PICKER (attach existing library photos to a description)
+// ═══════════════════════════════════════════════════════
+let pickerCtx=null;   // { sec, idx }
+let pickerPool=[]; let pickerNextId=1;
+async function openChecklistPicker(sec,idx){
+  pickerCtx={sec,idx};
+  const c=state.checklists[sec][idx];
+  pickerPool=[];
+  // Existing library photos become selectable; pre-select ones already attached
+  for(const p of state.photos){
+    const st=await idbGet(p.id).catch(()=>null);
+    pickerPool.push({ id:p.id, src:(st&&(st.thumb||st.src))||'', selected:(c.photoIds||[]).includes(p.id), existing:true });
+  }
+  document.getElementById('pickerTitle').textContent='Attach to: '+c.phrase;
+  renderPicker(); updatePickerCount();
+  document.getElementById('photoOverlay').classList.add('active');
+  document.body.style.overflow='hidden';
+}
+function renderPicker(){
+  const g=document.getElementById('pickerGrid');
+  if(!pickerPool.length){ g.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:40px;color:#aaa;"><div style="font-size:40px;">&#128247;</div><p>No photos yet. Use Camera or Add More.</p></div>`; return; }
+  g.innerHTML=pickerPool.map((p,i)=>`<div class="picker-item ${p.selected?'selected':''}" data-idx="${i}"><img src="${p.src}" alt=""><div class="picker-check">${p.selected?'&#10003;':''}</div></div>`).join('');
+  g.querySelectorAll('.picker-item').forEach(el=>el.addEventListener('click',()=>{ pickerPool[el.dataset.idx].selected=!pickerPool[el.dataset.idx].selected; renderPicker(); updatePickerCount(); }));
+}
+function updatePickerCount(){ const n=pickerPool.filter(p=>p.selected).length; document.getElementById('pickerCount').textContent=n+' selected'; const b=document.getElementById('pickerSave'); b.disabled=n===0; b.textContent=n?`Attach (${n})`:'Attach (0)'; }
+async function handlePickerFiles(files){
+  const arr=Array.from(files).filter(f=>f.type.startsWith('image/')); if(!arr.length) return;
+  toast('Processing...');
+  for(const file of arr){
+    const raw=await readFileAsDataURL(file); const src=await compressImage(raw); const thumb=await makeThumbnail(src,200);
+    const id=newPhotoId();
+    await idbPut({ id, src, thumb, filename:file.name });
+    // add to library too (unassigned) so it lives in one place
+    state.photos.push({ id, section:'—', type:'—', cat:'—', text:'', _thumb:thumb });
+    pickerPool.push({ id, src:thumb, selected:true, existing:false });
+  }
+  save(); renderPicker(); updatePickerCount();
+}
+async function savePicker(){
+  if(!pickerCtx) return;
+  const sel=pickerPool.filter(p=>p.selected).map(p=>p.id);
+  state.checklists[pickerCtx.sec][pickerCtx.idx].photoIds=sel;
+  save(); closePicker(); renderChecklist(pickerCtx.sec);
+  toast(sel.length+' photo'+(sel.length!==1?'s':'')+' attached');
+}
+function closePicker(){ document.getElementById('photoOverlay').classList.remove('active'); document.body.style.overflow=''; pickerCtx=null; pickerPool=[]; }
+
+// ═══════════════════════════════════════════════════════
+//  LIGHTBOX
+// ═══════════════════════════════════════════════════════
+async function openLightbox(photoId){
+  const st=await idbGet(photoId).catch(()=>null);
+  if(st&&st.src){ document.getElementById('lightboxImg').src=st.src; document.getElementById('lightbox').classList.add('active'); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  DICTATION (reused pattern)
+// ═══════════════════════════════════════════════════════
+let activeRec=null, activeMicBtn=null;
+function dictate(targetId, ev){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const target=document.getElementById(targetId);
+  const btn=ev?ev.currentTarget:null;
+  if(!target){ return; }
+  if(!SR){ toast('Voice input needs Safari or Chrome'); return; }
+  if(activeRec){ try{activeRec.stop();}catch(e){} if(activeMicBtn) activeMicBtn.classList.remove('listening'); if(activeMicBtn===btn){ activeRec=null; return; } }
+  const rec=new SR(); rec.lang='en-US'; rec.continuous=false; rec.interimResults=false;
+  if(btn) btn.classList.add('listening'); activeRec=rec; activeMicBtn=btn;
+  rec.onresult=e=>{ let said=''; for(const r of e.results) said+=r[0].transcript; const cur=(target.value||'').trimEnd(); target.value=cur?cur+' '+said:said; target.dispatchEvent(new Event('input',{bubbles:true})); target.dispatchEvent(new Event('change',{bubbles:true})); };
+  rec.onerror=e=>toast('Mic: '+(e.error||'error'));
+  rec.onend=()=>{ if(btn) btn.classList.remove('listening'); activeRec=null; activeMicBtn=null; };
+  try{ rec.start(); toast('&#127908; Listening...'); }catch(e){ if(btn) btn.classList.remove('listening'); }
+}
+
+// ═══════════════════════════════════════════════════════
+//  EXPORT — FIELD NOTES
+// ═══════════════════════════════════════════════════════
+function formatDate(ymd){ if(!ymd) return ''; const [y,m,d]=ymd.split('-'); if(!y||!m||!d) return ymd; const M=['January','February','March','April','May','June','July','August','September','October','November','December']; return `${M[parseInt(m,10)-1]} ${parseInt(d,10)}, ${y}`; }
+
+let _photoSeqMap={};
+function buildPhotoSeq(){
+  // sequential across sections in nav order; descriptions(checklist photos then desc photos), obs, lim
+  _photoSeqMap={}; let seq=1;
+  SECTIONS.forEach(sec=>{
+    // checklist-attached photos
+    state.checklists[sec].forEach(c=>{ if(c.checked) (c.photoIds||[]).forEach(pid=>{ if(!_photoSeqMap[pid]) _photoSeqMap[pid]=seq++; }); });
+    // photo-driven, description then observation then limitation
+    ['Description','Observation','Limitation'].forEach(t=>{
+      state.photos.filter(p=>p.section===sec&&p.type===t).forEach(p=>{ if(!_photoSeqMap[p.id]) _photoSeqMap[p.id]=seq++; });
+    });
+  });
+}
+function photoRefsFor(ids){ const r=(ids||[]).map(id=>_photoSeqMap[id]?'Photo '+_photoSeqMap[id]:null).filter(Boolean); return r.join(', '); }
+
+function buildExportText(){
+  buildPhotoSeq();
+  const g=state.general, lines=[];
+  lines.push('## GENERAL');
+  if(g.address) lines.push('Property address: '+g.address);
+  if(g.date) lines.push('Inspection date: '+formatDate(g.date));
+  if(g.client) lines.push('Client: '+g.client);
+  if(g.era) lines.push('Construction era: '+g.era);
+  if(g.foundation) lines.push('Foundation: '+g.foundation);
+  if(g.exterior) lines.push('Exterior: '+g.exterior);
+  if(g.occupancy) lines.push('Occupancy: '+g.occupancy);
+  if(g.weather) lines.push('Weather: '+g.weather);
+  if(g.notes) lines.push('General notes: '+g.notes);
+
+  SECTIONS.forEach(sec=>{
+    const checkedPhrases=state.checklists[sec].filter(c=>c.checked);
+    const descPhotos=state.photos.filter(p=>p.section===sec&&p.type==='Description');
+    const obs=state.photos.filter(p=>p.section===sec&&p.type==='Observation');
+    const lim=state.photos.filter(p=>p.section===sec&&p.type==='Limitation');
+    if(!checkedPhrases.length && !descPhotos.length && !obs.length && !lim.length) return;
+    lines.push(''); lines.push('## '+sec.toUpperCase());
+
+    if(checkedPhrases.length||descPhotos.length){
+      lines.push('# Descriptions');
+      checkedPhrases.forEach(c=>{
+        let l='- '+c.phrase; if(c.text&&c.text.trim()) l+=': '+c.text.trim(); lines.push(l);
+        const ph=photoRefsFor(c.photoIds); if(ph) lines.push('  photos: '+ph);
+      });
+      descPhotos.forEach(p=>{ lines.push('SD: '+(p.text||'').trim()); const ph=photoRefsFor([p.id]); if(ph) lines.push('  photos: '+ph); });
+    }
+    if(obs.length){
+      lines.push('# Observations');
+      // sort by category order R,DD,RM,I,M
+      const ORD=['R','DD','RM','I','M','SD','LM'];
+      [...obs].sort((a,b)=>ORD.indexOf(a.cat)-ORD.indexOf(b.cat)).forEach(p=>{ lines.push((p.cat!=='—'?p.cat:'I')+': '+(p.text||'').trim()); const ph=photoRefsFor([p.id]); if(ph) lines.push('  photos: '+ph); });
+    }
+    if(lim.length){
+      lines.push('# Limitations');
+      lim.forEach(p=>{ lines.push('LM: '+(p.text||'').trim()); const ph=photoRefsFor([p.id]); if(ph) lines.push('  photos: '+ph); });
+    }
+  });
+  return lines.join('\n');
+}
+
+// ═══════════════════════════════════════════════════════
+//  EXPORT PHOTOS → PHOTO TOOL (v3 bundle)
+// ═══════════════════════════════════════════════════════
+async function exportPhotosToPhotoTool(){
+  toast('Bundling photos...');
+  const all=await idbGetAll().catch(()=>[]);
+  const byId={}; all.forEach(p=>byId[p.id]=p);
+  const photoStore={}; let count=0;
+  const sections={};
+  SECTIONS.forEach(sec=>sections[sec.toUpperCase()]={descriptions:[],observations:[],limitations:[]});
+
+  SECTIONS.forEach(sec=>{
+    const KEY=sec.toUpperCase();
+    // checklist-attached
+    state.checklists[sec].filter(c=>c.checked).forEach(c=>{
+      (c.photoIds||[]).forEach(pid=>{ const st=byId[pid]; if(st&&st.src){ photoStore[pid]={src:st.src,filename:st.filename||pid}; count++; } });
+      if((c.photoIds||[]).length) sections[KEY].descriptions.push({ id:'chk_'+pid_key(c), code:'SD', text:c.phrase+(c.text?': '+c.text:''), attachedPhotos:(c.photoIds||[]).map(id=>({id,filename:id})), _moldSection:sec, _moldCategory:'System Description' });
+    });
+    ['Description','Observation','Limitation'].forEach(t=>{
+      state.photos.filter(p=>p.section===sec&&p.type===t).forEach(p=>{
+        const st=byId[p.id]; if(st&&st.src){ photoStore[p.id]={src:st.src,filename:st.filename||p.id}; count++; }
+        const bucket=t==='Description'?'descriptions':t==='Observation'?'observations':'limitations';
+        sections[KEY][bucket].push({ id:'ph_'+p.id, code:p.cat!=='—'?p.cat:'I', text:p.text||'', attachedPhotos:[{id:p.id,filename:p.id}], _moldSection:sec, _moldCategory:CAT_LABEL[p.cat]||t });
+      });
+    });
+  });
+  if(!count){ toast('No photos attached anywhere'); return; }
+  const bundle={ version:3, source:'home-inspector-pf', state:{ general:{ address:state.general.address||'', date:state.general.date||'' }, sections }, photoStore };
+  const blob=new Blob([JSON.stringify(bundle)],{type:'application/json'});
+  const addr=(state.general.address||'inspection').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${addr}_hi_photos.json`; a.click(); URL.revokeObjectURL(a.href);
+  toast(`Exported ${count} photo${count!==1?'s':''} — load in Photo Tool`);
+  closeModal('moreModal'); closeModal('exportModal');
+}
+function pid_key(c){ return (c.phrase||'x').replace(/[^a-z0-9]/gi,'').slice(0,8)+Math.random().toString(36).slice(2,5); }
+
+// ═══════════════════════════════════════════════════════
+//  UTIL
+// ═══════════════════════════════════════════════════════
+function toast(msg){ const t=document.getElementById('toast'); t.innerHTML=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2400); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function closeModal(id){ document.getElementById(id).classList.remove('active'); }
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  loadTemplates();
+  loadState();
+  seedChecklistsFromTemplates();
+  save();
+
+  document.querySelectorAll('.sidebar > .sb-item, .sb-item[data-page="library"], .sb-item[data-page="general"]').forEach(el=>{
+    if(el.dataset.page) el.addEventListener('click',()=>go(el.dataset.page));
+  });
+  document.getElementById('menuBtn').addEventListener('click',()=>{ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('sbOv').classList.toggle('open'); });
+  document.getElementById('sbOv').addEventListener('click',()=>{ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sbOv').classList.remove('open'); });
+
+  // Export
+  document.getElementById('exportBtn').addEventListener('click',()=>{ document.getElementById('exportText').value=buildExportText(); document.getElementById('exportModal').classList.add('active'); });
+  document.getElementById('copyBtn').addEventListener('click',async()=>{ try{ await navigator.clipboard.writeText(document.getElementById('exportText').value); toast('Copied'); }catch(e){ const ta=document.getElementById('exportText'); ta.select(); document.execCommand('copy'); toast('Copied'); } });
+  document.getElementById('downloadTxtBtn').addEventListener('click',()=>{ const text=document.getElementById('exportText').value; const addr=(state.general.address||'inspection').replace(/[^a-z0-9]+/gi,'_').toLowerCase(); const blob=new Blob([text],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${addr}_field_notes.txt`; a.click(); });
+  document.getElementById('exportPhotosBtn2').addEventListener('click',exportPhotosToPhotoTool);
+
+  // More menu
+  document.getElementById('menuMore').addEventListener('click',()=>document.getElementById('moreModal').classList.add('active'));
+  document.getElementById('exportPhotosBtn').addEventListener('click',exportPhotosToPhotoTool);
+  document.getElementById('saveJsonBtn').addEventListener('click',async()=>{
+    toast('Preparing session...');
+    const all=await idbGetAll().catch(()=>[]); const photoStore={}; all.forEach(p=>photoStore[p.id]={src:p.src,thumb:p.thumb,filename:p.filename});
+    const bundle={ version:1, source:'home-inspector-pf', state, templates, photoStore };
+    const blob=new Blob([JSON.stringify(bundle)],{type:'application/json'}); const addr=(state.general.address||'inspection').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${addr}_hi_session.json`; a.click(); URL.revokeObjectURL(a.href);
+    toast('Session saved (with photos)');
+  });
+  document.getElementById('loadJsonBtn').addEventListener('click',()=>document.getElementById('loadFile').click());
+  document.getElementById('loadFile').addEventListener('change',async ev=>{
+    const file=ev.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=async()=>{
+      try{ const p=JSON.parse(reader.result); const st=p.state||p;
+        if(st&&st.general&&st.photos){ SECTIONS.forEach(sec=>{ st.checklists[sec]=(st.checklists[sec]||[]).map(c=>({...c,photoIds:c.photoIds||[]})); }); state=st;
+          if(p.templates){ templates=p.templates; saveTemplates(); }
+          if(p.photoStore){ for(const [id,d] of Object.entries(p.photoStore)) await idbPut({id,src:d.src,thumb:d.thumb,filename:d.filename}).catch(()=>{}); toast(`Loaded · ${Object.keys(p.photoStore).length} photos`); } else toast('Session loaded');
+          state.photos.forEach(ph=>ph._thumb=null); save(); go('library'); closeModal('moreModal');
+        } else toast('Invalid session file');
+      }catch(e){ toast('Could not read file'); }
+    };
+    reader.readAsText(file); ev.target.value='';
+  });
+  document.getElementById('resetTemplateBtn').addEventListener('click',()=>{
+    if(!confirm('Reset all saved checklists and reminders to the built-in defaults? This affects future inspections, not the current one.')) return;
+    templates={}; SECTIONS.forEach(sec=>{ templates[sec]={ phrases:DEFAULT_TEMPLATES[sec].phrases.map(p=>({phrase:p,saved:true})), lookFor:[...DEFAULT_TEMPLATES[sec].lookFor] }; }); saveTemplates();
+    toast('Templates reset to defaults'); closeModal('moreModal');
+  });
+  document.getElementById('clearBtn').addEventListener('click',async()=>{
+    if(!confirm('Clear THIS inspection (photos + findings)? Your saved templates are kept.')) return;
+    state=createEmptyState(); await idbClear().catch(()=>{}); seedChecklistsFromTemplates(); save(); go('library'); closeModal('moreModal'); toast('Inspection cleared');
+  });
+
+  // Look-for modal
+  document.getElementById('lookAddBtn').addEventListener('click',addLook);
+  // Edit prompt
+  document.getElementById('editLocalBtn').addEventListener('click',()=>resolveEdit('local'));
+  document.getElementById('editOverwriteBtn').addEventListener('click',()=>resolveEdit('overwrite'));
+
+  // Photo picker (checklist attach)
+  document.getElementById('pickerClose').addEventListener('click',closePicker);
+  document.getElementById('pickerSave').addEventListener('click',savePicker);
+  document.getElementById('pickerCamera').addEventListener('change',async e=>{ await handlePickerFiles(e.target.files); e.target.value=''; });
+  document.getElementById('pickerLibrary').addEventListener('change',async e=>{ await handlePickerFiles(e.target.files); e.target.value=''; });
+  const ov=document.getElementById('photoOverlay');
+  ['dragenter','dragover'].forEach(evt=>ov.addEventListener(evt,e=>{ e.preventDefault(); e.stopPropagation(); if(e.dataTransfer&&Array.from(e.dataTransfer.types||[]).includes('Files')) ov.classList.add('drag-over'); }));
+  ['dragleave','dragend'].forEach(evt=>ov.addEventListener(evt,e=>{ e.preventDefault(); e.stopPropagation(); if(e.target===ov||!ov.contains(e.relatedTarget)) ov.classList.remove('drag-over'); }));
+  ov.addEventListener('drop',async e=>{ e.preventDefault(); e.stopPropagation(); ov.classList.remove('drag-over'); if(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files.length) await handlePickerFiles(e.dataTransfer.files); });
+
+  // Lightbox
+  document.getElementById('lightboxClose').addEventListener('click',()=>document.getElementById('lightbox').classList.remove('active'));
+  document.getElementById('lightbox').addEventListener('click',e=>{ if(e.target.id==='lightbox') document.getElementById('lightbox').classList.remove('active'); });
+
+  // Modal closers
+  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
+  document.querySelectorAll('.modal-back').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('active'); }));
+
+  renderMain();
+});
+</script>
+</body>
+</html>
