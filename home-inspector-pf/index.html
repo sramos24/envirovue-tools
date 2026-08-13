@@ -84,6 +84,20 @@ input,textarea,select,button { font-family:inherit; font-size:inherit; }
 .pbody { padding:10px; }
 .pfields { display:flex; flex-direction:column; gap:6px; }
 .pfields select, .pfields textarea { width:100%; padding:6px 8px; border:1px solid var(--g300); border-radius:6px; font-size:13px; font-family:inherit; color:var(--g700); background:#fff; }
+.section-select { border-color:var(--navy) !important; border-width:1.5px !important; font-weight:600; color:var(--navy) !important; margin-top:2px; }
+.extras-row { margin-top:6px; }
+.extras-btn { width:100%; background:rgba(31,56,100,0.06); border:1.5px dashed var(--navy); color:var(--navy); border-radius:6px; padding:6px 10px; font-size:12px; font-weight:600; cursor:pointer; }
+.extras-btn:active { background:rgba(31,56,100,0.14); }
+.extras-strip { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
+.extra-thumb { position:relative; width:46px; height:46px; }
+.extra-thumb img { width:46px; height:46px; object-fit:cover; border-radius:4px; display:block; }
+.extra-del { position:absolute; top:-6px; right:-6px; background:#c53030; color:#fff; border:none; border-radius:50%; width:18px; height:18px; font-size:12px; line-height:18px; text-align:center; cursor:pointer; padding:0; }
+.extra-pick-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.extra-pick-item { position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; cursor:pointer; border:3px solid transparent; }
+.extra-pick-item img { width:100%; height:100%; object-fit:cover; display:block; }
+.extra-pick-check { position:absolute; top:5px; right:5px; width:24px; height:24px; background:rgba(0,0,0,0.4); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:14px; opacity:0; }
+.extra-pick-item.picked { border-color:var(--navy); }
+.extra-pick-item.picked .extra-pick-check { background:var(--navy); opacity:1; }
 .pfields textarea { resize:vertical; min-height:44px; }
 .prow2 { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
 .field-mic { display:flex; gap:6px; align-items:flex-start; }
@@ -274,6 +288,20 @@ input,textarea,select,button { font-family:inherit; font-size:inherit; }
 <!-- Lightbox -->
 <div class="lightbox" id="lightbox"><button class="lightbox-close" id="lightboxClose">&#215;</button><img id="lightboxImg" src="" alt=""></div>
 
+<div class="modal-back" id="extraPickerModal">
+  <div class="modal">
+    <div class="modal-head"><div class="modal-title">Attach photos to this finding</div><button class="modal-close" onclick="closeModal('extraPickerModal')">&#215;</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--g500);margin-bottom:12px;">Tap unassigned photos to attach them to this finding. They'll be listed together under one comment in the report.</p>
+      <div class="extra-pick-grid" id="extraPickerGrid"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal('extraPickerModal')">Cancel</button>
+      <button class="btn primary" onclick="confirmExtraPicker()">Attach selected</button>
+    </div>
+  </div>
+</div>
+
 <!-- Look-for Modal -->
 <div class="modal-back" id="lookModal">
   <div class="modal">
@@ -352,8 +380,8 @@ const STORAGE_KEY  = 'insight_hi_photofirst_v1';
 const TEMPLATE_KEY = 'insight_hi_templates_v1';   // persists saved checklist phrases + look-for lists
 const IDB_NAME  = 'insight_hi_pf_photos';
 const IDB_STORE = 'photos';
-const MAX_PHOTO_W = 1920;
-const PHOTO_QUALITY = 0.75;
+const MAX_PHOTO_W = 2400;
+const PHOTO_QUALITY = 0.82;
 
 const SECTIONS = ['Roofing','Exteriors','Electrical','HVAC','Plumbing','Interiors','Structural'];
 const SECTION_ICONS = { Roofing:'🏠', Exteriors:'🧱', Electrical:'⚡', HVAC:'🌡️', Plumbing:'🚰', Interiors:'🛋️', Structural:'🏗️' };
@@ -416,7 +444,7 @@ async function idbClear(){ if(!idb) await openIDB(); return new Promise((res,rej
 //  IMAGE UTILITIES
 // ═══════════════════════════════════════════════════════
 function compressImage(dataUrl){ return new Promise(res=>{ const img=new Image(); img.onload=()=>{ let w=img.naturalWidth,h=img.naturalHeight; if(w>MAX_PHOTO_W){h=Math.round(h*MAX_PHOTO_W/w);w=MAX_PHOTO_W;} const c=document.createElement('canvas'); c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); res(c.toDataURL('image/jpeg',PHOTO_QUALITY)); }; img.onerror=()=>res(dataUrl); img.src=dataUrl; }); }
-function makeThumbnail(dataUrl,size){ return new Promise(res=>{ const img=new Image(); img.onload=()=>{ let w=img.naturalWidth,h=img.naturalHeight; const sc=Math.min(size/w,size/h,1); w=Math.round(w*sc);h=Math.round(h*sc); const c=document.createElement('canvas'); c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); res(c.toDataURL('image/jpeg',0.6)); }; img.onerror=()=>res(dataUrl); img.src=dataUrl; }); }
+function makeThumbnail(dataUrl,size){ return new Promise(res=>{ const img=new Image(); img.onload=()=>{ let w=img.naturalWidth,h=img.naturalHeight; const sc=Math.min(size/w,size/h,1); w=Math.round(w*sc);h=Math.round(h*sc); const c=document.createElement('canvas'); c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); res(c.toDataURL('image/jpeg',0.8)); }; img.onerror=()=>res(dataUrl); img.src=dataUrl; }); }
 function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(new Error('read fail')); r.readAsDataURL(file); }); }
 
 // ═══════════════════════════════════════════════════════
@@ -472,7 +500,7 @@ function seedChecklistsFromTemplates(){
 function renderNav(){
   const nav=document.getElementById('sectionNav');
   nav.innerHTML = SECTIONS.map(sec=>{
-    const n = state.photos.filter(p=>p.section===sec).length + state.checklists[sec].filter(c=>c.checked).length;
+    const n = state.photos.filter(p=>!p.parentId&&p.section===sec).length + state.checklists[sec].filter(c=>c.checked).length;
     return `<div class="sb-item ${currentPage===sec?'active':''} ${n>0?'has':''}" data-page="${sec}">
       <span class="sb-icon">${SECTION_ICONS[sec]||'📄'}</span><span>${sec}</span><span class="sb-count">${n}</span></div>`;
   }).join('');
@@ -523,9 +551,10 @@ function renderLibrary(){
     <div class="photo-grid" id="libGrid"></div>`;
 }
 function visibleLibPhotos(){
-  if(libFilter==='All') return state.photos;
-  if(libFilter==='Unassigned') return state.photos.filter(p=>!p.section||p.section==='—');
-  return state.photos.filter(p=>p.section===libFilter);
+  const notExtra = p => !p.parentId;
+  if(libFilter==='All') return state.photos.filter(notExtra);
+  if(libFilter==='Unassigned') return state.photos.filter(p=>notExtra(p)&&(!p.section||p.section==='—'));
+  return state.photos.filter(p=>notExtra(p)&&p.section===libFilter);
 }
 function renderLibGrid(){
   const grid=document.getElementById('libGrid'); if(!grid) return;
@@ -540,7 +569,6 @@ function renderLibGrid(){
       <div class="pbody">
         <div class="ptag-row">${tag}<button class="pdel" data-del="${p.id}" title="Delete">&#128465;</button></div>
         <div class="pfields">
-          <select data-pf="section" data-id="${p.id}">${['—',...SECTIONS].map(s=>`<option ${s===p.section?'selected':''}>${s}</option>`).join('')}</select>
           <div class="prow2">
             <select data-pf="type" data-id="${p.id}">${TYPES.map(t=>`<option ${t===p.type?'selected':''}>${t}</option>`).join('')}</select>
             <select data-pf="cat" data-id="${p.id}">${CATS.map(c=>`<option ${c===p.cat?'selected':''}>${c}</option>`).join('')}</select>
@@ -549,6 +577,8 @@ function renderLibGrid(){
             <textarea data-pf="text" data-id="${p.id}" placeholder="Description / finding text...">${esc(p.text)}</textarea>
             <button class="mic-btn" data-mic-target="pt-${p.id}">&#127908;</button>
           </div>
+          <select data-pf="section" data-id="${p.id}" class="section-select">${['—',...SECTIONS].map(s=>`<option ${s===p.section?'selected':''}>${s}</option>`).join('')}</select>
+          ${assigned?`<div class="extras-row"><button class="extras-btn" data-addextra="${p.id}">&#10133; Add photos to this finding${(p.extras&&p.extras.length)?' ('+p.extras.length+')':''}</button></div>${(p.extras&&p.extras.length)?`<div class="extras-strip" id="extras-${p.id}">${p.extras.map(eid=>`<div class="extra-thumb"><img data-full="${eid}" src=""><button class="extra-del" data-removeextra="${p.id}" data-extraid="${eid}">&times;</button></div>`).join('')}</div>`:''}`:''}
         </div>
       </div>
     </div>`;
@@ -557,23 +587,73 @@ function renderLibGrid(){
   vis.forEach(async p=>{ if(!p._thumb){ const st=await idbGet(p.id).catch(()=>null); if(st){ p._thumb=st.thumb||st.src; const img=grid.querySelector(`img[data-full="${p.id}"]`); if(img) img.src=p._thumb; } } });
   // wire
   grid.querySelectorAll('[data-pf]').forEach(el=>{
-    const headerField=['section','type','cat'].includes(el.dataset.pf);
+    const movesCard = el.dataset.pf==='section';
     el.addEventListener('input', ()=>{ setPhoto(el.dataset.id, el.dataset.pf, el.value, false); });
-    el.addEventListener('change', ()=>{ setPhoto(el.dataset.id, el.dataset.pf, el.value, headerField); });
+    el.addEventListener('change', ()=>{ setPhoto(el.dataset.id, el.dataset.pf, el.value, movesCard); });
     if(el.tagName==='TEXTAREA') el.id='pt-'+el.dataset.id;
   });
   grid.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ if(confirm('Delete this photo?')) deletePhoto(b.dataset.del); }));
   grid.querySelectorAll('[data-mic-target]').forEach(b=>b.addEventListener('click',(e)=>dictate(b.dataset.micTarget, e)));
   grid.querySelectorAll('.pthumb').forEach(img=>img.addEventListener('click',()=>openLightbox(img.dataset.full)));
+  // extras: load thumbs, wire add/remove
+  vis.forEach(p=>{ (p.extras||[]).forEach(async eid=>{ const st=await idbGet(eid).catch(()=>null); if(st){ const img=grid.querySelector(`#extras-${p.id} img[data-full="${eid}"]`); if(img){ img.src=st.thumb||st.src; img.addEventListener('click',()=>openLightbox(eid)); } } }); });
+  grid.querySelectorAll('[data-addextra]').forEach(b=>b.addEventListener('click',()=>openExtraPicker(b.dataset.addextra)));
+  grid.querySelectorAll('[data-removeextra]').forEach(b=>b.addEventListener('click',()=>removeExtra(b.dataset.removeextra, b.dataset.extraid)));
 }
 function setPhoto(id, field, val, rerender){
   const p=state.photos.find(x=>x.id===id); if(!p) return;
   p[field]=val; save();
   if(rerender){ renderLibGrid(); renderNav(); if(field==='section'){ /* moved sections */ } }
 }
+
+// ── EXTRA PHOTOS (multiple photos per finding) ──
+let extraParentId = null;
+function openExtraPicker(parentId){
+  extraParentId = parentId;
+  // candidates = unassigned photos that aren't already extras and aren't the parent
+  const parent = state.photos.find(p=>p.id===parentId);
+  const candidates = state.photos.filter(p=>p.id!==parentId && !p.parentId && (!p.section||p.section==='—'));
+  const grid=document.getElementById('extraPickerGrid');
+  if(!candidates.length){ grid.innerHTML=`<div class="empty-note" style="grid-column:1/-1;">No unassigned photos available. All photos are either assigned to a section or already attached elsewhere. Add more photos, or leave a photo unassigned to attach it here.</div>`; }
+  else {
+    grid.innerHTML = candidates.map(p=>`<div class="extra-pick-item" data-pick="${p.id}"><img data-full="${p.id}" src=""><div class="extra-pick-check">&#10003;</div></div>`).join('');
+    candidates.forEach(async p=>{ const st=await idbGet(p.id).catch(()=>null); if(st){ const img=grid.querySelector(`img[data-full="${p.id}"]`); if(img) img.src=st.thumb||st.src; } });
+    grid.querySelectorAll('.extra-pick-item').forEach(el=>el.addEventListener('click',()=>el.classList.toggle('picked')));
+  }
+  document.getElementById('extraPickerModal').classList.add('active');
+}
+function confirmExtraPicker(){
+  const parent = state.photos.find(p=>p.id===extraParentId); if(!parent){ closeModal('extraPickerModal'); return; }
+  parent.extras = parent.extras || [];
+  document.querySelectorAll('#extraPickerGrid .extra-pick-item.picked').forEach(el=>{
+    const pid=el.dataset.pick;
+    const child=state.photos.find(p=>p.id===pid);
+    if(child){ child.parentId=extraParentId; if(!parent.extras.includes(pid)) parent.extras.push(pid); }
+  });
+  save(); closeModal('extraPickerModal'); renderLibGrid(); renderNav();
+  const cnt=parent.extras.length;
+  toast(cnt?`${cnt} photo${cnt!==1?'s':''} attached to finding`:'Done');
+  extraParentId=null;
+}
+function removeExtra(parentId, extraId){
+  const parent=state.photos.find(p=>p.id===parentId); if(!parent) return;
+  parent.extras=(parent.extras||[]).filter(id=>id!==extraId);
+  const child=state.photos.find(p=>p.id===extraId); if(child) delete child.parentId;
+  save(); renderLibGrid(); renderNav();
+  toast('Photo returned to library');
+}
 async function deletePhoto(id){
+  const target=state.photos.find(p=>p.id===id);
+  // If this photo has extras, release them back to the library (unassigned) rather than deleting them
+  if(target && target.extras && target.extras.length){
+    target.extras.forEach(eid=>{ const child=state.photos.find(p=>p.id===eid); if(child) delete child.parentId; });
+  }
+  // If this photo is itself an extra, detach from its parent
+  if(target && target.parentId){
+    const parent=state.photos.find(p=>p.id===target.parentId);
+    if(parent) parent.extras=(parent.extras||[]).filter(x=>x!==id);
+  }
   state.photos = state.photos.filter(p=>p.id!==id);
-  // remove from any checklist attachments
   SECTIONS.forEach(sec=>state.checklists[sec].forEach(c=>{ c.photoIds=(c.photoIds||[]).filter(pid=>pid!==id); }));
   await idbDelete(id).catch(()=>{});
   save(); renderLibGrid(); renderNav();
@@ -599,7 +679,7 @@ async function handleLibFiles(files){
   for(const file of arr){
     const raw=await readFileAsDataURL(file);
     const src=await compressImage(raw);
-    const thumb=await makeThumbnail(src,200);
+    const thumb=await makeThumbnail(src,640);
     const id=newPhotoId();
     await idbPut({ id, src, thumb, filename:file.name });
     state.photos.push({ id, section:'—', type:'—', cat:'—', text:'', _thumb:thumb });
@@ -727,24 +807,32 @@ function renderChecklist(sec){
   list.forEach((c,idx)=>{ const t=document.getElementById(`cthumbs-${sec}-${idx}`); if(t&&(c.photoIds||[]).length){ t.innerHTML=c.photoIds.map(pid=>`<img data-full="${pid}" src="">`).join(''); c.photoIds.forEach(async pid=>{ const st=await idbGet(pid).catch(()=>null); if(st){ const img=t.querySelector(`img[data-full="${pid}"]`); if(img){ img.src=st.thumb||st.src; img.addEventListener('click',()=>openLightbox(pid)); } } }); } });
 }
 function renderSectionPhotos(sec){
-  const descPhotos=state.photos.filter(p=>p.section===sec&&p.type==='Description');
-  const obs=state.photos.filter(p=>p.section===sec&&p.type==='Observation');
-  const lim=state.photos.filter(p=>p.section===sec&&p.type==='Limitation');
+  const descPhotos=state.photos.filter(p=>!p.parentId&&p.section===sec&&p.type==='Description');
+  const obs=state.photos.filter(p=>!p.parentId&&p.section===sec&&p.type==='Observation');
+  const lim=state.photos.filter(p=>!p.parentId&&p.section===sec&&p.type==='Limitation');
   const dp=document.getElementById('descphotos-'+sec);
   if(dp) dp.innerHTML = descPhotos.length ? `<div style="margin-top:12px;border-top:1px dashed var(--g200);padding-top:10px;"><div style="font-size:11px;font-weight:700;color:var(--g500);text-transform:uppercase;margin-bottom:8px;">From photos</div>${descPhotos.map(findingHTML).join('')}</div>` : '';
   const o=document.getElementById('obs-'+sec); if(o) o.innerHTML = obs.length?obs.map(findingHTML).join(''):`<div class="empty-note">Tag a photo as ${sec} → Observation to populate.</div>`;
   const l=document.getElementById('lim-'+sec); if(l) l.innerHTML = lim.length?lim.map(findingHTML).join(''):`<div class="empty-note">e.g. "Viewed from hatch only" — tag a photo as ${sec} → Limitation.</div>`;
   // wire finding thumbs lightbox
   document.querySelectorAll('#page-'+sec+' .finding-thumbs img, .finding-thumbs img').forEach(img=>{ if(img.dataset.full) img.addEventListener('click',()=>openLightbox(img.dataset.full)); });
-  // load finding thumbs
-  [...descPhotos,...obs,...lim].forEach(async p=>{ const st=await idbGet(p.id).catch(()=>null); if(st){ const imgs=document.querySelectorAll(`.finding-thumbs img[data-full="${p.id}"]`); imgs.forEach(img=>{ img.src=st.thumb||st.src; }); } });
+  // load finding thumbs (primary + extras)
+  [...descPhotos,...obs,...lim].forEach(p=>{
+    [p.id, ...(p.extras||[])].forEach(async pid=>{
+      const st=await idbGet(pid).catch(()=>null);
+      if(st){ const imgs=document.querySelectorAll(`.finding-thumbs img[data-full="${pid}"]`); imgs.forEach(img=>{ img.src=st.thumb||st.src; }); }
+    });
+  });
 }
 function findingHTML(p){
   const cls=p.cat!=='—'?CAT_CLS[p.cat]:'';
+  const allIds=[p.id, ...(p.extras||[])];
+  const thumbs=allIds.map(pid=>`<img data-full="${pid}" src="" alt="">`).join('');
+  const extraCount=(p.extras||[]).length;
   return `<div class="finding ${cls}">
-    <div class="finding-head"><span class="finding-tag ${cls}">${p.cat!=='—'?p.cat:'—'}</span><span class="finding-src">photo</span></div>
+    <div class="finding-head"><span class="finding-tag ${cls}">${p.cat!=='—'?p.cat:'—'}</span><span class="finding-src">${extraCount?(extraCount+1)+' photos':'photo'}</span></div>
     <div class="finding-text">${p.text?esc(p.text):'<em style="color:#94A3B8">(no text yet)</em>'}</div>
-    <div class="finding-thumbs"><img data-full="${p.id}" src="" alt=""></div>
+    <div class="finding-thumbs">${thumbs}</div>
   </div>`;
 }
 
@@ -851,7 +939,7 @@ async function handlePickerFiles(files){
   const arr=Array.from(files).filter(f=>f.type.startsWith('image/')); if(!arr.length) return;
   toast('Processing...');
   for(const file of arr){
-    const raw=await readFileAsDataURL(file); const src=await compressImage(raw); const thumb=await makeThumbnail(src,200);
+    const raw=await readFileAsDataURL(file); const src=await compressImage(raw); const thumb=await makeThumbnail(src,640);
     const id=newPhotoId();
     await idbPut({ id, src, thumb, filename:file.name });
     // add to library too (unassigned) so it lives in one place
@@ -904,13 +992,14 @@ function formatDate(ymd){ if(!ymd) return ''; const [y,m,d]=ymd.split('-'); if(!
 let _photoSeqMap={};
 function buildPhotoSeq(){
   // sequential across sections in nav order; descriptions(checklist photos then desc photos), obs, lim
+  // each finding's primary photo AND its extras get consecutive numbers
   _photoSeqMap={}; let seq=1;
+  const addPhoto=pid=>{ if(!_photoSeqMap[pid]) _photoSeqMap[pid]=seq++; };
+  const addFinding=p=>{ addPhoto(p.id); (p.extras||[]).forEach(addPhoto); };
   SECTIONS.forEach(sec=>{
-    // checklist-attached photos
-    state.checklists[sec].forEach(c=>{ if(c.checked) (c.photoIds||[]).forEach(pid=>{ if(!_photoSeqMap[pid]) _photoSeqMap[pid]=seq++; }); });
-    // photo-driven, description then observation then limitation
+    state.checklists[sec].forEach(c=>{ if(c.checked) (c.photoIds||[]).forEach(addPhoto); });
     ['Description','Observation','Limitation'].forEach(t=>{
-      state.photos.filter(p=>p.section===sec&&p.type===t).forEach(p=>{ if(!_photoSeqMap[p.id]) _photoSeqMap[p.id]=seq++; });
+      state.photos.filter(p=>!p.parentId&&p.section===sec&&p.type===t).forEach(addFinding);
     });
   });
 }
@@ -932,9 +1021,9 @@ function buildExportText(){
 
   SECTIONS.forEach(sec=>{
     const checkedPhrases=state.checklists[sec].filter(c=>c.checked);
-    const descPhotos=state.photos.filter(p=>p.section===sec&&p.type==='Description');
-    const obs=state.photos.filter(p=>p.section===sec&&p.type==='Observation');
-    const lim=state.photos.filter(p=>p.section===sec&&p.type==='Limitation');
+    const descPhotos=state.photos.filter(p=>!p.parentId&&p.section===sec&&p.type==='Description');
+    const obs=state.photos.filter(p=>!p.parentId&&p.section===sec&&p.type==='Observation');
+    const lim=state.photos.filter(p=>!p.parentId&&p.section===sec&&p.type==='Limitation');
     if(!checkedPhrases.length && !descPhotos.length && !obs.length && !lim.length) return;
     lines.push(''); lines.push('## '+sec.toUpperCase());
 
@@ -944,17 +1033,16 @@ function buildExportText(){
         let l='- '+c.phrase; if(c.text&&c.text.trim()) l+=': '+c.text.trim(); lines.push(l);
         const ph=photoRefsFor(c.photoIds); if(ph) lines.push('  photos: '+ph);
       });
-      descPhotos.forEach(p=>{ lines.push('SD: '+(p.text||'').trim()); const ph=photoRefsFor([p.id]); if(ph) lines.push('  photos: '+ph); });
+      descPhotos.forEach(p=>{ lines.push('SD: '+(p.text||'').trim()); const ph=photoRefsFor([p.id,...(p.extras||[])]); if(ph) lines.push('  photos: '+ph); });
     }
     if(obs.length){
       lines.push('# Observations');
-      // sort by category order R,DD,RM,I,M
       const ORD=['R','DD','RM','I','M','SD','LM'];
-      [...obs].sort((a,b)=>ORD.indexOf(a.cat)-ORD.indexOf(b.cat)).forEach(p=>{ lines.push((p.cat!=='—'?p.cat:'I')+': '+(p.text||'').trim()); const ph=photoRefsFor([p.id]); if(ph) lines.push('  photos: '+ph); });
+      [...obs].sort((a,b)=>ORD.indexOf(a.cat)-ORD.indexOf(b.cat)).forEach(p=>{ lines.push((p.cat!=='—'?p.cat:'I')+': '+(p.text||'').trim()); const ph=photoRefsFor([p.id,...(p.extras||[])]); if(ph) lines.push('  photos: '+ph); });
     }
     if(lim.length){
       lines.push('# Limitations');
-      lim.forEach(p=>{ lines.push('LM: '+(p.text||'').trim()); const ph=photoRefsFor([p.id]); if(ph) lines.push('  photos: '+ph); });
+      lim.forEach(p=>{ lines.push('LM: '+(p.text||'').trim()); const ph=photoRefsFor([p.id,...(p.extras||[])]); if(ph) lines.push('  photos: '+ph); });
     }
   });
   return lines.join('\n');
