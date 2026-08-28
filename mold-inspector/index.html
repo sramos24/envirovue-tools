@@ -1671,13 +1671,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('moreClose').addEventListener('click', () =>
     document.getElementById('moreModal').classList.remove('active'));
 
-  document.getElementById('saveBtn').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  document.getElementById('saveBtn').addEventListener('click', async () => {
+    toast('Preparing session (including photos)...');
+    const allPhotos = await idbGetAll().catch(() => []);
+    const photoStore = {};
+    allPhotos.forEach(p => { photoStore[p.id] = { src: p.src, filename: p.filename }; });
+    const bundle = { version: 3, state, photoStore };
+    const blob = new Blob([JSON.stringify(bundle)], { type: 'application/json' });
     const addr = (state.general.address || 'mold').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob); a.download = `${addr}_mold_session.json`; a.click();
     URL.revokeObjectURL(a.href);
-    toast('Session saved');
+    toast('Session saved (with photos)');
   });
 
   // Export photos in Photo Tool v3 format (rooms → sections, conditions → categories)
@@ -1688,19 +1693,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     allPhotos.forEach(p => { byId[p.id] = p; });
 
     const COND_CAT = { '1':'Condition 1 - Normal', '2':'Condition 2 - Settled Spores', '3':'Condition 3 - Actual Growth' };
-    // Build a synthetic HI-style state: one "section" holding all rooms as findings
     const sections = { MOLD: { descriptions: [], observations: [], limitations: [] } };
     const photoStore = {};
     let photoCount = 0;
+    let referencedCount = 0;
+    const missingByRoom = {};
 
     (state.rooms || []).forEach(room => {
       const aps = room.attachedPhotos || [];
       if (!aps.length) return;
+      const foundAps = [];
       aps.forEach(ap => {
+        referencedCount++;
         const stored = byId[ap.id];
-        if (stored && stored.src) { photoStore[ap.id] = { src: stored.src, filename: stored.filename || ap.filename }; photoCount++; }
+        if (stored && stored.src) {
+          photoStore[ap.id] = { src: stored.src, filename: stored.filename || ap.filename };
+          photoCount++;
+          foundAps.push(ap);
+        } else {
+          const rn = room.name || 'Unnamed room';
+          missingByRoom[rn] = (missingByRoom[rn] || 0) + 1;
+        }
       });
-      // Each room becomes a finding; caption = room name + remediation
       let text = room.name || 'Room';
       if (room.condition) text += ` — ${COND_CAT[room.condition] || ''}`.trimEnd();
       if (room.remediation && room.remediation.trim()) text += `. ${room.remediation.trim()}`;
@@ -1708,14 +1722,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         id: 'mroom_' + Math.random().toString(36).slice(2),
         code: room.condition === '3' ? 'R' : room.condition === '2' ? 'DD' : 'I',
         text,
-        attachedPhotos: aps,
-        // custom fields the Photo Tool import will read directly
+        attachedPhotos: foundAps,
         _moldSection: room.name || 'Mold',
         _moldCategory: COND_CAT[room.condition] || 'Observation'
       });
     });
 
-    if (!photoCount) { toast('No photos attached to any room'); return; }
+    const missingCount = referencedCount - photoCount;
+    if (missingCount > 0) {
+      const roomList = Object.entries(missingByRoom).map(([r,n]) => `${r}: ${n}`).join('\n');
+      const proceed = confirm(
+        `\u26A0\uFE0F ${missingCount} of ${referencedCount} photos could not be found in storage \u2014 iOS may have cleared them.\n\n` +
+        `Missing by room:\n${roomList}\n\n` +
+        `These originals are in your iPhone Photos (you imported them from camera). ` +
+        `After exporting the ${photoCount} available photos, add the missing ones in the Photo Tool via Library.\n\n` +
+        `Export the ${photoCount} available photos now?`
+      );
+      if (!proceed) { toast('Export cancelled'); return; }
+    }
+
+    if (!photoCount) { toast('No photos available in storage to export'); return; }
 
     const bundle = {
       version: 3,
@@ -1743,9 +1769,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   loadFile.addEventListener('change', ev => {
     const file = ev.target.files[0]; if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
-        const p = JSON.parse(reader.result);
+        const raw = JSON.parse(reader.result);
+        // Support v3 bundle format (with photoStore) and legacy format
+        const p = raw.version === 3 ? raw.state : raw;
+        const photoStore = raw.version === 3 ? (raw.photoStore || {}) : {};
         if (p && p.general) {
           state.general    = Object.assign(createEmptyState().general, p.general || {});
           state.building   = Object.assign(createEmptyState().building, p.building || {});
@@ -1754,9 +1783,16 @@ document.addEventListener('DOMContentLoaded', async () => {
           state.rooms = p.rooms || [];
           state.airSamples = p.airSamples || [];
           state.surfaceSamples = p.surfaceSamples || [];
+          // Restore photos from bundle into IDB
+          const photoKeys = Object.keys(photoStore);
+          if (photoKeys.length) {
+            for (const [id, data] of Object.entries(photoStore)) {
+              await idbPut({ id, src: data.src, filename: data.filename }).catch(() => {});
+            }
+            toast('Session loaded \u00b7 ' + photoKeys.length + ' photos restored');
+          } else { toast('Session loaded'); }
           save(); renderMain();
           document.getElementById('moreModal').classList.remove('active');
-          toast('Session loaded');
         } else { toast('Invalid session file'); }
       } catch(e) { toast('Could not read file'); }
     };
