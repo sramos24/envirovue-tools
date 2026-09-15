@@ -202,6 +202,16 @@ input,textarea,select,button { font-family: inherit; font-size: inherit; }
 .rdywrap .ico { font-size: 32px; margin-bottom: 8px; }
 
 /* toast */
+
+#fabHA { display:none; position:fixed; right:16px; bottom:max(18px,calc(18px + env(safe-area-inset-bottom)));
+  z-index:300; background:var(--navy); color:#fff; border:none; border-radius:26px;
+  padding:13px 20px; font-size:14px; font-weight:700; font-family:inherit;
+  box-shadow:0 4px 16px rgba(0,0,0,.3); cursor:pointer; }
+#fabHA:active { transform:scale(.96); }
+#fabHA.on { display:block; }
+@media print { #fabHA { display:none !important; } }
+.add-samp{width:100%;margin-top:10px;padding:9px;border:1.5px dashed var(--navy);border-radius:8px;background:rgba(31,56,100,.06);color:var(--navy);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.add-samp:active{transform:scale(.98)}
 .toast { position: fixed; bottom: 18px; left: 50%;
   transform: translateX(-50%) translateY(60px);
   background: var(--navy); color: #fff; padding: 10px 18px;
@@ -286,7 +296,7 @@ input,textarea,select,button { font-family: inherit; font-size: inherit; }
   </div>
 
   <!-- HA adder -->
-  <div class="card">
+  <div class="card" id="haCard">
     <div class="cttl">➕ Add Homogeneous Area</div>
     <div class="ha-box">
       <div class="ha-ttl" id="haTitle">HA 1 — New Homogeneous Area</div>
@@ -390,6 +400,7 @@ input,textarea,select,button { font-family: inherit; font-size: inherit; }
   </div>
 </div>
 
+<button id="fabHA" aria-label="Add homogeneous area">➕ Add HA</button>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -508,8 +519,10 @@ function load() {
 // ═══════════════════════════════════
 function renderSamples() {
   const card=document.getElementById('sampCard'), cont=document.getElementById('sampCont');
-  if(!S.samples.length){card.style.display='none';return;}
+  const fab=document.getElementById('fabHA');
+  if(!S.samples.length){card.style.display='none';if(fab)fab.classList.remove('on');return;}
   card.style.display='block';
+  if(fab)fab.classList.add('on');
   document.getElementById('sampBadge').textContent=`(${S.samples.length} sample${S.samples.length!==1?'s':''})`;
   cont.innerHTML = S.samples.map((s,i) => sCard(s,i)).join('');
   wireSamples();
@@ -542,6 +555,7 @@ function sCard(s, i) {
       <button class="sphbtn${hp?' has':''}" data-slib="${i}">🖼 Library</button>
       ${hp?`<img class="sph-prev" src="${s.photoThumb}" style="display:block;" alt=""><button class="sph-clr" data-sclr="${i}" style="display:inline;">×</button>`:''}
     </div>
+    <button class="add-samp" data-addsamp="${i}">➕ Add another sample to HA ${s.ha||1}</button>
   </div></div>`;
 }
 
@@ -559,6 +573,25 @@ function wireSamples() {
     if(!confirm(`Remove sample #${i+1}?`)) return;
     const s=S.samples[i]; if(s && s.photoId) idbDel(s.photoId).catch(()=>{});
     S.samples.splice(i,1); save(); renderSamples(); updateSummary();
+  }));
+  document.querySelectorAll('[data-addsamp]').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    const i=parseInt(b.dataset.addsamp);
+    const src=S.samples[i]; if(!src) return;
+    const ha=src.ha;
+    // insert after the last sample sharing this HA
+    let last=i;
+    for(let k=0;k<S.samples.length;k++){ if(S.samples[k].ha===ha) last=k; }
+    S.samples.splice(last+1,0,{ha:ha,location:'',material:src.material||'',color:src.color||'',description:src.description||''});
+    save(); renderSamples(); updateSummary();
+    setTimeout(()=>{
+      const el=document.querySelector(`.sc[data-i="${last+1}"]`);
+      if(el){ el.scrollIntoView({behavior:'smooth',block:'center'});
+        const bd=document.getElementById('bd'+(last+1)), ch=document.getElementById('chev'+(last+1));
+        if(bd) bd.classList.add('open'); if(ch) ch.classList.add('open');
+        const loc=document.querySelector(`input[data-i="${last+1}"][data-f="location"]`); if(loc) loc.focus();
+      }
+    },60);
   }));
   document.querySelectorAll('[data-i][data-f]').forEach(el => {
     el.addEventListener('input', () => { S.samples[parseInt(el.dataset.i)][el.dataset.f]=el.value; save(); });
@@ -947,6 +980,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // HA count
+  document.getElementById('fabHA').addEventListener('click',()=>{
+    const hc=document.getElementById('haCard');
+    if(hc) hc.scrollIntoView({behavior:'smooth',block:'start'});
+    setTimeout(()=>{const f=document.getElementById('haLoc');if(f)f.focus();},420);
+  });
   document.getElementById('haMinus').addEventListener('click',()=>{haCount=Math.max(1,haCount-1);document.getElementById('haCnt').value=haCount;});
   document.getElementById('haPlus').addEventListener('click',()=>{haCount=Math.min(50,haCount+1);document.getElementById('haCnt').value=haCount;});
   document.getElementById('haCnt').addEventListener('input',e=>{const v=parseInt(e.target.value,10);if(!isNaN(v))haCount=Math.min(50,Math.max(1,v));});
