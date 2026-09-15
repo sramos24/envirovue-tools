@@ -6,7 +6,7 @@
 // Bump this version whenever you update any file in the repo.
 // Users will get the fresh version next time they open the app
 // while online — the old cache is purged automatically.
-const CACHE_VERSION = 'envirovue-v1.9.2';
+const CACHE_VERSION = 'envirovue-v1.6.0';
 
 // All files that should work offline
 const PRECACHE_URLS = [
@@ -22,6 +22,9 @@ const PRECACHE_URLS = [
   './mold-inspector/',
   './mold-inspector/index.html',
   './mold-inspector/manifest.json',
+  './home-inspector-pf/',
+  './home-inspector-pf/index.html',
+  './home-inspector-pf/manifest.json',
   './asbestos-lead/',
   './asbestos-lead/index.html',
   './asbestos-lead/manifest.json',
