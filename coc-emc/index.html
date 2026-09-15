@@ -121,7 +121,9 @@ input,textarea,select,button { font-family: inherit; font-size: inherit; }
   background: #fff; font-size: 18px; font-weight: 700; cursor: pointer;
   display: flex; align-items: center; justify-content: center; color: var(--navy); }
 .cnb:active { background: var(--g100); }
-.cnv { font-size: 18px; font-weight: 700; color: var(--navy); min-width: 20px; text-align: center; }
+.cnv { font-size: 18px; font-weight: 700; color: var(--navy); width: 52px; text-align: center; border: 1.5px solid var(--border); border-radius: 8px; padding: 4px 2px; background: #fff; font-family: inherit; -moz-appearance: textfield; }
+.cnv::-webkit-outer-spin-button, .cnv::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.cnv:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 2px rgba(31,56,100,.15); }
 .ha-add { flex: 1; min-width: 130px; padding: 9px; background: var(--pu); color: #fff;
   border: none; border-radius: var(--rs); font-size: 13px; font-weight: 600; cursor: pointer; }
 .ha-add:active { transform: scale(.98); }
@@ -320,7 +322,7 @@ input,textarea,select,button { font-family: inherit; font-size: inherit; }
         <div class="cnt-row">
           <label>Samples:</label>
           <button class="cnb" id="haMinus">−</button>
-          <span class="cnv" id="haCnt">2</span>
+          <input class="cnv" id="haCnt" type="number" min="1" max="50" value="2" inputmode="numeric">
           <button class="cnb" id="haPlus">+</button>
         </div>
         <button class="ha-add" id="haAddBtn">Add HA →</button>
@@ -381,6 +383,8 @@ input,textarea,select,button { font-family: inherit; font-size: inherit; }
       <button class="btn" style="width:100%;margin-bottom:8px;" id="saveBtn">💾 Save Session</button>
       <button class="btn" style="width:100%;margin-bottom:8px;" id="loadBtn">📂 Load Session</button>
       <button class="btn" style="width:100%;margin-bottom:8px;" id="newBtn">🗒 New COC (keep settings)</button>
+      <button class="btn" style="width:100%;margin-bottom:8px;background:#5c3a1a;color:#fff;" id="impAsbBtn">⚠️ Import HAs from Asbestos Survey</button>
+      <input type="file" id="impAsbFile" accept=".json" style="display:none">
       <button class="btn" style="width:100%;color:#c53030;border-color:#f2c2c2;" id="clearBtn">🗑 Clear All</button>
     </div>
   </div>
@@ -943,8 +947,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // HA count
-  document.getElementById('haMinus').addEventListener('click',()=>{haCount=Math.max(1,haCount-1);document.getElementById('haCnt').textContent=haCount;});
-  document.getElementById('haPlus').addEventListener('click',()=>{haCount=Math.min(6,haCount+1);document.getElementById('haCnt').textContent=haCount;});
+  document.getElementById('haMinus').addEventListener('click',()=>{haCount=Math.max(1,haCount-1);document.getElementById('haCnt').value=haCount;});
+  document.getElementById('haPlus').addEventListener('click',()=>{haCount=Math.min(50,haCount+1);document.getElementById('haCnt').value=haCount;});
+  document.getElementById('haCnt').addEventListener('input',e=>{const v=parseInt(e.target.value,10);if(!isNaN(v))haCount=Math.min(50,Math.max(1,v));});
+  document.getElementById('haCnt').addEventListener('blur',e=>{e.target.value=haCount;});
   document.getElementById('haAddBtn').addEventListener('click',addHA);
 
   // HA photos
@@ -1057,6 +1063,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     S.samples=[]; save(); renderSamples(); updateSummary();
     document.getElementById('optModal').classList.remove('on'); toast('Samples cleared');
   });
+  document.getElementById('impAsbBtn').addEventListener('click',()=>document.getElementById('impAsbFile').click());
+  document.getElementById('impAsbFile').addEventListener('change',ev=>{
+    const f=ev.target.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{
+      try{
+        const p=JSON.parse(r.result);
+        if(p.source!=='asbestos-lead-coc'||!Array.isArray(p.has)){ toast('Not an Asbestos Survey COC export file'); return; }
+        if(S.samples.length && !confirm(`Add ${p.has.length} HA(s) to the current ${S.samples.length} sample(s)?`)) return;
+        if(p.address && !S.address){ S.address=p.address; const el=document.getElementById('fAddr'); if(el) el.value=p.address; }
+        if(p.date && !S.date){ S.date=p.date; const el=document.getElementById('fDate'); if(el) el.value=p.date; }
+        const base=S.samples.reduce((m,s)=>Math.max(m,parseInt(s.ha)||0),0);
+        let n=0;
+        p.has.forEach((h,i)=>{
+          S.samples.push({ha:h.ha||(base+i+1),location:h.location||'',material:h.material||'',color:h.color||'',description:h.description||''});
+          n++;
+        });
+        save(); renderSamples(); updateSummary();
+        document.getElementById('optModal').classList.remove('on');
+        toast(`Imported ${n} HA${n!==1?'s':''} — add sample #s and locations`);
+      }catch(e){ toast('Could not read import file'); }
+    };
+    r.readAsText(f); ev.target.value='';
+  });
+
   document.getElementById('clearBtn').addEventListener('click',async()=>{
     if(!confirm('Clear everything?'))return;
     S=newState(); await idbClear().catch(()=>{});
