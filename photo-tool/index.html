@@ -126,23 +126,31 @@ header{background:var(--navy);padding:0 20px;padding-top:max(0px,env(safe-area-i
 .pdf-cover td:first-child{background:#1a3a5c;color:#fff;font-weight:600;width:150px}
 .pdf-section{max-width:680px;margin:0 auto 28px}
 .pdf-sec-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#1a3a5c;border-bottom:2px solid #1a3a5c;padding-bottom:6px;margin-bottom:14px}
-.pdf-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pdf-grid{display:block}
+.pdf-row{display:flex;gap:14px;margin-bottom:14px;break-inside:avoid;page-break-inside:avoid}
+.pdf-row>.pdf-card,.pdf-row>.pdf-card-empty{flex:1 1 0;min-width:0}
+.pdf-keep{break-inside:avoid;page-break-inside:avoid}
 .pdf-card{border:1px solid #dde3ee;border-left:4px solid #b0bcd0;border-radius:6px;overflow:hidden;page-break-inside:avoid;break-inside:avoid}
-.pdf-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.pdf-card img{width:100%;height:2.55in;object-fit:contain;background:#f2f2f2;display:block}
 .pdf-card-body{padding:8px 10px}
 .pdf-card-num{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:3px}
 .pdf-card-cat{display:block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
-.pdf-card-caption{font-size:11px;color:#4a5568;line-height:1.4;margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.pdf-card-caption{font-size:11px;color:#4a5568;line-height:1.4;margin-top:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical}
 @page{margin:0.6in 0.5in}
 @media print{
   body > *:not(#printDiv){display:none!important}
   #printDiv{display:block!important;font-family:'IBM Plex Sans',sans-serif}
-  /* two-column grid using columns — more reliable page-break than CSS grid */
-  .pdf-grid{column-count:2;column-gap:14px;orphans:1;widows:1}
-  .pdf-card{display:inline-block;width:100%;margin-bottom:14px;break-inside:avoid;page-break-inside:avoid;border:1px solid #dde3ee;border-radius:6px;overflow:hidden;vertical-align:top}
-  .pdf-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+  /* v1.9.4: fixed two-card rows. Each row is one unbreakable block, so a card can never split across pages
+     (multi-column + break-inside is ignored by Safari/Chrome print, which caused split cards). */
+  .pdf-grid{display:block}
+  .pdf-row{display:flex;gap:14px;margin-bottom:14px;break-inside:avoid;page-break-inside:avoid}
+  .pdf-row>.pdf-card,.pdf-row>.pdf-card-empty{flex:1 1 0;min-width:0}
+  .pdf-keep{break-inside:avoid;page-break-inside:avoid}
+  .pdf-sec-title{break-after:avoid;page-break-after:avoid}
+  .pdf-card{display:block;break-inside:avoid;page-break-inside:avoid;border:1px solid #dde3ee;border-radius:6px;overflow:hidden}
+  .pdf-card img{width:100%;height:2.55in;object-fit:contain;background:#f2f2f2;display:block}
   .pdf-card-body{padding:8px 10px}
-  .pdf-card-caption{-webkit-line-clamp:4;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical}
+  .pdf-card-caption{-webkit-line-clamp:5;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical}
   .pdf-section{break-inside:auto;page-break-inside:auto}
   .pdf-cover{page-break-after:always}
   .pdf-cover table{width:100%;border-collapse:collapse;border:1px solid #dde3ee}
@@ -208,13 +216,13 @@ header{background:var(--navy);padding:0 20px;padding-top:max(0px,env(safe-area-i
     <label>Max Width:</label>
     <select id="maxWSelect">
       <option value="1920">1920px</option>
-      <option value="1280">1280px</option>
+      <option value="1280" selected>1280px</option>
       <option value="960">960px</option>
     </select>
     <label>Quality:</label>
     <select id="qualitySelect">
       <option value="0.80">High 80%</option>
-      <option value="0.65">Med 65%</option>
+      <option value="0.65" selected>Med 65%</option>
       <option value="0.50">Low 50%</option>
     </select>
     <label>Format:</label>
@@ -285,8 +293,8 @@ const CATEGORIES = ['System Description','Repair','Due Diligence','Rec. Maintena
 // ─── COMPRESS ─────────────────────────────────────────────
 function getCompress() {
   return {
-    maxW:    parseInt(document.getElementById('maxWSelect').value)    || 1920,
-    quality: parseFloat(document.getElementById('qualitySelect').value) || 0.80,
+    maxW:    parseInt(document.getElementById('maxWSelect').value)    || 1280,
+    quality: parseFloat(document.getElementById('qualitySelect').value) || 0.65,
     format:  document.getElementById('formatSelect').value             || 'jpeg'
   };
 }
@@ -566,7 +574,7 @@ function restoreSession(file) {
 function importHISession(file) {
   toast('Reading session file...');
   const reader=new FileReader();
-  reader.onload=()=>{
+  reader.onload=async ()=>{
     try {
       const bundle=JSON.parse(reader.result);
       if(bundle.version!==3||!bundle.state||!bundle.photoStore){ toast('Not a valid v3 Home Inspector session'); return; }
@@ -594,7 +602,10 @@ function importHISession(file) {
           for(const ap of (f.attachedPhotos||[])){
             const stored=photoStore[ap.id];
             if(!stored?.src) continue;
-            photos.push({id:nextId++,src:stored.src,filename:ap.filename||ap.id,section:useSection,category:useCategory,caption:(f.text||'').trim(),linked:false,order:photos.length});
+            // v1.9.4: imported photos now go through the same compression as added photos
+            if(imported%5===0) toast('Compressing photo '+(imported+1)+'...');
+            const small=await compressImage(stored.src);
+            photos.push({id:nextId++,src:small,filename:ap.filename||ap.id,section:useSection,category:useCategory,caption:(f.text||'').trim(),linked:false,order:photos.length});
             imported++;
           }
         }
@@ -628,13 +639,11 @@ function exportPDF() {
     </table></div>`;
   const key=gb==='category'?'category':gb==='none'?null:'section';
   if(!key){
-    html+=`<div class="pdf-section"><div class="pdf-sec-title">All Photos</div><div class="pdf-grid">${photos.map((p,i)=>pCard(p,i+1)).join('')}</div></div>`;
+    html+=pSection('All Photos', photos.map((p,i)=>({p,i})));
   } else {
     const groups={};
     photos.forEach((p,i)=>{ const g=p[key]||'—'; (groups[g]=groups[g]||[]).push({p,i}); });
-    html+=Object.entries(groups).map(([g,items])=>
-      `<div class="pdf-section"><div class="pdf-sec-title">${esc(g)}</div><div class="pdf-grid">${items.map(({p,i})=>pCard(p,i+1)).join('')}</div></div>`
-    ).join('');
+    html+=Object.entries(groups).map(([g,items])=>pSection(g,items)).join('');
   }
   document.getElementById('pdfPreview').innerHTML=html;
   document.getElementById('pdfModal').classList.add('open');
@@ -645,9 +654,26 @@ const CAT_BORDER={
   'System Description':'#7a7a7a',
   'Condition 1 - Normal':'#3c9a3c','Condition 2 - Settled Spores':'#c0a030','Condition 3 - Actual Growth':'#b83030'
 };
+// v1.9.4: build a section as rows of two cards; the title travels with the first row
+function pSection(title, items){
+  const rows=[];
+  for(let k=0;k<items.length;k+=2){
+    const a=items[k], b=items[k+1];
+    rows.push(`<div class="pdf-row">${pCard(a.p,a.i+1)}${b?pCard(b.p,b.i+1):'<div class="pdf-card-empty"></div>'}</div>`);
+  }
+  const first=rows.shift()||'';
+  return `<div class="pdf-section"><div class="pdf-keep"><div class="pdf-sec-title">${esc(title)}</div>${first}</div><div class="pdf-grid">${rows.join('')}</div></div>`;
+}
+// v1.9.4: trim long captions at a word boundary instead of mid-word
+function trimCaption(s, max=280){
+  s=(s||'').trim();
+  if(s.length<=max) return s;
+  const cut=s.slice(0,max), sp=cut.lastIndexOf(' ');
+  return (sp>max*0.6?cut.slice(0,sp):cut).replace(/[\s,;:.\-—]+$/,'')+'…';
+}
 function pCard(p,seq){
   const bdr = CAT_BORDER[p.category]||'#b0bcd0';
-  const caption = (p.caption||'').trim().slice(0,200);
+  const caption = trimCaption(p.caption);
   return `<div class="pdf-card" style="border-left:4px solid ${bdr}">
     <img src="${p.src}" alt="">
     <div class="pdf-card-body">
