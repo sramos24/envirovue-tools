@@ -470,7 +470,31 @@ function newPhotoId(){ return 'p_'+Date.now()+'_'+(uidCounter++); }
 // ═══════════════════════════════════════════════════════
 //  PERSISTENCE
 // ═══════════════════════════════════════════════════════
-function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+// Thumbnails live in IndexedDB only. Never write them to localStorage (5MB cap) — that was silently killing saves.
+function save(){
+  try{
+    const lean={ ...state, photos: state.photos.map(p=>{ const {_thumb, ...rest}=p; return rest; }) };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lean));
+    save._failed=false;
+  }catch(e){
+    if(!save._failed){ save._failed=true; toast('&#9888; Auto-save failed — use Save Session now'); }
+  }
+}
+// Any photo sitting in IndexedDB with no record in state gets restored as Unassigned.
+async function reconcilePhotos(){
+  const all=await idbGetAll().catch(()=>[]);
+  if(!all.length) return 0;
+  const known=new Set();
+  state.photos.forEach(p=>{ known.add(p.id); (p.extras||[]).forEach(x=>known.add(x)); });
+  SECTIONS.forEach(sec=>(state.checklists[sec]||[]).forEach(c=>(c.photoIds||[]).forEach(x=>known.add(x))));
+  const ts=id=>parseInt(String(id).split('_')[1],10)||0, seq=id=>parseInt(String(id).split('_')[2],10)||0;
+  const orphans=all.filter(p=>p&&p.id&&!known.has(p.id));
+  if(!orphans.length) return 0;
+  orphans.forEach(p=>state.photos.push({ id:p.id, section:'—', type:'—', cat:'—', text:'' }));
+  state.photos.sort((a,b)=>(ts(a.id)-ts(b.id))||(seq(a.id)-seq(b.id)));
+  save();
+  return orphans.length;
+}
 function loadState(){
   try{ const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return;
     const p=JSON.parse(raw);
@@ -1102,6 +1126,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   loadState();
   seedChecklistsFromTemplates();
   save();
+  reconcilePhotos().then(n=>{ if(n){ go(currentPage||'library'); toast(n+' photo'+(n>1?'s':'')+' recovered to Unassigned'); } }).catch(()=>{});
 
   document.querySelectorAll('.sidebar > .sb-item, .sb-item[data-page="library"], .sb-item[data-page="general"]').forEach(el=>{
     if(el.dataset.page) el.addEventListener('click',()=>go(el.dataset.page));
@@ -1121,7 +1146,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('saveJsonBtn').addEventListener('click',async()=>{
     toast('Preparing session...');
     const all=await idbGetAll().catch(()=>[]); const photoStore={}; all.forEach(p=>photoStore[p.id]={src:p.src,thumb:p.thumb,filename:p.filename});
-    const bundle={ version:1, source:'home-inspector-pf', state, templates, photoStore };
+    const leanState={ ...state, photos: state.photos.map(p=>{ const {_thumb, ...rest}=p; return rest; }) };
+    const bundle={ version:1, source:'home-inspector-pf', state:leanState, templates, photoStore };
     const blob=new Blob([JSON.stringify(bundle)],{type:'application/json'}); const addr=(state.general.address||'inspection').replace(/[^a-z0-9]+/gi,'_').toLowerCase();
     const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${addr}_hi_session.json`; a.click(); URL.revokeObjectURL(a.href);
     toast('Session saved (with photos)');
@@ -1134,8 +1160,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
       try{ const p=JSON.parse(reader.result); const st=p.state||p;
         if(st&&st.general&&st.photos){ SECTIONS.forEach(sec=>{ st.checklists[sec]=(st.checklists[sec]||[]).map(c=>({...c,photoIds:c.photoIds||[]})); }); state=st;
           if(p.templates){ templates=p.templates; saveTemplates(); }
-          if(p.photoStore){ for(const [id,d] of Object.entries(p.photoStore)) await idbPut({id,src:d.src,thumb:d.thumb,filename:d.filename}).catch(()=>{}); toast(`Loaded · ${Object.keys(p.photoStore).length} photos`); } else toast('Session loaded');
-          state.photos.forEach(ph=>ph._thumb=null); save(); go('library'); closeModal('moreModal');
+          state.photos.forEach(ph=>ph._thumb=null);
+          if(p.photoStore){ await idbClear().catch(()=>{}); for(const [id,d] of Object.entries(p.photoStore)) await idbPut({id,src:d.src,thumb:d.thumb,filename:d.filename}).catch(()=>{}); const rec=await reconcilePhotos(); toast(`Loaded · ${Object.keys(p.photoStore).length} photos`+(rec?` · ${rec} recovered`:'')); } else toast('Session loaded');
+          save(); go('library'); closeModal('moreModal');
         } else toast('Invalid session file');
       }catch(e){ toast('Could not read file'); }
     };
